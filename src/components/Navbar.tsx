@@ -1,25 +1,48 @@
 import { Link } from "react-router-dom";
-import paperLogo from '../assets/paper.svg';
-import dashboardLogo from '../assets/dashboard.svg';
-import reviewLogo from '../assets/review.svg';
+import HomeIcon from '@mui/icons-material/Home';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import Icon from '@mui/material/Icon';
+//import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+
 
 export default function Navbar() {
+
+
+
+
+
     return (
         <nav className="nav">
         <Link to="/" className="site-title"></Link>
             <ul>
                 <li>
-                    <img src={dashboardLogo} width="30" height="30" alt="dashboard"/>
-                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/dashboard">
+                        <Icon>
+                            <HomeIcon /*fontSize="large" OR sx={{ fontSize: 40 }}*/ />
+                        </Icon>
+                    </Link>
                 </li>
                 <li>
-                    <img src={paperLogo} width="30" height="30" alt="papers"/>
-                    <Link to="/papers">Papers</Link>
+                    <Link to="/papers">
+                        <Icon>
+                            <MenuBookIcon /*fontSize="large" OR sx={{ fontSize: 40 }}*/ />
+                        </Icon>
+                    </Link>
                 </li>
                 <li>
-                    <img src={reviewLogo} width="30" height="30" alt="reviews"/>
-                    <Link to="/reviews">Reviews</Link>
+                    <Link to="/reviews">
+                        <Icon>
+                            <LibraryBooksIcon /*fontSize="large" OR sx={{ fontSize: 40 }}*/ />
+                        </Icon>
+                    </Link>
                 </li>
+                {/* Formerly:
+                <li>
+                    <img src={AccountCircleIcon} width="30" height="30" alt="profile"/>
+                    <Link to="/profile">Profile</Link>
+                </li>
+                */}
             </ul>
         </nav>
     )
