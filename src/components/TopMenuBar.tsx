@@ -5,7 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import PeerLabIcon from '../assets/peer_lab_logo.svg';
+import PeerLabIcon from '../assets/peerlabLogo_squared.svg';
 import {useNavigate} from "react-router-dom";
 
 /**
@@ -29,7 +29,7 @@ export default function MenuAppBar() {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar>
-                    <img src={PeerLabIcon} width="30" height="30" alt="logo"/>
+                    <img src={PeerLabIcon} width="50" height="50" alt="logo"/>
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                         *Username*
                     </Typography>

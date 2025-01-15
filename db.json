@@ -1,0 +1,14 @@
+{
+  "paper": [
+    {
+      "id": 1,
+      "title": "On json-server mocks",
+      "ownerName": "Brettschneider",
+      "authors": "PSE"
+    }
+  ],
+  "user": {
+    "name": "Brettschneider",
+    "email": "brett@schneider.de"
+  }
+}

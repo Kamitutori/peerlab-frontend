@@ -4,6 +4,13 @@ import {useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import {useState} from "react";
 
+{/*
+async function fetchMyPapers() {
+    const res = await axios
+        .get("http://localhost:5173/api/papers/*methodName*", {params: {_sort: "title"}});
+    return res.data;
+*/}
+
 export default function Profile() {
 
     const [username, setUsername] = useState(null);
@@ -41,7 +48,7 @@ export default function Profile() {
     }
     // Assume, data was successfully loaded.
 
-    {/*}
+    {/*
     setUsername(userData.username);
     setEmail(userData.email);
     */}
@@ -51,17 +58,10 @@ export default function Profile() {
             <div>{username}</div>
             <div>{email}</div>
             <PaperList papers={paperData}/>
-            {/*<ReviewList reviews={reviewData}/> */}
+            <ReviewList reviews={reviewData}/>
         </div>
     )
 }
-
-{/*
-async function fetchMyPapers() {
-    const res = await axios
-        .get("http://localhost:5173/api/papers/*methodName*", {params: {_sort: "title"}});
-    return res.data;
-*/}
 
 function fetchMyPapers() {
     return axios
