@@ -1,10 +1,16 @@
-import axios from "axios";
-
-interface ReviewListProps {
-    reviews?: axios.AxiosResponse<any> | undefined
+/*
+import { RequestListEntry } from "./RequestList";
+interface ReviewListEntry {
+    id: number;
+    submissionDate: string;
+    request: RequestListEntry;
 }
 
-export default function ReviewList({reviews}: ReviewListProps) {
+interface ReviewListProps {
+    reviews?: ReviewListEntry[];
+}
+*/
+export default function ReviewList() {
     return (
         <div>
             <h2>ReviewList</h2>

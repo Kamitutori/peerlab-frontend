@@ -1,4 +1,5 @@
-export default function Reviews() {
+// TODO: Implement MyReviews
+export default function MyReviews() {
     return (
         <div>
             <h1>Reviews</h1>

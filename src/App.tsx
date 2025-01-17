@@ -10,11 +10,12 @@ import Login from './pages/Login'
 import { Route, Routes} from "react-router-dom";
 import Dashboard from "./pages/Dashboard.tsx";
 import Profile from "./pages/Profile.tsx";
-import Papers from "./pages/Papers.tsx";
-import Reviews from "./pages/Reviews.tsx";
+import MyPapers from "./pages/MyPapers.tsx";
+import MyReviews from "./pages/MyReviews.tsx";
 import NoPage from "./pages/NoPage.tsx";
 import Navbar from "./components/Navbar.tsx";
 import TopMenuBar from "./components/TopMenuBar.tsx";
+import SinglePaper from "./components/SinglePaper.tsx";
 
 function App() {
 
@@ -28,9 +29,10 @@ function App() {
                     <Route path="/login" element={<Login />}/>
                     <Route path="/dashboard" element={<Dashboard />}/>
                     <Route path="/profile" element={<Profile />}/>
-                    <Route path="/papers" element={<Papers />}/>
-                    <Route path="/reviews" element={<Reviews />}/>
+                    <Route path="/papers" element={<MyPapers />}/>
+                    <Route path="/reviews" element={<MyReviews />}/>
                     <Route path="*" element={<NoPage />}/>
+                    <Route path="/single-paper" element={<SinglePaper />}/>
                 </Routes>
             </div>
         </div>
