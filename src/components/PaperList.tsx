@@ -1,12 +1,15 @@
-import {List, ListItem, ListItemButton, ListItemText} from "@mui/material";
+import {ListItem, ListItemButton, ListItemText} from "@mui/material";
 import {FixedSizeList, ListChildComponentProps} from 'react-window';
 import Box from "@mui/material/Box";
 
-interface PaperListProps {
-    papers?: unknown
+export interface PaperListEntry {
+    id: number;
+    title: string;
+    ownerName: string;
+    authors: string;
 }
 
-export default function VirtualizedPaperList({papers}: PaperListProps) {
+export default function VirtualizedPaperList() {
 
     function renderRow(props: ListChildComponentProps) {
         const {index, style} = props;
@@ -20,6 +23,7 @@ export default function VirtualizedPaperList({papers}: PaperListProps) {
                     />
                 </ListItemButton>
             </ListItem>
+
         );
     }
 
@@ -39,7 +43,7 @@ export default function VirtualizedPaperList({papers}: PaperListProps) {
                     {renderRow}
                 </FixedSizeList>
 
-                {/*}
+                {/*
                 <List
                     height={400}
                     width={360}
