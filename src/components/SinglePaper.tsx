@@ -1,4 +1,4 @@
-// TODO Implement the single paper view
+
 import {useQuery} from "@tanstack/react-query";
 import Box from "@mui/material/Box";
 
@@ -24,7 +24,8 @@ export default function SinglePaper() {
         data: paperData} =
         useQuery({ queryKey: ["paper"],
             queryFn: async () => {
-                const res = await fetch(`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paper`);
+                const res = await fetch(
+                    `https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paper`);
                 return (await res.json());
             }
         });
@@ -45,12 +46,11 @@ export default function SinglePaper() {
             <div>{`Active ${paperObject.active}`}</div>
             <div>{`Internal: ${paperObject.internal}`}</div>
             <div>{`Reviews: X/${paperObject.reviewLimit}`}</div>
-            <Box>
-                <div>{`Preview: `}</div>
-                <div>{paperObject.abstractText}</div>
+            <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)' }}>
+                <div>{`Preview: ${paperObject.abstractText}`}</div>
             </Box>
             <Box>
-                <div>{paperObject.authorsNote}</div>
+                <div>{`Authors note: ${paperObject.authorsNote}`}</div>
             </Box>
             <div>{`Upload Date: ${paperObject.uploadDate}`}</div>
 

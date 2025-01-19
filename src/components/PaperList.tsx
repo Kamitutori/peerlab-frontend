@@ -2,7 +2,7 @@ import {ListItem, ListItemButton, ListItemText} from "@mui/material";
 import {FixedSizeList, ListChildComponentProps} from 'react-window';
 import Box from "@mui/material/Box";
 
-export interface PaperListEntry {
+export interface PaperListEntryTemplate {
     id: number;
     title: string;
     ownerName: string;

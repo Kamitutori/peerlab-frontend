@@ -8,10 +8,6 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import PeerLabIcon from '../assets/peerlabLogo_squared.svg';
 import {useNavigate} from "react-router-dom";
 
-/**
- * Notice TODO: Look up MUI AppBar to see an implementation of handling authorization and submenus.
- */
-
 export default function MenuAppBar() {
     /*
     const [auth, setAuth] = React.useState(true);
@@ -27,10 +23,10 @@ export default function MenuAppBar() {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static">
+            <AppBar position="fixed">
                 <Toolbar>
                     <img src={PeerLabIcon} width="50" height="50" alt="logo"/>
-                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                    <Typography variant="h6" component="div" sx={{flexGrow: 1}} align={"left"}>
                         *Username*
                     </Typography>
                     {/* {auth && (*/}
