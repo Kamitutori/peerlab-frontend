@@ -16,6 +16,8 @@ import NoPage from "./pages/NoPage.tsx";
 import Navbar from "./components/Navbar.tsx";
 import TopMenuBar from "./components/TopMenuBar.tsx";
 import SinglePaper from "./components/SinglePaper.tsx";
+import Register from "./pages/Register.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
 
 function App() {
 
@@ -27,6 +29,8 @@ function App() {
                 <Routes>
                     <Route index element={<Login />} />
                     <Route path="/login" element={<Login />}/>
+                    <Route path="/register" element={<Register />}/>
+                    <Route path="/forgot-password" element={<ForgotPassword />}/>
                     <Route path="/dashboard" element={<Dashboard />}/>
                     <Route path="/profile" element={<Profile />}/>
                     <Route path="/papers" element={<MyPapers />}/>

@@ -21,6 +21,7 @@ export default function Profile() {
         isPending: isPaperPending,
         isError: isPaperError,
         error: paperError,
+        https://localhost:3000/api/papers
         */
         data: paperData } =
         useQuery({
