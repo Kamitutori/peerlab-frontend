@@ -101,7 +101,7 @@ function CustomPasswordField() {
     );
 }
 
-function CustomLoginButton(provider: AuthProvider, formData: FormData) {
+function CustomLoginButton() {
     return (
         <Button
             type="submit"
@@ -111,7 +111,6 @@ function CustomLoginButton(provider: AuthProvider, formData: FormData) {
             disableElevation
             fullWidth
             sx={{ my: 2 }}
-            onClick={() => {handleSignIn(provider, formData)}}
         >
             Log In
         </Button>
