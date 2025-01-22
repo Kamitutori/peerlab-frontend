@@ -38,7 +38,7 @@ export default function SinglePaper() {
         return <span>{`Error!: ${paperError.message}`}</span>;
     }
 
-    let paperObject: PaperElement = paperData[1];
+    const paperObject: PaperElement = paperData[1];
     return (
         <>
             <h1>{paperObject.title}</h1>
