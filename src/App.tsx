@@ -6,7 +6,6 @@ import Profile from "./pages/Profile.tsx";
 import MyPapers from "./pages/MyPapers.tsx";
 import MyReviews from "./pages/MyReviews.tsx";
 import NoPage from "./pages/NoPage.tsx";
-import Navbar from "./components/Navbar.tsx";
 import TopMenuBar from "./components/TopBar.tsx";
 import SinglePaper from "./components/SinglePaper.tsx";
 /**
@@ -17,7 +16,6 @@ function App() {
     return (
         <div>
             <TopMenuBar />
-            <Navbar />
             <div className="container">
                 <Routes>
                     <Route index element={<Login />} />
