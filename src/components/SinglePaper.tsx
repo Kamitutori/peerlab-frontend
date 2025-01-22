@@ -41,7 +41,7 @@ export default function SinglePaper() {
     let paperObject: PaperElement = paperData[1];
     return (
         <>
-            <h1>{paperObject.title}</h1>
+            <h2>{paperObject.title}</h2>
             <h2>{paperObject.authors}</h2>
             <div>{`Active ${paperObject.active}`}</div>
             <div>{`Internal: ${paperObject.internal}`}</div>

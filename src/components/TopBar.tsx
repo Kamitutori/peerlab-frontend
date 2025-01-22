@@ -3,6 +3,7 @@ import { styled, Theme, CSSObject, useTheme} from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
+import { Button } from '@mui/material';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -151,6 +152,9 @@ export default function MenuAppBar() {
                     </Typography>
                     {/* {auth && (*/}
                         <div>
+                            <Button variant="outlined" sx={{color : 'white', size : 'small'}}>
+                                Log out
+                            </Button>
                             <IconButton
                                 size="large"
                                 aria-label="account of current user"
