@@ -1,60 +1,58 @@
-import {ListItem, ListItemButton, ListItemText} from "@mui/material";
-import {FixedSizeList, ListChildComponentProps} from 'react-window';
-import Box from "@mui/material/Box";
+import * as React from 'react';
+import {styled} from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import ListItem from '@mui/material/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ArticleIcon from '@mui/icons-material/Article';
+import {useQuery} from "@tanstack/react-query";
 
-export interface PaperListEntryTemplate {
-    id: number;
-    title: string;
-    ownerName: string;
-    authors: string;
+function generate(element: React.ReactElement<unknown>) {
+    return [0, 1, 2].map((value) =>
+        React.cloneElement(element, {
+            key: value,
+        }),
+    );
 }
 
-export default function VirtualizedPaperList() {
+const Demo = styled('div')(({theme}) => ({
+    backgroundColor: theme.palette.background.paper,
+}));
 
-    function renderRow(props: ListChildComponentProps) {
-        const {index, style} = props;
-
-        return (
-            <ListItem style={style} key={index} component="div" disablePadding>
-                <ListItemButton>
-                    <ListItemText
-                        primary={`paper_title_${index + 1}`/*` Item ` */}
-                        secondary={'author'}
-                    />
-                </ListItemButton>
-            </ListItem>
-
-        );
-    }
-
+export default function PaperList() {
+    useQuery({
+        queryKey: ["paper"],
+        queryFn: async () => {
+            const res = await fetch(
+                `https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`);
+            return (await res.json());
+        }
+    });
     return (
-        <div>
-            <h2>PaperList</h2>
-            <Box
-                sx={{width: '100%', height: 400, maxWidth: 360, bgcolor: '#555'}}
-            >
-                <FixedSizeList
-                    height={400}
-                    width={360}
-                    itemSize={46}
-                    itemCount={200}
-                    overscanCount={5}
-                >
-                    {renderRow}
-                </FixedSizeList>
-
-                {/*
-                <List
-                    height={400}
-                    width={360}
-                    itemSize={46}
-                >
-                    {renderRow}
-                </List>
-                */}
-            </Box>
-
-        </div>
-    )
+        <Box sx={{flexGrow: 1, maxWidth: 752}}>
+            <Typography sx={{mt: 4, mb: 2}} variant="h6" component="div">
+                My Papers
+            </Typography>
+            <Demo>
+                {generate(
+                    <ListItem
+                        secondaryAction={
+                            <IconButton edge="end" aria-label="delete">
+                                <DeleteIcon/>
+                            </IconButton>
+                        }
+                    >
+                        <ListItemAvatar>
+                            <Avatar>
+                                <ArticleIcon/>
+                            </Avatar>
+                        </ListItemAvatar>
+                    </ListItem>,
+                )}
+            </Demo>
+        </Box>
+    );
 }
-
