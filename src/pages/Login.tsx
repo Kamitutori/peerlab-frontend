@@ -6,7 +6,7 @@ import {Button, InputAdornment, InputLabel, OutlinedInput} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import { AppProvider } from '@toolpad/core/AppProvider';
-import { SignInPage, type AuthProvider } from '@toolpad/core/SignInPage'
+import { SignInPage, type AuthProvidee } from '@toolpad/core/SignInPage'
 */
 
 import * as React from 'react';
@@ -26,9 +26,8 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { AppProvider } from '@toolpad/core/AppProvider';
-import { SignInPage } from '@toolpad/core/SignInPage';
+import {AuthProvider, SignInPage} from '@toolpad/core/SignInPage';
 import peerLabLogoTransparent from '../assets/peerlabLogo_transparent.svg';
-import {AuthProvider} from "./SignUpPage.tsx";
 import {useQuery} from "@tanstack/react-query";
 import {redirect} from "react-router-dom";
 
@@ -170,6 +169,7 @@ function AgreeWithTerms() {
 */
 
 function handleSignIn(_provider: AuthProvider, formData: FormData) {
+    console.log(`Hi!`)
     const {data: responseData} = useQuery({
         queryKey: ['login'],
         queryFn: async () => {
@@ -208,11 +208,8 @@ export default function SlotsSignIn() {
             <SignInPage
                 signIn={(provider, formData) =>
                     handleSignIn(provider, formData)
-                /*
-                    alert(
-                        `Logging in with "${provider.name}" and credentials: ${formData.get('email')}, ${formData.get('password')}, and checkbox value: ${formData.get('tandc')}.`,
-                    )
-                */
+
+                    //alert(`Logging in with "${provider.name}" and credentials: ${formData.get('email')}, ${formData.get('password')}, and checkbox value: ${formData.get('tandc')}.`,)
                 }
                 slots={{
                     title: Title,
@@ -221,7 +218,7 @@ export default function SlotsSignIn() {
                     passwordField: CustomPasswordField,
                     submitButton: CustomLoginButton,
                     signUpLink: SignUpLink,
-                    //rememberMe: AgreeWithTerms,
+                    // rememberMe: AgreeWithTerms,
                     forgotPasswordLink: ForgotPasswordLink,
                 }}
                 providers={providers}

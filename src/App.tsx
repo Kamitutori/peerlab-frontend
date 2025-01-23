@@ -7,7 +7,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 import Login from './pages/Login'
-import { Route, Routes} from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Dashboard from "./pages/Dashboard.tsx";
 import Profile from "./pages/Profile.tsx";
 import MyPapers from "./pages/MyPapers.tsx";
@@ -18,27 +18,35 @@ import TopMenuBar from "./components/TopMenuBar.tsx";
 import SinglePaper from "./components/SinglePaper.tsx";
 import Register from "./pages/Register.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
+import PrivateRoute from "./components/auth/PrivateRoute.tsx";
 
 function App() {
 
     return (
         <div>
-            <TopMenuBar />
-            <Navbar />
-            <div className="container">
-                <Routes>
-                    <Route index element={<Login />} />
-                    <Route path="/login" element={<Login />}/>
-                    <Route path="/register" element={<Register />}/>
-                    <Route path="/forgot-password" element={<ForgotPassword />}/>
-                    <Route path="/dashboard" element={<Dashboard />}/>
-                    <Route path="/profile" element={<Profile />}/>
-                    <Route path="/papers" element={<MyPapers />}/>
-                    <Route path="/reviews" element={<MyReviews />}/>
-                    <Route path="*" element={<NoPage />}/>
-                    <Route path="/single-paper" element={<SinglePaper />}/>
-                </Routes>
-            </div>
+            <BrowserRouter>
+                {/* <AuthProvider children={Login}> */}
+                    <TopMenuBar/>
+                    <Navbar/>
+                    <div className="container">
+                        <Routes>
+                            <Route index element={<Login/>}/>
+                            <Route path="/login" element={<Login/>}/>
+                            <Route path="/register" element={<Register/>}/>
+                            <Route path="/forgot-password" element={<ForgotPassword/>}/>
+                            <Route element={<PrivateRoute />}>
+                                <Route path="/dashboard" element={<Dashboard />} />
+                            </Route>
+                                <Route path="/profile" element={<Profile/>}/>
+                                <Route path="/papers" element={<MyPapers/>}/>
+                                <Route path="/reviews" element={<MyReviews/>}/>
+                                <Route path="/single-paper" element={<SinglePaper/>}/>
+
+                            <Route path="*" element={<NoPage/>}/>
+                        </Routes>
+                    </div>
+                {/* </AuthProvider> */}
+            </BrowserRouter>
         </div>
     )
 

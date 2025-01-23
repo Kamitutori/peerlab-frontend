@@ -1,179 +1,201 @@
-import * as React from 'react';
 import {
     Button,
-    FormControl,
-    //FormControlLabel,
-    //Checkbox,
-    InputLabel,
-    OutlinedInput,
+    Checkbox,
+    createTheme,
+    FormControlLabel,
+    Paper,
+    Stack,
     TextField,
-    InputAdornment,
-    Link,
-    Alert,
-    IconButton, createTheme,
-} from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { AppProvider } from '@toolpad/core/AppProvider';
-import { SignInPage } from '@toolpad/core/SignInPage';
-const providers = [{ id: 'credentials', name: 'Email and Password' }];
+    ThemeProvider
+} from "@mui/material";
+import Box from "@mui/material/Box";
+import {redirect} from "react-router-dom";
+import React, {useState} from "react";
+import peerLabLogoTransparent from "../assets/peerlabLogo_transparent.svg";
+import {useQuery} from "@tanstack/react-query";
 
-function CustomEmailField() {
-    return (
-        <TextField
-            id="input-with-icon-textfield"
-            label="Email"
-            name="email"
-            type="email"
-            size="small"
-            fullWidth
-            variant="outlined"
-        />
-    );
+const theme = createTheme({
+    components: {
+        MuiTextField: {
+            defaultProps: {
+                size:"small",
+            },
+            styleOverrides: {
+                root: {
+                    "& .MuiOutlinedInput-root": {
+                        color: "#fff",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#606060",
+                            borderWidth: "2px",
+                        },
+                        "&.Mui-focused": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#7e3ff2",
+                                borderWidth: "2px",
+                            },
+                        },
+                        "&:hover:not(.Mui-focused)": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#b5b5b5",
+                            },
+                        },
+                        "& .MuiOutlinedInput-input": {
+                            color: "#fff"
+                        }
+                    },
+                    "& .MuiInputLabel-outlined": {
+                        color: "#bcbcbc",
+                        "&.Mui-focused": {
+                            color: "primary",
+                            fontWeight: "bold",
+                        },
+                    }
+                }}}}
+});
+
+function backToLogin() {
+    window.location.href = "http://localhost:5173/login";
+    redirect("/login");
 }
 
-function CustomPasswordField() {
-    const [showPassword, setShowPassword] = React.useState(false);
 
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-    const handleMouseDownPassword = (event: React.MouseEvent) => {
-        event.preventDefault();
+
+
+
+export default function Register() {
+    const[showPassword, setShowPassword] = useState(true);
+    const[fetching, setFetching] = useState(false);
+    const [input, setInput] = useState({
+        name: "",
+        email: "",
+        password: "",
+        rep_password:""
+    });
+
+    const {data: responseData} = useQuery({
+        queryKey: ['register'],
+        queryFn: async () => {
+            console.log("Submitting...");
+            const res = await fetch("http://localhost:8080/api/auth/register", {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'Content-Type': '*/*',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                body: JSON.stringify({
+                    name: input.name,
+                    email: input.email,
+                    password: input.password,
+                })
+            })
+            return (await res.json());
+        },
+        enabled: fetching,
+        refetchOnReconnect: false,
+        refetchOnMount:false,
+        refetchOnWindowFocus:false,
+        retryOnMount: false,
+        retry: 0
+    })
+
+    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setInput((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+        console.log(input);
     };
 
-    return (
-        <FormControl sx={{ my: 2 }} fullWidth variant="outlined">
-            <InputLabel size="small" htmlFor="outlined-adornment-password">
-                Password
-            </InputLabel>
-            <OutlinedInput
-                id="outlined-adornment-password"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                size="small"
-                endAdornment={
-                    <InputAdornment position="end">
-                        <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={handleClickShowPassword}
-                            onMouseDown={handleMouseDownPassword}
-                            edge="end"
-                            size="small"
-                        >
-                            {showPassword ? (
-                                <VisibilityOff fontSize="inherit" />
-                            ) : (
-                                <Visibility fontSize="inherit" />
-                            )}
-                        </IconButton>
-                    </InputAdornment>
-                }
-                label="Password"
-            />
-        </FormControl>
-    );
-}
+    const registerUser = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const { name, email, password, rep_password } = {
+            name: input.name,
+            email: input.email,
+            password: input.password,
+            rep_password: input.rep_password};
+        if (password !== rep_password) {
+            alert("Passwords do not match");
+            return;
+        }
+        if (name === "" || email === "" || password === "" || rep_password === "") {
+            alert("Please fill in all fields.");
+            return;
+        }
 
-function CustomButton() {
-    return (
-        <Button
-            type="submit"
-            variant="outlined"
-            color="info"
-            size="small"
-            disableElevation
-            fullWidth
-            sx={{ my: 2 }}
-        >
-            Sign Up
-        </Button>
-    );
-}
+        /*
+        const response = registerQuery();
+        if (response === null) {
+            console.log("Houston, we have a problem.");
+            return;
+        } else {
+            console.log(JSON.stringify(response))
+        }
+        */
 
-function ReturnToLogin() {
-    return (
-        <Link href="/login" variant="body2">
-            Return to Login
-        </Link>
-    );
-}
+        if (responseData === undefined) {
+            console.log("Houston, we have a problem.");
+            return;
 
-function ForgotPasswordLink() {
-    return (
-        <Link href="/forgot-password" variant="body2">
-            Forgot password?
-        </Link>
-    );
-}
+        }
 
-function Title() {
-    return <h2 style={{ marginBottom: 8 }}>Login</h2>;
-}
+        setFetching(true);
+        responseData.refetch();
+        setFetching(false);
 
-function Subtitle() {
-    return (
-        <Alert sx={{ mb: 2, px: 1, py: 0.25 }} severity="error">
-            No functionality yet...
-        </Alert>
-    );
-}
-
-/*
-function AgreeWithTerms() {
-    return (
-        <FormControlLabel
-            control={
-                <Checkbox
-                    name="tandc"
-                    value="true"
-                    color="primary"
-                    sx={{ padding: 0.5, '& .MuiSvgIcon-root': { fontSize: 20 } }}
-                />
+    if (responseData.data !== undefined) {
+        console.log("Success!");
+        redirect(`/login'`);
+        if (responseData.get('status') === 200) {
+            // TODO save jwt
+            console.log('Success!');
+            redirect('/login');
+        }  else {
+                //console.log(responseData.data);
             }
-            slotProps={{
-                typography: {
-                    fontSize: 14,
-                },
-            }}
-            color="textSecondary"
-            label="I agree with the T&C"
-        />
-    );
-}
-*/
+            alert(`Failed to register: ${responseData.get('message')}`);
+        }
 
-export default function SlotsSignUp() {
-    const darkTheme = createTheme({
-        palette: {
-            mode: 'dark',
-            background: { default: '#333' },
-            primary: { main: '#5567d6' },
-        },
-    });
+    }
+
+
+
     return (
-        <AppProvider theme={darkTheme}>
-            <SignInPage>
-                signIn={(provider: any, formData: any) =>
-                alert(
-                    `Signing up with "${provider.name}" and credentials: ${formData.get('email')}, ${formData.get('password')}, and checkbox value: ${formData.get('tandc')}.`,
-                )
-            }
-                slots={{
-                title: Title,
-                subtitle: Subtitle,
-                nameField: CustomEmailField,
-                emailField: CustomEmailField,
-                passwordField: CustomPasswordField,
-                submitButton: CustomButton,
-                signUpLink: ReturnToLogin,
-                //rememberMe: AgreeWithTerms,
-                forgotPasswordLink: ForgotPasswordLink,
-
-
-            }}
-                providers={providers}
-
-            </SignInPage>
-        </AppProvider>
+        <Box>
+            <Paper sx={{bgcolor: "#333"}} elevation={4} square={false}>
+                <form onSubmit={registerUser}>
+                    <Stack rowGap={1} paddingX={6} paddingY={2}
+                           direction="column"
+                           spacing={0.5}
+                           sx={{
+                               justifyContent: "center",
+                               alignItems: "center",}}
+                    >
+                        <img src={peerLabLogoTransparent}
+                             alt="PeerLab logo"
+                             style={{height: 100, width: 100}}
+                        />
+                        <h1 style={{ color:"#fff" }}>Register</h1>
+                        <div></div>
+                        <ThemeProvider theme={theme}>
+                            <TextField id="name-input" name="name" label="Name" onChange={handleInput}></TextField>
+                            <TextField id="email-input" name="email" label="Email" onChange={handleInput}></TextField>
+                            <TextField id="password-input" name="password" label="Password"
+                                       type={showPassword ? 'text' : 'password'} onChange={handleInput}></TextField>
+                            <TextField id="repeat-password-input" name="rep_password" label="Repeat Password"
+                                       type={showPassword ? 'text' : 'password'} onChange={handleInput}>
+                            </TextField>
+                                <FormControlLabel style={{ color:"#b5b5b5" }} label="Show Password" control={
+                                    <Checkbox style={{ color:"#cdcdcd" }} onChange={() => setShowPassword(!showPassword)} />}
+                                />
+                            <Button id="register" type="submit" variant="contained" color="primary">Register</Button>
+                            <Button variant="outlined" color="primary" onClick={backToLogin}>Back To Login</Button>
+                        </ThemeProvider>
+                    </Stack>
+                </form>
+            </Paper>
+        </Box>
     );
 }
