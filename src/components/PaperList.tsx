@@ -40,7 +40,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 backgroundColor: "#504e4e",
             }}
         >
-            <CardContent sx={{ maxHeight: 400, overflow: 'auto', padding: 0 }}>
+            <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -62,7 +62,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
-                    <List>
+                    <List sx={{ maxHeight: 360, overflow: 'auto' }}>
                         {data.map((paper: { id: number; title: string; ownerName: string }, index: number) => (
                             <div key={paper.id}>
                                 <ListItemButton

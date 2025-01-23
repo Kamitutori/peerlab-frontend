@@ -67,6 +67,36 @@
       "title": "On energy efficient circuit designs in micro controllers",
       "ownerName": "Prof. Henkel",
       "authors": "IEEE International Conference on Circuit, Power & Computing Technologies"
+    },
+    {
+      "id": 6,
+      "title": "On Lebesgue Polynomials",
+      "ownerName": "Maximilien Witzmer",
+      "authors": "Maximilien Witzmer, Manuela Mustermann"
+    },
+    {
+      "id": 7,
+      "title": "On coping with theoretical computer science",
+      "ownerName": "Jules",
+      "authors": "Jules, Marv"
+    },
+    {
+      "id": 8,
+      "title": "On JSON-Server mocks",
+      "ownerName": "Brettschneider",
+      "authors": "PSE"
+    },
+    {
+      "id": 9,
+      "title": "A Method for Obtaining Digital Signatures and Public-Key Cryptosystems",
+      "ownerName": "Ronald McDonald",
+      "authors": "Ronald L. Rivest, Adi Shamir, Leonard Adleman"
+    },
+    {
+      "id": 10,
+      "title": "On energy efficient circuit designs in micro controllers",
+      "ownerName": "Prof. Henkel",
+      "authors": "IEEE International Conference on Circuit, Power & Computing Technologies"
     }
   ]
 
