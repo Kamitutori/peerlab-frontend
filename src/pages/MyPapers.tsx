@@ -1,6 +1,5 @@
-// TODO: Implement MyPapers
-import PaperList from "../components/PaperList.tsx";
-import {Box, Grid2} from "@mui/material";
+import PaperList from "../components/PaperList";
+import { Box, Grid } from "@mui/material";
 
 export default function MyPapers() {
     return (
@@ -8,20 +7,20 @@ export default function MyPapers() {
             <PaperList
                 endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
                 title={"Recently Reviewed"} />
-            <Grid2 container spacing={4} justifyContent="center">
-                <Grid2>
+            <Grid container spacing={4} justifyContent="center">
+                <Grid item xs={12} md={6}>
                     <PaperList
-                    endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
-                    title="Current Papers"
+                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        title="Current Papers"
                     />
-                </Grid2>
-                <Grid2>
+                </Grid>
+                <Grid item xs={12} md={6}>
                     <PaperList
-                    endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
-                    title="Finished Papers"
+                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        title="Finished Papers"
                     />
-                </Grid2>
-            </Grid2>
+                </Grid>
+            </Grid>
         </Box>
     );
 }

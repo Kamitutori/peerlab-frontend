@@ -8,9 +8,9 @@ import {
     ListItemButton,
     ListItemText,
     Typography,
+    Divider,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
-import Divider from "@mui/material/Divider";
 
 interface PaperListProps {
     endpoint: string;
@@ -34,26 +34,31 @@ export default function PaperList({endpoint, title}: PaperListProps) {
     return (
         <Card
             sx={{
-                maxWidth: 800,
                 margin: "auto",
                 mt: 4,
                 boxShadow: 3,
                 backgroundColor: "#504e4e",
             }}
         >
-            <CardContent>
-                <Typography variant="h6" component="div" sx={{
-                    mb: 2,
-                    color: "white"
-                }}>
+            <CardContent sx={{ maxHeight: 400, overflow: 'auto', padding: 0 }}>
+                <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                        mb: 2,
+                        color: "white",
+                        position: 'sticky',
+                        top: 0,
+                        backgroundColor: "#353535", // Highlight color
+                        zIndex: 1,
+                        padding: '8px 16px',
+                        width: '100%',
+                    }}
+                >
                     {title}
                 </Typography>
                 {isLoading ? (
-                    <Typography sx={{
-                        color: "white"
-                    }}>
-                        Loading papers...
-                    </Typography>
+                    <Typography sx={{ color: "white" }}>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
@@ -84,7 +89,6 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                                     fontSize: "0.875rem",
                                                     textOverflow: "ellipsis",
                                                     overflow: "hidden",
-                                                    maxWidth: "200px",
                                                     color: "white",
                                                 },
                                             },
