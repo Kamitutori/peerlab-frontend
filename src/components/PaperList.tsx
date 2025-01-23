@@ -45,7 +45,6 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     variant="h6"
                     component="div"
                     sx={{
-                        mb: 2,
                         color: "white",
                         position: 'sticky',
                         top: 0,
