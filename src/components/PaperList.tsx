@@ -34,10 +34,14 @@ export default function PaperList() {
                 margin: "auto",
                 mt: 4,
                 boxShadow: 3,
+                backgroundColor: "#504e4e",
             }}
         >
             <CardContent>
-                <Typography variant="h6" component="div" sx={{ mb: 2 }}>
+                <Typography variant="h6" component="div" sx={{
+                    mb: 2,
+                    color: "white"
+                }}>
                     My Papers
                 </Typography>
                 {isLoading ? (
@@ -53,7 +57,7 @@ export default function PaperList() {
                                 sx={{
                                     borderRadius: 2,
                                     "&:hover": {
-                                        backgroundColor: "#e3f2fd",
+                                        backgroundColor: "#353535",
                                     },
                                 }}
                             >
@@ -73,11 +77,13 @@ export default function PaperList() {
                                                 textOverflow: "ellipsis",
                                                 overflow: "hidden",
                                                 maxWidth: "200px",
+                                                color: "white",
                                             },
                                         },
                                         secondary: {
                                             sx: {
                                                 fontSize: "0.75rem",
+                                                color: "white",
                                             },
                                         }
                                     }}
