@@ -1,5 +1,14 @@
-import {useQuery} from "@tanstack/react-query"; // Make sure react-query is installed
-import {Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Typography,} from "@mui/material";
+import {useQuery} from "@tanstack/react-query";
+import {
+    Avatar,
+    Card,
+    CardContent,
+    List,
+    ListItemAvatar,
+    ListItemButton,
+    ListItemText,
+    Typography,
+} from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
 
 export default function PaperList() {
@@ -14,36 +23,70 @@ export default function PaperList() {
         },
     });
 
-    if (isLoading) {
-        return <Typography>Loading...</Typography>;
-    }
-
-    if (error) {
-        return <Typography color="error">Failed to load papers.</Typography>;
-    }
+    const handleClick = (paperId: number) => {
+        console.log(`Clicked on paper with ID: ${paperId}`);
+    };
 
     return (
-        <Box sx={{ flexGrow: 1, maxWidth: 752 }}>
-            <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-                My Papers
-            </Typography>
-            <List>
-                {data.map((paper: { id: number; title: string; ownerName: string }) => (
-                    <ListItem
-                        key={paper.id}
-                    >
-                        <ListItemAvatar>
-                            <Avatar>
-                                <ArticleIcon />
-                            </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                            primary={paper.title}
-                            secondary={`Author: ${paper.ownerName}`}
-                        />
-                    </ListItem>
-                ))}
-            </List>
-        </Box>
+        <Card
+            sx={{
+                maxWidth: 800,
+                margin: "auto",
+                mt: 4,
+                boxShadow: 3,
+            }}
+        >
+            <CardContent>
+                <Typography variant="h6" component="div" sx={{ mb: 2 }}>
+                    My Papers
+                </Typography>
+                {isLoading ? (
+                    <Typography>Loading papers...</Typography>
+                ) : error ? (
+                    <Typography color="error">Failed to load papers.</Typography>
+                ) : (
+                    <List>
+                        {data.map((paper: { id: number; title: string; ownerName: string }) => (
+                            <ListItemButton
+                                key={paper.id}
+                                onClick={() => handleClick(paper.id)}
+                                sx={{
+                                    borderRadius: 2,
+                                    "&:hover": {
+                                        backgroundColor: "#e3f2fd",
+                                    },
+                                }}
+                            >
+                                <ListItemAvatar>
+                                    <Avatar>
+                                        <ArticleIcon />
+                                    </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={paper.title}
+                                    secondary={`Author: ${paper.ownerName}`}
+                                    slotProps={{
+                                        primary: {
+                                            noWrap: true,
+                                            sx: {
+                                                fontSize: "0.875rem",
+                                                textOverflow: "ellipsis",
+                                                overflow: "hidden",
+                                                maxWidth: "200px",
+                                            },
+                                        },
+                                        secondary: {
+                                            sx: {
+                                                fontSize: "0.75rem",
+                                            },
+                                        }
+                                    }}
+                                />
+                            </ListItemButton>
+                        ))}
+                    </List>
+                )}
+            </CardContent>
+        </Card>
     );
 }
