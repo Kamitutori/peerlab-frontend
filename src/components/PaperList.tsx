@@ -10,14 +10,18 @@ import {
     Typography,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
+import Divider from "@mui/material/Divider";
 
-export default function PaperList() {
+interface PaperListProps {
+    endpoint: string;
+    title: string;
+}
+
+export default function PaperList({endpoint, title}: PaperListProps) {
     const {data, isLoading, error} = useQuery({
-        queryKey: ["paper"],
+        queryKey: [endpoint],
         queryFn: async () => {
-            const res = await fetch(
-                `https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`
-            );
+            const res = await fetch(endpoint);
             if (!res.ok) throw new Error("Failed to fetch papers");
             return res.json();
         },
@@ -42,55 +46,59 @@ export default function PaperList() {
                     mb: 2,
                     color: "white"
                 }}>
-                    My Papers
+                    {title}
                 </Typography>
                 {isLoading ? (
                     <Typography sx={{
                         color: "white"
-                    }}>Loading papers...</Typography>
+                    }}>
+                        Loading papers...
+                    </Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
                     <List>
-                        {data.map((paper: { id: number; title: string; ownerName: string }) => (
-                            <ListItemButton
-                                key={paper.id}
-                                onClick={() => handleClick(paper.id)}
-                                sx={{
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                        backgroundColor: "#353535",
-                                    },
-                                }}
-                            >
-                                <ListItemAvatar>
-                                    <Avatar>
-                                        <ArticleIcon/>
-                                    </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary={paper.title}
-                                    secondary={`Author: ${paper.ownerName}`}
-                                    slotProps={{
-                                        primary: {
-                                            noWrap: true,
-                                            sx: {
-                                                fontSize: "0.875rem",
-                                                textOverflow: "ellipsis",
-                                                overflow: "hidden",
-                                                maxWidth: "200px",
-                                                color: "white",
-                                            },
+                        {data.map((paper: { id: number; title: string; ownerName: string }, index: number) => (
+                            <div key={paper.id}>
+                                <ListItemButton
+                                    onClick={() => handleClick(paper.id)}
+                                    sx={{
+                                        borderRadius: 2,
+                                        "&:hover": {
+                                            backgroundColor: "#353535",
                                         },
-                                        secondary: {
-                                            sx: {
-                                                fontSize: "0.75rem",
-                                                color: "white",
-                                            },
-                                        }
                                     }}
-                                />
-                            </ListItemButton>
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar>
+                                            <ArticleIcon/>
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={paper.title}
+                                        secondary={`Author: ${paper.ownerName}`}
+                                        slotProps={{
+                                            primary: {
+                                                noWrap: true,
+                                                sx: {
+                                                    fontSize: "0.875rem",
+                                                    textOverflow: "ellipsis",
+                                                    overflow: "hidden",
+                                                    maxWidth: "200px",
+                                                    color: "white",
+                                                },
+                                            },
+                                            secondary: {
+                                                sx: {
+                                                    fontSize: "0.75rem",
+                                                    color: "white",
+                                                },
+                                            }
+                                        }}
+                                    />
+                                </ListItemButton>
+                                {index < data.length - 1 && <Divider sx={{backgroundColor: "grey"}}/>}
+                            </div>
                         ))}
                     </List>
                 )}
