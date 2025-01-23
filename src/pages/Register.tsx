@@ -58,14 +58,9 @@ function backToLogin() {
     redirect("/login");
 }
 
-
-
-
-
-
 export default function Register() {
-    const[showPassword, setShowPassword] = useState(true);
-    const[fetching, setFetching] = useState(false);
+    const [showPassword, setShowPassword] = useState(true);
+    const [fetching, setFetching] = useState(false);
     const [input, setInput] = useState({
         name: "",
         email: "",
@@ -73,9 +68,15 @@ export default function Register() {
         rep_password:""
     });
 
-    const {data: responseData} = useQuery({
+    const { data: responseData } =
+        useQuery({
         queryKey: ['register'],
         queryFn: async () => {
+        /*
+            if (!fetching) {
+                return HTML
+            }
+        */
             console.log("Submitting...");
             const res = await fetch("http://localhost:8080/api/auth/register", {
                 method: 'POST',
@@ -146,10 +147,7 @@ export default function Register() {
         setFetching(false);
 
     if (responseData.data !== undefined) {
-        console.log("Success!");
-        redirect(`/login'`);
         if (responseData.get('status') === 200) {
-            // TODO save jwt
             console.log('Success!');
             redirect('/login');
         }  else {
@@ -159,8 +157,6 @@ export default function Register() {
         }
 
     }
-
-
 
     return (
         <Box>

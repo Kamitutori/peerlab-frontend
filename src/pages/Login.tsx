@@ -168,32 +168,7 @@ function AgreeWithTerms() {
 }
 */
 
-function handleSignIn(_provider: AuthProvider, formData: FormData) {
-    console.log(`Hi!`)
-    const {data: responseData} = useQuery({
-        queryKey: ['login'],
-        queryFn: async () => {
-            const res = await fetch('http://localhost:8080/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    // Set host and Authorization...
-                    'host': 'localhost:8080',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.get('email'),
-                    password: formData.get('password'),
-                })
-            });
-            return (await res.json());}
-    });
-    if (responseData.get('status') === 200) {
-        alert('Success!');
-        //redirect('/dashboard');
-    }
 
-}
 
 export default function SlotsSignIn() {
     const darkTheme = createTheme({
@@ -203,6 +178,35 @@ export default function SlotsSignIn() {
             primary: { main: '#5567d6' },
         },
     });
+
+    function handleSignIn(_provider: AuthProvider, formData: FormData) {
+        console.log(`Hi!`)
+        const {data: responseData} = useQuery({
+            queryKey: ['login'],
+            queryFn: async () => {
+                const res = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        // Set host and Authorization...
+                        'host': 'localhost:8080',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.get('email'),
+                        password: formData.get('password'),
+                    })
+                });
+                return (await res.json());}
+        });
+        if (responseData.get('status') === 200) {
+            alert('Success!');
+            //redirect('/dashboard');
+        }
+
+    }
+
+
     return (
         <AppProvider branding={BRANDING} theme={darkTheme}>
             <SignInPage
