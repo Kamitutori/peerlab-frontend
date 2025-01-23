@@ -1,58 +1,100 @@
-import * as React from 'react';
-import {styled} from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArticleIcon from '@mui/icons-material/Article';
 import {useQuery} from "@tanstack/react-query";
-
-function generate(element: React.ReactElement<unknown>) {
-    return [0, 1, 2].map((value) =>
-        React.cloneElement(element, {
-            key: value,
-        }),
-    );
-}
-
-const Demo = styled('div')(({theme}) => ({
-    backgroundColor: theme.palette.background.paper,
-}));
+import {
+    Avatar,
+    Card,
+    CardContent,
+    List,
+    ListItemAvatar,
+    ListItemButton,
+    ListItemText,
+    Typography,
+} from "@mui/material";
+import ArticleIcon from "@mui/icons-material/Article";
 
 export default function PaperList() {
-    useQuery({
+    const {data, isLoading, error} = useQuery({
         queryKey: ["paper"],
         queryFn: async () => {
             const res = await fetch(
-                `https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`);
-            return (await res.json());
-        }
+                `https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`
+            );
+            if (!res.ok) throw new Error("Failed to fetch papers");
+            return res.json();
+        },
     });
+
+    const handleClick = (paperId: number) => {
+        console.log(`Clicked on paper with ID: ${paperId}`);
+    };
+
     return (
-        <Box sx={{flexGrow: 1, maxWidth: 752}}>
-            <Typography sx={{mt: 4, mb: 2}} variant="h6" component="div">
-                My Papers
-            </Typography>
-            <Demo>
-                {generate(
-                    <ListItem
-                        secondaryAction={
-                            <IconButton edge="end" aria-label="delete">
-                                <DeleteIcon/>
-                            </IconButton>
-                        }
-                    >
-                        <ListItemAvatar>
-                            <Avatar>
-                                <ArticleIcon/>
-                            </Avatar>
-                        </ListItemAvatar>
-                    </ListItem>,
+        <Card
+            sx={{
+                maxWidth: 800,
+                margin: "auto",
+                mt: 4,
+                boxShadow: 3,
+                backgroundColor: "#504e4e",
+            }}
+        >
+            <CardContent>
+                <Typography variant="h6" component="div" sx={{
+                    mb: 2,
+                    color: "white"
+                }}>
+                    My Papers
+                </Typography>
+                {isLoading ? (
+                    <Typography sx={{
+                        color: "white"
+                    }}>Loading papers...</Typography>
+                ) : error ? (
+                    <Typography color="error">Failed to load papers.</Typography>
+                ) : (
+                    <List>
+                        {data.map((paper: { id: number; title: string; ownerName: string }) => (
+                            <ListItemButton
+                                key={paper.id}
+                                onClick={() => handleClick(paper.id)}
+                                sx={{
+                                    borderRadius: 2,
+                                    "&:hover": {
+                                        backgroundColor: "#353535",
+                                    },
+                                }}
+                            >
+                                <ListItemAvatar>
+                                    <Avatar>
+                                        <ArticleIcon/>
+                                    </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={paper.title}
+                                    secondary={`Author: ${paper.ownerName}`}
+                                    slotProps={{
+                                        primary: {
+                                            noWrap: true,
+                                            sx: {
+                                                fontSize: "0.875rem",
+                                                textOverflow: "ellipsis",
+                                                overflow: "hidden",
+                                                maxWidth: "200px",
+                                                color: "white",
+                                            },
+                                        },
+                                        secondary: {
+                                            sx: {
+                                                fontSize: "0.75rem",
+                                                color: "white",
+                                            },
+                                        }
+                                    }}
+                                />
+                            </ListItemButton>
+                        ))}
+                    </List>
                 )}
-            </Demo>
-        </Box>
+            </CardContent>
+        </Card>
     );
 }

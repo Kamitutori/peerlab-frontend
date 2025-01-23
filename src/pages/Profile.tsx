@@ -46,7 +46,7 @@ export default function Profile() {
     }
 
     // At least user was successfully fetched
-    let userObject: UserTemplate = userData[1];
+    const userObject: UserTemplate = userData[1];
 
     return (
         <div>
