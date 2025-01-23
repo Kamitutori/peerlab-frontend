@@ -12,7 +12,7 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 
 export default function PaperList() {
-    const { data, isLoading, error } = useQuery({
+    const {data, isLoading, error} = useQuery({
         queryKey: ["paper"],
         queryFn: async () => {
             const res = await fetch(
@@ -45,7 +45,9 @@ export default function PaperList() {
                     My Papers
                 </Typography>
                 {isLoading ? (
-                    <Typography>Loading papers...</Typography>
+                    <Typography sx={{
+                        color: "white"
+                    }}>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
@@ -63,7 +65,7 @@ export default function PaperList() {
                             >
                                 <ListItemAvatar>
                                     <Avatar>
-                                        <ArticleIcon />
+                                        <ArticleIcon/>
                                     </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText
