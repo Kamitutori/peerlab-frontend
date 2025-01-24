@@ -13,21 +13,63 @@ import Profile from "./pages/Profile.tsx";
 import MyPapers from "./pages/MyPapers.tsx";
 import MyReviews from "./pages/MyReviews.tsx";
 import NoPage from "./pages/NoPage.tsx";
-import Navbar from "./components/Navbar.tsx";
-import TopMenuBar from "./components/TopMenuBar.tsx";
+import TopMenuBar from "./components/TopBar.tsx";
 import SinglePaper from "./components/SinglePaper.tsx";
 import Register from "./pages/Register.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import PrivateRoute from "./components/auth/PrivateRoute.tsx";
+import {createTheme, ThemeProvider} from "@mui/material";
+
+const theme = createTheme({
+    components: {
+        MuiTextField: {
+            defaultProps: {
+                size: "small",
+            },
+            styleOverrides: {
+                root: {
+                    "& .MuiOutlinedInput-root": {
+                        color: "#fff",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#606060",
+                            borderWidth: "2px",
+                        },
+                        "&.Mui-focused": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#7e3ff2",
+                                borderWidth: "2px",
+                            },
+                        },
+                        "&:hover:not(.Mui-focused)": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#b5b5b5",
+                            },
+                        },
+                        "& .MuiOutlinedInput-input": {
+                            color: "#fff"
+                        }
+                    },
+                    "& .MuiInputLabel-outlined": {
+                        color: "#bcbcbc",
+                        "&.Mui-focused": {
+                            color: "primary",
+                            fontWeight: "bold",
+                        },
+                    }
+                }
+            }
+        }
+    }
+});
 
 function App() {
 
     return (
         <div>
             <BrowserRouter>
+                <ThemeProvider theme={theme}>
                 {/* <AuthProvider children={Login}> */}
                     <TopMenuBar/>
-                    <Navbar/>
                     <div className="container">
                         <Routes>
                             <Route index element={<Login/>}/>
@@ -46,39 +88,10 @@ function App() {
                         </Routes>
                     </div>
                 {/* </AuthProvider> */}
+                    </ThemeProvider>
             </BrowserRouter>
         </div>
     )
-
-    /*
-    Some code from project init. May be useful to have something to look at in terms of animation and links.
-
-    const [count, setCount] = useState(0)
-    return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-    )
-     */
 }
 
 export default App

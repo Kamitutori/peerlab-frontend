@@ -1,5 +1,4 @@
 import React, {createContext, useContext, useState} from "react";
-import {AuthenticationContext} from "@toolpad/core";
 import {useNavigate} from "react-router-dom";
 
 /**
@@ -18,13 +17,12 @@ export function useUpdateAuth() {
     return useContext(AuthUpdateContext);
 }
 
-export default function AuthProvider ({ children }) {
+export default function AuthProvider (children: any) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("site") || "");
     const navigate = useNavigate();
 
-    /* Entspricht function toggleTheme
-    const loginAction = async (data) => {
+    const logIn = async (data: any) => {
         try {
             const response = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
@@ -48,14 +46,12 @@ export default function AuthProvider ({ children }) {
         }
     };
 
-
     const logOut= () => {
         setUser(null);
         setToken("");
         localStorage.removeItem("site");
         navigate("/login");
     }
-    */
 
     return (
         <AuthContext.Provider value={token}>
