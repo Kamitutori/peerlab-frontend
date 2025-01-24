@@ -1,8 +1,13 @@
 import PaperList from "../components/PaperList";
 import {Box, Fab, Grid} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import {useNavigate} from "react-router-dom";
 
 export default function MyPapers() {
+    const navigate = useNavigate();
+    const handleAddPaperClick = () => {
+        navigate('/edit-paper')
+    }
     return (
         <Box sx={{ flexGrow: 1, padding: 4 }}>
             <PaperList
@@ -26,6 +31,7 @@ export default function MyPapers() {
                 variant={"extended"}
                 color={"primary"}
                 sx={{position: "fixed", bottom: 16, right: 16}}
+                onClick={handleAddPaperClick}
             >
                 <AddIcon />
                 Add Paper

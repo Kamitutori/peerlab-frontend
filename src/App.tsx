@@ -8,6 +8,8 @@ import MyReviews from "./pages/MyReviews.tsx";
 import NoPage from "./pages/NoPage.tsx";
 import TopMenuBar from "./components/TopBar.tsx";
 import SinglePaper from "./components/SinglePaper.tsx";
+import EditPaper from "./pages/EditPaper.tsx";
+
 /**
  * Notice TODO: Look up MUI AppBar to see an implementation of handling authorization and submenus.
  */
@@ -26,6 +28,7 @@ function App() {
                     <Route path="/reviews" element={<MyReviews />}/>
                     <Route path="*" element={<NoPage />}/>
                     <Route path="/single-paper" element={<SinglePaper />}/>
+                    <Route path="/edit-paper" element={<EditPaper />}/>
                 </Routes>
             </div>
         </div>

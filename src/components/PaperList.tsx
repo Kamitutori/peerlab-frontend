@@ -37,7 +37,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 margin: "auto",
                 mt: 4,
                 boxShadow: 3,
-                backgroundColor: "#504e4e",
+                backgroundColor: "background.paper",
             }}
         >
             <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
@@ -48,7 +48,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                         color: "white",
                         position: 'sticky',
                         top: 0,
-                        backgroundColor: "#353535", // Highlight color
+                        backgroundColor: "background.paper",
                         zIndex: 1,
                         padding: '8px 16px',
                         width: '100%',
@@ -75,7 +75,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                 >
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <ArticleIcon/>
+                                            <ArticleIcon sx={{color: 'white'}}/>
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
