@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     Box,
     Button,
@@ -9,7 +9,15 @@ import {
     FormControlLabel,
     Radio,
     Grid,
-    IconButton
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Checkbox,
+    Paper
 } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import CustomTextField from '../components/CustomTextField';
@@ -25,7 +33,17 @@ export default function EditPaper() {
     const [authorsNote, setAuthorsNote] = useState('');
     const [files, setFiles] = useState<File[]>([]);
     const [warning, setWarning] = useState('');
+    const [reviewers, setReviewers] = useState([]);
+    const [selectedReviewers, setSelectedReviewers] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        // Fetch reviewers from an API
+        fetch('https://my-json-server.typicode.com/kamitutori/peerlab-frontend/userList')
+            .then(response => response.json())
+            .then(data => setReviewers(data))
+            .catch(error => console.error('Error fetching reviewers:', error));
+    }, []);
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -58,6 +76,7 @@ export default function EditPaper() {
             internal,
             authorsNote,
             files,
+            selectedReviewers
         };
         console.log(paperData);
         // Add your form submission logic here
@@ -77,6 +96,22 @@ export default function EditPaper() {
 
     const handleRemoveFile = () => {
         setFiles([]);
+    };
+
+    const handleReviewerChange = (reviewerId: string) => {
+        setSelectedReviewers(prevSelected =>
+            prevSelected.includes(reviewerId)
+                ? prevSelected.filter(id => id !== reviewerId)
+                : [...prevSelected, reviewerId]
+        );
+    };
+
+    const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.checked) {
+            setSelectedReviewers(reviewers.map(reviewer => reviewer.id));
+        } else {
+            setSelectedReviewers([]);
+        }
     };
 
     return (
@@ -195,6 +230,35 @@ export default function EditPaper() {
                         }
                     }}
                 />
+                <TableContainer component={Paper} sx={{ marginTop: 4, maxHeight: 400, overflow: 'auto' }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Reviewer</TableCell>
+                                <TableCell align="right">
+                                    <Checkbox
+                                        checked={selectedReviewers.length === reviewers.length}
+                                        indeterminate={selectedReviewers.length > 0 && selectedReviewers.length < reviewers.length}
+                                        onChange={handleSelectAll}
+                                    />
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {reviewers.map((reviewer: { id: string, name: string }) => (
+                                <TableRow key={reviewer.id} sx={{ height: 40 }}>
+                                    <TableCell>{reviewer.name}</TableCell>
+                                    <TableCell align="right">
+                                        <Checkbox
+                                            checked={selectedReviewers.includes(reviewer.id)}
+                                            onChange={() => handleReviewerChange(reviewer.id)}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
                 {warning && (
                     <Typography color="error" sx={{ mt: 2 }}>
                         {warning}
