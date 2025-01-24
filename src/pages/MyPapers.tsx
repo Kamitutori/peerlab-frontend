@@ -1,5 +1,6 @@
 import PaperList from "../components/PaperList";
-import { Box, Grid } from "@mui/material";
+import {Box, Fab, Grid} from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
 export default function MyPapers() {
     return (
@@ -21,6 +22,14 @@ export default function MyPapers() {
                     />
                 </Grid>
             </Grid>
+            <Fab
+                variant={"extended"}
+                color={"primary"}
+                sx={{position: "fixed", bottom: 16, right: 16}}
+            >
+                <AddIcon />
+                Add Paper
+            </Fab>
         </Box>
     );
 }
