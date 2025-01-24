@@ -108,7 +108,7 @@ export default function EditPaper() {
 
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setSelectedReviewers(reviewers.map(reviewer => reviewer.id));
+            setSelectedReviewers(reviewers.map(reviewer => reviewer));
         } else {
             setSelectedReviewers([]);
         }
@@ -230,20 +230,44 @@ export default function EditPaper() {
                         }
                     }}
                 />
-                <TableContainer component={Paper} sx={{ marginTop: 4, maxHeight: 400, overflow: 'auto' }}>
+                <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell>Reviewer</TableCell>
-                                <TableCell align="right">
-                                    <Checkbox
-                                        checked={selectedReviewers.length === reviewers.length}
-                                        indeterminate={selectedReviewers.length > 0 && selectedReviewers.length < reviewers.length}
-                                        onChange={handleSelectAll}
-                                    />
+                                <TableCell
+                                    align="right"
+                                    sx={{
+                                        position: 'sticky',
+                                        top: 0,
+                                        backgroundColor: 'background',
+                                        zIndex: 1
+                                    }}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            flexDirection: 'row-reverse'
+                                        }}>
+                                        <Checkbox
+                                            checked={selectedReviewers.length === reviewers.length}
+                                            indeterminate={selectedReviewers.length > 0 && selectedReviewers.length < reviewers.length}
+                                            onChange={handleSelectAll}
+                                        />
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ mr: 1 }}
+                                        >
+                                            Select all
+                                        </Typography>
+                                    </Box>
                                 </TableCell>
                             </TableRow>
                         </TableHead>
+                    </Table>
+                </TableContainer>
+                <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
+                    <Table>
                         <TableBody>
                             {reviewers.map((reviewer: { id: string, name: string }) => (
                                 <TableRow key={reviewer.id} sx={{ height: 40 }}>
