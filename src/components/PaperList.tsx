@@ -75,7 +75,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                 >
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <ArticleIcon sx={{color: 'white'}}/>
+                                            <ArticleIcon sx={{color: 'primary.main'}}/>
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
@@ -88,13 +88,13 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                                     fontSize: "0.875rem",
                                                     textOverflow: "ellipsis",
                                                     overflow: "hidden",
-                                                    color: "white",
+                                                    color: "primary",
                                                 },
                                             },
                                             secondary: {
                                                 sx: {
                                                     fontSize: "0.75rem",
-                                                    color: "white",
+                                                    color: "primary",
                                                 },
                                             }
                                         }}
