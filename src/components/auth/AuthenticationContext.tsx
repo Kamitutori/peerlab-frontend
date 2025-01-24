@@ -17,12 +17,10 @@ export function useUpdateAuth() {
     return useContext(AuthUpdateContext);
 }
 
-export default function AuthProvider (children: any) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("site") || "");
     const navigate = useNavigate();
 
-    const logIn = async (data: any) => {
         try {
             const response = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
