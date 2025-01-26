@@ -21,7 +21,13 @@ export default function PaperList({endpoint, title}: PaperListProps) {
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
-            const res = await fetch(endpoint);
+            const res = await fetch(endpoint, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
             if (!res.ok) throw new Error("Failed to fetch papers");
             return res.json();
         },

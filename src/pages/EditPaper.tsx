@@ -51,7 +51,7 @@ export default function EditPaper() {
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
 
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         const minScoreNum = parseInt(minScore);
         const maxScoreNum = parseInt(maxScore);
@@ -84,8 +84,27 @@ export default function EditPaper() {
             files,
             selectedReviewers
         };
-        console.log(paperData);
-        // Add your form submission logic here
+
+        try {
+            const response = await fetch('http://localhost:8080/api/papers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(paperData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            console.log('Success:', result);
+            // Handle success (e.g., show a success message, redirect, etc.)
+        } catch (error) {
+            console.error('Error:', error);
+            // Handle error (e.g., show an error message)
+        }
     };
 
     const onDrop = (acceptedFiles: File[]) => {
@@ -121,7 +140,7 @@ export default function EditPaper() {
     };
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 600, padding: 4, backgroundColor: 'background.paper', boxShadow: 3 }}>
+        <Paper sx={{ width: '100%', maxWidth: 600, padding: 4, backgroundColor: 'background.paper', boxShadow: 3 }}>
             <Typography variant="h4" component="h1" sx={{ color: 'white' }}>
                 Add Paper
             </Typography>
@@ -298,6 +317,6 @@ export default function EditPaper() {
                     Submit
                 </Button>
             </form>
-        </Box>
+        </Paper>
     );
 }

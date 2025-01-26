@@ -16,7 +16,7 @@ export default function MyPapers() {
             <Grid container spacing={4} justifyContent="center">
                 <Grid item xs={12} md={6}>
                     <PaperList
-                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        endpoint={`http://localhost:8080/api/papers`}
                         title="Current Papers"
                     />
                 </Grid>
