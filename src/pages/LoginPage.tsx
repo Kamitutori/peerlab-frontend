@@ -1,15 +1,15 @@
-import { Button, Checkbox, FormControlLabel, Paper, Stack, TextField } from "@mui/material";
+import {Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
-import React, { useState } from "react";
+import React, {useState} from "react";
 import peerLabLogoTransparent from "../assets/peerlabLogo_transparent.svg";
-import { useUpdateAuth } from "../components/auth/AuthenticationContext";
+import {useUpdateAuth} from "../components/auth/AuthenticationContext";
 
 function goToRegister() {
     window.location.href = "http://localhost:5173/register";
 }
 
-export default function Login() {
-    const { login }  = useUpdateAuth();
+export default function LoginPage() {
+    const {login} = useUpdateAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [input, setInput] = useState({
         email: "",
@@ -21,7 +21,7 @@ export default function Login() {
     }
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setInput((prev) => ({
             ...prev,
             [name]: value,
@@ -30,29 +30,43 @@ export default function Login() {
 
     const loginToApplication = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const { email, password } = input;
+        const {email, password} = input;
         if (email === "" || password === "") {
             alert("Please fill in all fields.");
             return;
         }
-        await login({ email, password });
+        await login({email, password});
+        // TODO Statements here are not reached if successful. Remove alerts and insert error message here. Problem: how to transfer the response code?
     };
 
     return (
         <Box>
-            <Paper sx={{ bgcolor: "#333", width: "350px", maxWidth: "350px"}} elevation={4}>
+            <Paper sx={{
+                bgcolor: "#333",
+                width: "350px",
+                maxWidth: "350px"
+            }}
+                   elevation={4}
+            >
                 <form onSubmit={loginToApplication}>
-                    <Stack rowGap={1} paddingX={6} paddingY={2} spacing={0.5}
-                           direction="column"
-                           sx={{
-                               justifyContent: "center",
-                               alignItems: "center",
-                           }}>
+                    <Stack
+                        rowGap={1}
+                        paddingX={6}
+                        paddingY={2}
+                        spacing={0.5}
+                        direction="column"
+                        sx={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
                         <img src={peerLabLogoTransparent}
                              alt="PeerLab logo"
-                             style={{ height: 100, width: 100 }}
+                             style={{height: 100, width: 100}}
                         />
-                        <h1 style={{ color: "#fff" }}>Login</h1>
+                        <h1 style={{color: "#fff"}}>
+                            Login
+                        </h1>
                         <div></div>
                         <TextField
                             id="email-input"
@@ -68,11 +82,11 @@ export default function Login() {
                             onChange={handleInput}
                         />
                         <FormControlLabel
-                            style={{ color: "#b5b5b5" }}
+                            style={{color: "#b5b5b5"}}
                             label="Show Password"
                             control={
                                 <Checkbox
-                                    style={{ color: "#cdcdcd" }}
+                                    style={{color: "#cdcdcd"}}
                                     onChange={() => setShowPassword(!showPassword)}
                                 />
                             }

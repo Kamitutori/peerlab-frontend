@@ -18,16 +18,7 @@ export default function Profile() {
                 const res = await fetch(`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/user`);
                 return (await res.json());}
         });
-    /*
-    const {
-        isPending: isReviewPending,
-        isError: isReviewError,
-        data: reviewData,
-        error: reviewError} =
-        useQuery({ queryKey: ["myReviews"], queryFn: fetchMyReviews });
-    */
 
-    // User as "dominant" object over the others...
     if (isUserPending) {
         return <span>Loading... (shimmer)</span>
     }

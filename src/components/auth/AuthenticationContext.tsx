@@ -47,12 +47,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 setToken(res);
                 localStorage.setItem("jwt", res);
                 navigate("/dashboard");
-            } else {
-                throw new Error(res || "Login failed");
+            } else if (response.status === 400) {
+                alert("Invalid email or password.");
             }
         } catch (error) {
-            console.error("Login error:", error);
-            alert("Login failed. Please try again.");
+            console.error("LoginPage error:", error);
+            alert("LoginPage failed. Please try again.");
         }
     };
 

@@ -3,14 +3,14 @@ import {createTheme, ThemeProvider} from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
 
-import Login from "./pages/Login";
+import LoginPage from "./pages/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import MyPapers from "./pages/MyPapers";
 import MyReviews from "./pages/MyReviews";
 import NoPage from "./pages/NoPage";
 import TopMenuBar from "./components/TopBar";
-import Register from "./pages/Register";
+import RegisterPage from "./pages/RegisterPage.tsx";
 import ForgotPassword from "./pages/ForgotPassword";
 import SinglePaper from "./components/SinglePaper.tsx";
 
@@ -68,19 +68,19 @@ function App() {
                                 <Route
                                     index
                                     element={
-                                            <Login />
+                                            <LoginPage />
                                     }
                                 />
                                 <Route
                                     path="/login"
                                     element={
-                                            <Login />
+                                            <LoginPage />
                                     }
                                 />
                                 <Route
                                     path="/register"
                                     element={
-                                            <Register />
+                                            <RegisterPage />
                                     }
                                 />
                                 <Route

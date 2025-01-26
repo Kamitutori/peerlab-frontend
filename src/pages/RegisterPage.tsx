@@ -18,14 +18,14 @@ function backToLogin() {
     window.location.href = "http://localhost:5173/login";
 }
 
-export default function Register() {
-    const [showPassword, setShowPassword] = useState(false);
+export default function RegisterPage() {
     const [input, setInput] = useState({
         name: "",
         email: "",
         password: "",
         rep_password: ""
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<'error' | 'success' | 'warning' | ''>('');
     const [showMessage, setShowMessage] = useState(false);
@@ -98,8 +98,7 @@ export default function Register() {
 
         refetch().then(({data}) => {
             if (data == 200) {
-                setMessageProps(`Registration successful. Verify your email to authenticate and login afterward. 
- Redirecting to login...`, "success");
+                setMessageProps(`Registration successful. Verify your email to authenticate and login afterward. Redirecting to login...`, "success");
                 setTimeout(() => {
                     window.location.href = "http://localhost:5173/login";
                 }, 10000);
@@ -115,13 +114,21 @@ export default function Register() {
             })
     }
 
-
     return (
         <Box>
-            <Paper sx={{bgcolor: "#333", overflow: "hidden", wordWrap: "break-word", maxWidth: "400px", width: "400px"}} elevation={4} square={false}
+            <Paper sx={{
+                bgcolor: "#333",
+                overflow: "hidden",
+                wordWrap: "break-word",
+                maxWidth: "400px",
+                width: "400px"}}
+                   elevation={4}
             >
                 <form onSubmit={registerUser}>
-                    <Stack rowGap={1} paddingX={6} paddingY={2} spacing={0.5}
+                    <Stack rowGap={1}
+                           paddingX={6}
+                           paddingY={2}
+                           spacing={0.5}
                            direction="column"
                            sx={{
                                justifyContent: "center",
@@ -132,12 +139,14 @@ export default function Register() {
                              alt="PeerLab logo"
                              style={{height: 100, width: 100}}
                         />
-                        <h1 style={{color: "#fff"}}>Register</h1>
+                        <h1 style={{color: "#fff"}}>
+                            Register
+                        </h1>
                         {showMessage && (
-                        <Alert severity={messageType as 'error' | 'success'} sx={{ whiteSpace: 'pre-line', width: "100%" , textAlign: "center", alignItems: "center"}}>
-                            {message}
-                        </Alert>
-                    )}
+                            <Alert severity={messageType as 'error' | 'success'} sx={{ whiteSpace: 'pre-line', width: "100%" , textAlign: "center", alignItems: "center"}}>
+                                {message}
+                            </Alert>
+                        )}
                         <div></div>
                         <TextField
                             id="name-input"
@@ -174,7 +183,8 @@ export default function Register() {
                             label="Show Password"
                             control={
                                 <Checkbox style={{color: "#cdcdcd"}}
-                                          onChange={() => setShowPassword(!showPassword)}/>
+                                          onChange={() => setShowPassword(!showPassword)}
+                                />
                             }
                         />
                         <Button
@@ -192,7 +202,6 @@ export default function Register() {
                         >
                             Back To Login
                         </Button>
-
                     </Stack>
                 </form>
             </Paper>

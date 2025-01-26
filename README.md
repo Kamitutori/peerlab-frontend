@@ -1,10 +1,10 @@
 # peerlab-frontend
 The frontend of PeerLab.
 
-TODO; Auth / Register
+TODO; Auth / RegisterPage
 - Better messaging for failure in login
 - redirect for jwt dashboard
-- incosistent use of redirecting: In Login/Register it's done with window.location.href, in AuthContext its with useNavigate.
+- incosistent use of redirecting: In LoginPage/RegisterPage it's done with window.location.href, in AuthContext its with useNavigate.
 
 ## Getting Started
 You will need the node package manager (npm) to actually develop and run anything of the frontend.
@@ -26,7 +26,7 @@ The port to connect to is displayed.
 +++ End of notice +++
 
 
-# Example for Register without useQuery
+# Example for RegisterPage without useQuery
 Implementation not 1:1 possible as await needs to be called in an async function.
 ```typescript
     const register = async () => {
