@@ -1,65 +1,72 @@
-import React, {createContext, useContext, useState} from "react";
-import {useNavigate} from "react-router-dom";
-
+// TODO Meaningful login failure messages have to be implemented
 /**
  * This function provides the context for access control according to the login status.
  * This means, that if the user is not logged in, they cannot access dashboard,... and will be redirected to the login page.
  */
+import React, { createContext, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const AuthContext = React.createContext();
-const AuthUpdateContext = React.createContext();
+type AuthContextType = {
+    token: string;
+};
+
+type AuthUpdateContextType = {
+    login: (data: { email: string; password: string }) => Promise<void>;
+    logout: () => void;
+};
+
+const AuthContext = createContext<AuthContextType | null>(null);
+const AuthUpdateContext = createContext<AuthUpdateContextType | null>(null);
 
 export function useAuth() {
-    return useContext(AuthContext);
+    const context = useContext(AuthContext);
+    if (!context) throw new Error("useAuth must be used within an AuthProvider");
+    return context;
 }
 
 export function useUpdateAuth() {
-    return useContext(AuthUpdateContext);
+    const context = useContext(AuthUpdateContext);
+    if (!context) throw new Error("useUpdateAuth must be used within an AuthProvider");
+    return context;
 }
 
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem("site") || "");
+export default function AuthProvider({ children }: { children: React.ReactNode }) {
+    const [token, setToken] = useState<string>(localStorage.getItem("jwt") || "");
     const navigate = useNavigate();
 
+    const login = async (data: { email: string; password: string }) => {
         try {
             const response = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
-            const res = await response.json();
-            // TODO revise this section
-            if (res.data) {
-                setUser(res.data.user);
-                setToken(res.token);
-                localStorage.setItem("site", res.token);
+            const res = await response.text();
+
+            if (response.ok) {
+                setToken(res);
+                localStorage.setItem("jwt", res);
                 navigate("/dashboard");
-                return;
+            } else {
+                throw new Error(res || "Login failed");
             }
-            throw new Error(res.message);
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error("Login error:", error);
+            alert("Login failed. Please try again.");
         }
     };
 
-    const logOut= () => {
-        setUser(null);
+    const logout = () => {
         setToken("");
-        localStorage.removeItem("site");
+        localStorage.removeItem("jwt");
         navigate("/login");
-    }
+    };
 
     return (
-        <AuthContext.Provider value={token}>
-            <AuthUpdateContext.Provider value={setToken}>
+        <AuthContext.Provider value={{token }}>
+            <AuthUpdateContext.Provider value={{ login, logout }}>
                 {children}
             </AuthUpdateContext.Provider>
         </AuthContext.Provider>
     );
 }
-
-
-
-//export default AuthProvider;

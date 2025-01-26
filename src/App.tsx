@@ -1,24 +1,18 @@
-/*
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-*/
-
-import './App.css'
-
-import Login from './pages/Login'
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import Dashboard from "./pages/Dashboard.tsx";
-import Profile from "./pages/Profile.tsx";
-import MyPapers from "./pages/MyPapers.tsx";
-import MyReviews from "./pages/MyReviews.tsx";
-import NoPage from "./pages/NoPage.tsx";
-import TopMenuBar from "./components/TopBar.tsx";
-import SinglePaper from "./components/SinglePaper.tsx";
-import Register from "./pages/Register.tsx";
-import ForgotPassword from "./pages/ForgotPassword.tsx";
-import PrivateRoute from "./components/auth/PrivateRoute.tsx";
 import {createTheme, ThemeProvider} from "@mui/material";
+import AuthProvider from "./components/auth/AuthenticationContext";
+import PrivateRoute from "./components/auth/PrivateRoute";
+
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import MyPapers from "./pages/MyPapers";
+import MyReviews from "./pages/MyReviews";
+import NoPage from "./pages/NoPage";
+import TopMenuBar from "./components/TopBar";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import SinglePaper from "./components/SinglePaper.tsx";
 
 const theme = createTheme({
     components: {
@@ -36,7 +30,7 @@ const theme = createTheme({
                         },
                         "&.Mui-focused": {
                             "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#7e3ff2",
+                                borderColor: "#646cff",
                                 borderWidth: "2px",
                             },
                         },
@@ -63,35 +57,105 @@ const theme = createTheme({
 });
 
 function App() {
-
     return (
         <div>
             <BrowserRouter>
                 <ThemeProvider theme={theme}>
-                {/* <AuthProvider children={Login}> */}
-                    <TopMenuBar/>
-                    <div className="container">
-                        <Routes>
-                            <Route index element={<Login/>}/>
-                            <Route path="/login" element={<Login/>}/>
-                            <Route path="/register" element={<Register/>}/>
-                            <Route path="/forgot-password" element={<ForgotPassword/>}/>
-                            <Route element={<PrivateRoute />}>
-                                <Route path="/dashboard" element={<Dashboard />} />
-                            </Route>
-                                <Route path="/profile" element={<Profile/>}/>
-                                <Route path="/papers" element={<MyPapers/>}/>
-                                <Route path="/reviews" element={<MyReviews/>}/>
-                                <Route path="/single-paper" element={<SinglePaper/>}/>
+                    <AuthProvider>
+                        <div className="container">
+                            <Routes>
+                                {/* Public Routes */}
+                                <Route
+                                    index
+                                    element={
+                                            <Login />
+                                    }
+                                />
+                                <Route
+                                    path="/login"
+                                    element={
+                                            <Login />
+                                    }
+                                />
+                                <Route
+                                    path="/register"
+                                    element={
+                                            <Register />
+                                    }
+                                />
+                                <Route
+                                    path="/forgot-password"
+                                    element={
+                                            <ForgotPassword />
+                                    }
+                                />
 
-                            <Route path="*" element={<NoPage/>}/>
-                        </Routes>
-                    </div>
-                {/* </AuthProvider> */}
-                    </ThemeProvider>
+                                {/* Private Routes with TopMenuBar */}
+                                <Route
+                                    path="/dashboard"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar />
+                                                <Dashboard />
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/profile"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar />
+                                                <Profile />
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/papers"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar />
+                                                <MyPapers />
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/reviews"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar />
+                                                <MyReviews />
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/single-paper"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar />
+                                                <SinglePaper />
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+
+                                {/* Fallback Route */}
+                                <Route path="*" element={<NoPage/>}/>
+                            </Routes>
+                        </div>
+                    </AuthProvider>
+                </ThemeProvider>
             </BrowserRouter>
         </div>
-    )
+    );
 }
 
-export default App
+export default App;

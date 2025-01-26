@@ -23,6 +23,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import PeerLabIcon from '../assets/peerlabLogo_squared.svg';
 import {useNavigate} from "react-router-dom";
 import { Link } from "react-router-dom";
+import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 
 
 const drawerWidth = 240;
@@ -112,7 +113,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 
 export default function MenuAppBar() {
-
+    const { logout } = useUpdateAuth();
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {
@@ -150,9 +151,8 @@ export default function MenuAppBar() {
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}} align={"left"}>
                         *Username*
                     </Typography>
-                    {/* {auth && (*/}
                         <div>
-                            <Button variant="outlined" sx={{color : 'white', size : 'small'}}>
+                            <Button variant="outlined" sx={{color : 'white', size : 'small'}} onClick={logout}>
                                 Log out
                             </Button>
                             <IconButton
@@ -164,7 +164,6 @@ export default function MenuAppBar() {
                                 <AccountCircle/>
                             </IconButton>
                         </div>
-                    {/* )} */}
                 </Toolbar>
             </AppBar>
 
