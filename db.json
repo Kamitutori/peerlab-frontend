@@ -42,7 +42,7 @@
       "id": 1,
       "title": "On Lebesgue Polynomials",
       "ownerName": "Maximilien Witzmer",
-        "authors": "Maximilien Witzmer, Manuela Mustermann"
+      "authors": "Maximilien Witzmer, Manuela Mustermann"
     },
     {
       "id": 2,
@@ -98,6 +98,89 @@
       "ownerName": "Prof. Henkel",
       "authors": "IEEE International Conference on Circuit, Power & Computing Technologies"
     }
+  ],
+  "reviewList": [
+    {
+      "id": 1,
+      "paperId": 1,
+      "paperName": "On Lebesgue Polynomials",
+      "authorName": "Der Witzemer"
+    },
+    {
+      "id": 2,
+      "paperId": 2,
+      "paperName": "On coping with theoretical computer science",
+      "authorName": "Jules"
+    },
+    {
+      "id": 3,
+      "paperId": 3,
+      "paperName": "On JSON Server mocks",
+      "authorName": "Brettschneider"
+    },
+    {
+      "id": 4,
+      "paperId": 4,
+      "paperName": "A Method for Obtaining Digital Signatures and Public-Key Cryptosystems",
+      "authorName": "Ronald McDonald"
+    },
+    {
+      "id": 5,
+      "paperId": 5,
+      "paperName": "On energy efficient circuit designs in micro controllers",
+      "authorName": "Prof. Henkel"
+    },
+    {
+        "id": 6,
+        "paperId": 6,
+        "paperName": "On Lebesgue Polynomials",
+        "authorName": "Der Witzemer"
+        },
+        {
+        "id": 7,
+        "paperId": 7,
+        "paperName": "On coping with theoretical computer science",
+        "authorName": "Jules"
+        },
+        {
+        "id": 8,
+        "paperId": 8,
+        "paperName": "On JSON Server mocks",
+        "authorName": "Brettschneider"
+        },
+        {
+        "id": 9,
+        "paperId": 9,
+        "paperName": "A Method for Obtaining Digital Signatures and Public-Key Cryptosystems",
+        "authorName": "Ronald McDonald"
+        },
+        {
+        "id": 10,
+        "paperId": 10,
+        "paperName": "On energy efficient circuit designs in micro controllers",
+        "authorName": "Prof. Henkel"
+    }
+  ],
+  "userList": [
+    {
+      "id": 1,
+      "name": "Diese Junge"
+    },
+    {
+      "id": 2,
+      "name": "Maria (Artits) Curry"
+    },
+    {
+      "id": 3,
+      "name": "Brettschneider"
+    },
+    {
+      "id": 4,
+      "name": "Gasriese"
+    },
+    {
+      "id": 5,
+      "name": "Prof. Henkel"
+    }
   ]
-
 }
