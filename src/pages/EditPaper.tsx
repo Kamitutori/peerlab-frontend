@@ -108,7 +108,7 @@ export default function EditPaper() {
 
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setSelectedReviewers(reviewers.map(reviewer => reviewer));
+            setSelectedReviewers(reviewers.map(reviewer => reviewer.id));
         } else {
             setSelectedReviewers([]);
         }
