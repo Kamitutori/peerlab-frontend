@@ -23,6 +23,12 @@ import { useDropzone } from 'react-dropzone';
 import CustomTextField from '../components/CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 
+// Define a type for the reviewer
+interface Reviewer {
+    id: string;
+    name: string;
+}
+
 export default function EditPaper() {
     const [paperName, setPaperName] = useState('');
     const [authors, setAuthors] = useState('');
@@ -33,7 +39,7 @@ export default function EditPaper() {
     const [authorsNote, setAuthorsNote] = useState('');
     const [files, setFiles] = useState<File[]>([]);
     const [warning, setWarning] = useState('');
-    const [reviewers, setReviewers] = useState([]);
+    const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [selectedReviewers, setSelectedReviewers] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -269,7 +275,7 @@ export default function EditPaper() {
                 <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
                     <Table>
                         <TableBody>
-                            {reviewers.map((reviewer: { id: string, name: string }) => (
+                            {reviewers.map((reviewer) => (
                                 <TableRow key={reviewer.id} sx={{ height: 40 }}>
                                     <TableCell>{reviewer.name}</TableCell>
                                     <TableCell align="right">
