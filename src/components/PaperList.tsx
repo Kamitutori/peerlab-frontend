@@ -109,3 +109,6 @@ export default function PaperList({endpoint, title}: PaperListProps) {
         </Card>
     );
 }
+
+export class PaperListEntry {
+}

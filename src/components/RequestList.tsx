@@ -1,4 +1,3 @@
-// TODO: Implement the RequestList component
 export interface RequestListEntry {
     id: number;
     status: string;
