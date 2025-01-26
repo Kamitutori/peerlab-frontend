@@ -25,7 +25,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
                 },
             });
             if (!res.ok) throw new Error("Failed to fetch papers");
