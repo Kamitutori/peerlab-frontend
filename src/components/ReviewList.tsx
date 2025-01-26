@@ -1,3 +1,16 @@
+// TODO Implement the ReviewList component
+/*
+import { RequestListEntry } from "./RequestList";
+interface ReviewListEntry {
+    id: number;
+    submissionDate: string;
+    request: RequestListEntry;
+}
+
+interface ReviewListProps {
+    reviews?: ReviewListEntry[];
+}
+*/
 export default function ReviewList() {
     return (
         <div>

@@ -1,161 +1,39 @@
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {createTheme, ThemeProvider} from "@mui/material";
-import AuthProvider from "./components/auth/AuthenticationContext";
-import PrivateRoute from "./components/auth/PrivateRoute";
-
-import LoginPage from "./pages/LoginPage.tsx";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import MyPapers from "./pages/MyPapers";
-import MyReviews from "./pages/MyReviews";
-import NoPage from "./pages/NoPage";
-import TopMenuBar from "./components/TopBar";
-import RegisterPage from "./pages/RegisterPage.tsx";
-import ForgotPassword from "./pages/ForgotPassword";
+import './App.css'
+import Login from './pages/Login'
+import { Route, Routes} from "react-router-dom";
+import Dashboard from "./pages/Dashboard.tsx";
+import Profile from "./pages/Profile.tsx";
+import MyPapers from "./pages/MyPapers.tsx";
+import MyReviews from "./pages/MyReviews.tsx";
+import NoPage from "./pages/NoPage.tsx";
+import TopMenuBar from "./components/TopBar.tsx";
 import SinglePaper from "./components/SinglePaper.tsx";
+import EditPaper from "./pages/EditPaper.tsx";
 
-const theme = createTheme({
-    components: {
-        MuiTextField: {
-            defaultProps: {
-                size: "small",
-            },
-            styleOverrides: {
-                root: {
-                    "& .MuiOutlinedInput-root": {
-                        color: "#fff",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#606060",
-                            borderWidth: "2px",
-                        },
-                        "&.Mui-focused": {
-                            "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#646cff",
-                                borderWidth: "2px",
-                            },
-                        },
-                        "&:hover:not(.Mui-focused)": {
-                            "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#b5b5b5",
-                            },
-                        },
-                        "& .MuiOutlinedInput-input": {
-                            color: "#fff"
-                        }
-                    },
-                    "& .MuiInputLabel-outlined": {
-                        color: "#bcbcbc",
-                        "&.Mui-focused": {
-                            color: "primary",
-                            fontWeight: "bold",
-                        },
-                    }
-                }
-            }
-        }
-    }
-});
-
+/**
+ * Notice TODO: Look up MUI AppBar to see an implementation of handling authorization and submenus.
+ */
 function App() {
+
     return (
         <div>
-            <BrowserRouter>
-                <ThemeProvider theme={theme}>
-                    <AuthProvider>
-                        <div className="container">
-                            <Routes>
-                                {/* Public Routes */}
-                                <Route
-                                    index
-                                    element={
-                                            <LoginPage />
-                                    }
-                                />
-                                <Route
-                                    path="/login"
-                                    element={
-                                            <LoginPage />
-                                    }
-                                />
-                                <Route
-                                    path="/register"
-                                    element={
-                                            <RegisterPage />
-                                    }
-                                />
-                                <Route
-                                    path="/forgot-password"
-                                    element={
-                                            <ForgotPassword />
-                                    }
-                                />
-
-                                {/* Private Routes with TopMenuBar */}
-                                <Route
-                                    path="/dashboard"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar />
-                                                <Dashboard />
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/profile"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar />
-                                                <Profile />
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/papers"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar />
-                                                <MyPapers />
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/reviews"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar />
-                                                <MyReviews />
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/single-paper"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar />
-                                                <SinglePaper />
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-
-                                {/* Fallback Route */}
-                                <Route path="*" element={<NoPage/>}/>
-                            </Routes>
-                        </div>
-                    </AuthProvider>
-                </ThemeProvider>
-            </BrowserRouter>
+            <TopMenuBar />
+            <div className="container">
+                <Routes>
+                    <Route index element={<Login />} />
+                    <Route path="/login" element={<Login />}/>
+                    <Route path="/dashboard" element={<Dashboard />}/>
+                    <Route path="/profile" element={<Profile />}/>
+                    <Route path="/papers" element={<MyPapers />}/>
+                    <Route path="/reviews" element={<MyReviews />}/>
+                    <Route path="*" element={<NoPage />}/>
+                    <Route path="/single-paper" element={<SinglePaper />}/>
+                    <Route path="/edit-paper" element={<EditPaper />}/>
+                </Routes>
+            </div>
         </div>
-    );
+    )
+
 }
 
-export default App;
+export default App
