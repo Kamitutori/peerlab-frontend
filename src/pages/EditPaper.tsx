@@ -1,25 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Box,
     Button,
-    Typography,
-    FormControl,
-    FormLabel,
-    RadioGroup,
+    Checkbox,
     FormControlLabel,
-    Radio,
     Grid,
     IconButton,
+    Paper,
+    Radio,
+    RadioGroup,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    Checkbox,
-    Paper
+    Typography
 } from '@mui/material';
-import { useDropzone } from 'react-dropzone';
+import {useDropzone} from 'react-dropzone';
 import CustomTextField from '../components/CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -137,86 +135,86 @@ export default function EditPaper() {
     };
 
     return (
-        <Paper sx={{ width: '100%', maxWidth: 600, padding: 4, backgroundColor: 'background.paper', boxShadow: 3 }}>
+        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3 }}>
             <Typography variant="h4" component="h1" sx={{ color: 'white' }}>
                 Add Paper
             </Typography>
             <form onSubmit={handleSubmit}>
-                <CustomTextField
-                    required
-                    label="Paper name"
-                    value={paperName}
-                    onChange={(e) => setPaperName(e.target.value)}
-                />
-                <CustomTextField
-                    required
-                    label="Authors"
-                    value={authors}
-                    onChange={(e) => setAuthors(e.target.value)}
-                />
-                <CustomTextField
-                    required
-                    label="Maximum number of reviews"
-                    value={maxReviews}
-                    onChange={(e) => setMaxReviews(e.target.value)}
-                />
                 <Grid container spacing={2}>
-                    <Grid item xs={6}>
+                    <Grid item xs={8}
+                    sx={{ display: 'flex', flexDirection: 'column'}}
+                    >
                         <CustomTextField
                             required
-                            label="Minimum score"
-                            value={minScore}
-                            onChange={(e) => setMinScore(e.target.value)}
+                            label="Paper name"
+                            value={paperName}
+                            onChange={(e) => setPaperName(e.target.value)}
+                        />
+                        <CustomTextField
+                            required
+                            label="Authors"
+                            value={authors}
+                            onChange={(e) => setAuthors(e.target.value)}
+                        />
+                        <CustomTextField
+                            required
+                            label="Maximum number of reviews"
+                            value={maxReviews}
+                            onChange={(e) => setMaxReviews(e.target.value)}
+                        />
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <CustomTextField
+                                    required
+                                    label="Minimum score"
+                                    value={minScore}
+                                    onChange={(e) => setMinScore(e.target.value)}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <CustomTextField
+                                    required
+                                    label="Maximum score"
+                                    value={maxScore}
+                                    onChange={(e) => setMaxScore(e.target.value)}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <CustomTextField
+                            label="Authors note"
+                            value={authorsNote}
+                            onChange={(e) => setAuthorsNote(e.target.value)}
+                            multiline
+                            rows={10}
+                            sx={{ width: '100%' }}
                         />
                     </Grid>
-                    <Grid item xs={6}>
-                        <CustomTextField
-                            required
-                            label="Maximum score"
-                            value={maxScore}
-                            onChange={(e) => setMaxScore(e.target.value)}
-                        />
+                    <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                <RadioGroup
+                                    row
+                                    value={internal}
+                                    onChange={(e) => setInternal(e.target.value)}
+                                >
+                                    <FormControlLabel
+                                        value="internal"
+                                        control={<Radio />}
+                                        label="Internal"
+                                        sx={{ color: 'primary' }}
+                                    />
+                                    <FormControlLabel
+                                        value="external"
+                                        control={<Radio />}
+                                        label="External"
+                                        sx={{ color: 'primary' }}
+                                    />
+                                </RadioGroup>
+                            </Box>
                     </Grid>
                 </Grid>
-                <FormControl component="fieldset" margin="normal">
-                    <FormLabel
-                        component="legend"
-                        sx={{
-                            color: 'white',
-                            textAlign: 'center',
-                            width: '100%'
-                        }}
-                    >
-                        Internal or External
-                    </FormLabel>
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                        <RadioGroup
-                            row
-                            value={internal}
-                            onChange={(e) => setInternal(e.target.value)}
-                        >
-                            <FormControlLabel
-                                value="internal"
-                                control={<Radio />}
-                                label="Internal"
-                                sx={{ color: 'primary' }}
-                            />
-                            <FormControlLabel
-                                value="external"
-                                control={<Radio />}
-                                label="External"
-                                sx={{ color: 'primary' }}
-                            />
-                        </RadioGroup>
-                    </Box>
-                </FormControl>
-                <CustomTextField
-                    label="Authors note"
-                    value={authorsNote}
-                    onChange={(e) => setAuthorsNote(e.target.value)}
-                    multiline
-                    rows={4}
-                />
+
                 {files.length === 0 ? (
                     <Box {...getRootProps()}
                          sx={{
