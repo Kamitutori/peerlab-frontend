@@ -94,9 +94,6 @@ export default function EditPaper() {
                 body: JSON.stringify(paperData)
             });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
 
             const result = await response.json();
             console.log('Success:', result);
@@ -192,24 +189,26 @@ export default function EditPaper() {
                     >
                         Internal or External
                     </FormLabel>
-                    <RadioGroup
-                        row
-                        value={internal}
-                        onChange={(e) => setInternal(e.target.value)}
-                    >
-                        <FormControlLabel
-                            value="internal"
-                            control={<Radio />}
-                            label="Internal"
-                            sx={{ color: 'primary' }}
-                        />
-                        <FormControlLabel
-                            value="external"
-                            control={<Radio />}
-                            label="External"
-                            sx={{ color: 'primary' }}
-                        />
-                    </RadioGroup>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <RadioGroup
+                            row
+                            value={internal}
+                            onChange={(e) => setInternal(e.target.value)}
+                        >
+                            <FormControlLabel
+                                value="internal"
+                                control={<Radio />}
+                                label="Internal"
+                                sx={{ color: 'primary' }}
+                            />
+                            <FormControlLabel
+                                value="external"
+                                control={<Radio />}
+                                label="External"
+                                sx={{ color: 'primary' }}
+                            />
+                        </RadioGroup>
+                    </Box>
                 </FormControl>
                 <CustomTextField
                     label="Authors note"
