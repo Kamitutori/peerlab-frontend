@@ -87,7 +87,8 @@ export default function EditPaper() {
             const response = await fetch('http://localhost:8080/api/papers', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify(paperData)
             });
@@ -135,8 +136,8 @@ export default function EditPaper() {
     };
 
     return (
-        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3 }}>
-            <Typography variant="h4" component="h1" sx={{ color: 'white' }}>
+        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
+            <Typography variant="h4" component="h1" sx={{ color: 'white' }} fontWeight={"bold"}>
                 Add Paper
             </Typography>
             <form onSubmit={handleSubmit}>

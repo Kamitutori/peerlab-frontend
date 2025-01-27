@@ -1,5 +1,5 @@
 import PaperList from "../components/PaperList";
-import {Box, Fab, Grid} from "@mui/material";
+import {Box, Fab, Grid2} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import {useNavigate} from "react-router-dom";
 
@@ -13,20 +13,20 @@ export default function MyPapers() {
             <PaperList
                 endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
                 title={"Recently Reviewed"} />
-            <Grid container spacing={4} justifyContent="center">
-                <Grid item xs={12} md={6}>
+            <Grid2 container spacing={4} justifyContent="center">
+                <Grid2>
                     <PaperList
                         endpoint={`http://localhost:8080/api/papers`}
                         title="Current Papers"
                     />
-                </Grid>
-                <Grid item xs={12} md={6}>
+                </Grid2>
+                <Grid2>
                     <PaperList
                         endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
                         title="Finished Papers"
                     />
-                </Grid>
-            </Grid>
+                </Grid2>
+            </Grid2>
             <Fab
                 variant={"extended"}
                 color={"primary"}
