@@ -116,6 +116,7 @@ export default function MenuAppBar() {
     const { logout } = useUpdateAuth();
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
+    const [username, setUsername] = React.useState<string | null>("Henlo");
     const handleDrawerOpen = () => {
         setOpen(true);
       };
@@ -128,6 +129,22 @@ export default function MenuAppBar() {
     const redirect = () => {
         navigate('/profile');
     }
+
+    React.useEffect(() => {
+        // Retrieve and parse user object from localStorage
+        const userJson = localStorage.getItem('user');
+        if (userJson) {
+            try {
+                const userObject = JSON.parse(userJson);
+                setUsername(userObject.email);
+            } catch (error) {
+                setUsername(null);
+                alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
+            }
+        } else {
+            alert("Unexpected behavior: User is on profile page with no user object in localStorage.");
+        }
+    }, []);
 
     return (
         <Box sx={{ flexGrow: 1 ,display : 'flex'}}>
@@ -149,7 +166,9 @@ export default function MenuAppBar() {
                     </IconButton>
                     <img src={PeerLabIcon} width="50" height="50" alt="logo"/>
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}} align={"left"}>
-                        *Username*
+                        {username
+                            /*Username*/
+                        }
                     </Typography>
                         <div>
                             <Button variant="outlined" sx={{color : 'white', size : 'small'}} onClick={logout}>
