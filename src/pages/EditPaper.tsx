@@ -169,6 +169,7 @@ export default function EditPaper() {
                                     label="Minimum score"
                                     value={minScore}
                                     onChange={(e) => setMinScore(e.target.value)}
+                                    disabled={internal === 'internal'}
                                 />
                             </Grid2>
                             <Grid2>
@@ -177,6 +178,7 @@ export default function EditPaper() {
                                     label="Maximum score"
                                     value={maxScore}
                                     onChange={(e) => setMaxScore(e.target.value)}
+                                    disabled={internal === 'internal'}
                                 />
                             </Grid2>
                         </Grid2>
