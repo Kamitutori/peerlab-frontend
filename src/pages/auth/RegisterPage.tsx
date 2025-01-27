@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../assets/peerlabLogo_transparent.svg";
+import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
 import {useQuery} from "@tanstack/react-query";
 
 function backToLogin() {
@@ -51,7 +51,6 @@ export default function RegisterPage() {
                         password: input.password,
                     })
                 })
-                console.log(res.status)
                 return (res.status);
             },
             enabled: false,
@@ -167,9 +166,9 @@ export default function RegisterPage() {
                             onChange={handleInput}
                         />
                         <TextField
-                            id="repeat-password-input"
+                            id="confirm-password-input"
                             name="rep_password"
-                            label="Repeat Password"
+                            label="Confirm Password"
                             type={showPassword ? 'text' : 'password'}
                             onChange={handleInput}
                         />

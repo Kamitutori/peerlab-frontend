@@ -1,8 +1,8 @@
 import {Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../assets/peerlabLogo_transparent.svg";
-import {useUpdateAuth} from "../components/auth/AuthenticationContext";
+import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
+import {useUpdateAuth} from "../../components/auth/AuthenticationContext.tsx";
 
 function goToRegister() {
     window.location.href = "http://localhost:5173/register";
