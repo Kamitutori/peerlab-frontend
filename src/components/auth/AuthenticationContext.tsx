@@ -5,9 +5,16 @@
  */
 import React, { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+/*
+type User = {
+    id: number;
+    name: string;
+    email: string;
+} | null;
+*/
 type AuthContextType = {
     token: string;
+    //user: User;
 };
 
 type AuthUpdateContextType = {
@@ -31,8 +38,9 @@ export function useUpdateAuth() {
 }
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [token, setToken] = useState<string>(localStorage.getItem("jwt") || "");
     const navigate = useNavigate();
+    const [token, setToken] = useState<string>(localStorage.getItem("jwt") || "");
+    //const [user, setUser] = useState<User>(localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")!) : null);
 
     const login = async (data: { email: string; password: string }) => {
         try {
@@ -42,10 +50,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 body: JSON.stringify(data),
             });
             const res = await response.text();
-
+            //const res = await response.json();
             if (response.ok) {
+                //const { token, user} = res;
                 setToken(res);
+                //setToken(token);
+                //setUser(user);
                 localStorage.setItem("jwt", res);
+                //localStorage.setItem("user", JSON.stringify(user));
                 navigate("/dashboard");
             } else if (response.status === 400) {
                 alert("Invalid email or password.");
@@ -58,12 +70,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
     const logout = () => {
         setToken("");
+        //setUser(null);
         localStorage.removeItem("jwt");
+        //localStorage.removeItem("user");
         navigate("/login");
     };
 
     return (
-        <AuthContext.Provider value={{token }}>
+        <AuthContext.Provider value={{token, /* user */ }}>
             <AuthUpdateContext.Provider value={{ login, logout }}>
                 {children}
             </AuthUpdateContext.Provider>

@@ -150,6 +150,7 @@ export default function MenuAppBar() {
                     <img src={PeerLabIcon} width="50" height="50" alt="logo"/>
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}} align={"left"}>
                         *Username*
+                        {/*localStorage.get("user").name*/}
                     </Typography>
                         <div>
                             <Button variant="outlined" sx={{color : 'white', size : 'small'}} onClick={logout}>

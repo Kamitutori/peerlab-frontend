@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../assets/peerlabLogo_transparent.svg";
+import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
 import {useQuery} from "@tanstack/react-query";
 
 function backToLogin() {
@@ -40,7 +40,6 @@ export default function RegisterPage() {
         useQuery({
             queryKey: ['register'],
             queryFn: async () => {
-                console.log("Submitting...");
                 const res = await fetch("http://localhost:8080/api/auth/register", {
                     method: 'POST',
                     headers: {
@@ -52,7 +51,6 @@ export default function RegisterPage() {
                         password: input.password,
                     })
                 })
-                console.log(res.status)
                 return (res.status);
             },
             enabled: false,
@@ -90,12 +88,12 @@ export default function RegisterPage() {
             setMessageProps("Please enter a valid email address.", "warning");
             return;
         }
-
+        /*
         if (!strongPasswordRegex.test(input.password)) {
             setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
             return;
         }
-
+        */
         refetch().then(({data}) => {
             if (data == 200) {
                 setMessageProps(`Registration successful. Verify your email to authenticate and login afterward. Redirecting to login...`, "success");
@@ -153,31 +151,27 @@ export default function RegisterPage() {
                             name="name"
                             label="Name"
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <TextField
                             id="email-input"
                             name="email"
                             label="Email"
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <TextField
                             id="password-input"
                             name="password"
                             label="Password"
                             type={showPassword ? 'text' : 'password'}
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <TextField
-                            id="repeat-password-input"
+                            id="confirm-password-input"
                             name="rep_password"
-                            label="Repeat Password"
+                            label="Confirm Password"
                             type={showPassword ? 'text' : 'password'}
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <FormControlLabel
                             style={{color: "#b5b5b5"}}
                             label="Show Password"
