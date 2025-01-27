@@ -23,6 +23,7 @@ import {
 
 function ProfilePage() {
     let strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [input, setInput] = useState({
         name: "",
@@ -48,10 +49,12 @@ function ProfilePage() {
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
+        setInputToDefault()
     };
 
     const handleMenuClose = () => {
         setAnchorEl(null);
+        setShowMessage(false);
     };
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,12 +68,44 @@ function ProfilePage() {
 
     const setInputToDefault = () => {
         setInput({
-            name: "",
-            email: "",
+            name: "", //localStorage.getItem("user").name,
+            email: "", //localStorage.getItem("user").email,
             password: "",
             confirmPassword: ""
         });
     };
+
+    const submitEditProfile = async () => {
+        if (emailRegex.test(input.email)) {
+            try {
+                const res = await fetch("http://localhost:8080/api/user/", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem("jwt")}`
+                    },
+                    body: JSON.stringify({
+                        // TODO this implementation assumes that the current values are inserted. Decide, whether empty fields will be ignored.
+                        name: input.name,
+                        email: input.email
+                    })
+                });
+                if (res.status == 200) {
+                    setMessageProps("Successfully edited profile.", "success");
+                    localStorage.setItem("user", JSON.stringify({
+                        // id: localStorage.getItem("user").id,
+                        name: input.name,
+                        email: input.email,
+                    }));
+                } else if (res.status == 400) {
+                    // TODO implement good failure handling
+                    setMessageProps("Failure: 400", "error");
+                }
+            } catch (error) {
+                alert(`An error has occurred: ${error}.`)
+            }
+        }
+    }
 
     const submitChangePassword = async () => {
         if (input.password !== input.confirmPassword) {
@@ -79,25 +114,67 @@ function ProfilePage() {
         } else if (!strongPasswordRegex.test(input.password)) {
             setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
             return;
+        } else {
+            try {
+                const res = await fetch("http://localhost:8080/api/user/", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem("jwt")}`
+                    },
+                    body: JSON.stringify({
+                        password: input.password
+                    })
+                });
+                if (res.status == 200) {
+                    setMessageProps("Successfully changed password.", "success");
+                } else if (res.status == 400) {
+                    // TODO implement good failure handling
+                    setMessageProps("Failure: 400", "error");
+                }
+            } catch (error) {
+                alert(`An error has occurred: ${error}.`)
+            }
         }
     };
 
+    const submitAccountDeletion = async () => {
+        try {
+            const res = await fetch("http://localhost:8080/api/user/", {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem("jwt")}`
+                    }
+                }
+            )
+            if (res.status == 200) {
+                setMessageProps("Successfully deleted account.", "success");
+                localStorage.removeItem("jwt");
+                localStorage.removeItem("user");
+                window.location.href = "http://localhost:5173/login";
+            }
+        } catch (error) {
+            alert(`An error has occurred: ${error}.`)
+        }
+    }
+
     return (
-        <Box sx={{width: "800px", display: "flex", height: "flex", backgroundColor: "#777"}}>
+        <Box sx={{width: "800px", display: "flex", height: "flex", backgroundColor: "#777", marginTop: 10}}>
             {/* Content */}
             <Box sx={{flexGrow: 1, padding: 4}}>
 
-                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2}}>
+                <Box sx={{display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2}}>
 
                     <Box>
                         {/* Header */}
                         <Typography variant="subtitle1" sx={{mb: 2}}>
                             {/*<Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4}}> */}
-                                <Typography variant="h4">
-                                    Name Surname
-                                    {/* localStorage.get("user").name */}
-                                </Typography>
-                                {/*</Box> */}
+                            <Typography variant="h4">
+                                Name Surname
+                                {/* localStorage.get("user").name */}
+                            </Typography>
+                            {/*</Box> */}
 
                             <Typography variant="subtitle1" sx={{mb: 2}}>
                                 email@email.kit.edu
@@ -143,7 +220,7 @@ function ProfilePage() {
                             <MenuItem
                                 onClick={() => {
                                     handleMenuClose();
-                                    // Logic for Delete Profile can go here
+                                    submitAccountDeletion()
                                     console.log("Delete Profile Clicked");
                                 }}
                             >
@@ -157,80 +234,76 @@ function ProfilePage() {
                 <Divider sx={{my: 2}}/>
 
                 {/* Optional Change Menus */}
-                {isEditProfile && (
-                    <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4}}>
-                        <Typography variant="h4">
-                            Edit Profile
-                        </Typography>
-                    </Box>
-                )}
+                {(isEditProfile || isChangePassword) && (
+                    <Box sx={{
+                        display: "grid",
+                        justifyContent: "center",
 
-                {isChangePassword && (
-                    <Box sx={{display: "grid", justifyContent: "center", mb: 4}}>
+                        /* display: "flex", justifyContent: "space-between", */
+                        /* mb: 4 */
+                    }}>
                         <Typography variant="h6" sx={{mb: 2}}>
-                            Change Password
+                            {isEditProfile ? "Edit Profile" : "Change Password"}
                         </Typography>
+                        {showMessage && (
+                            <Alert severity={messageType as 'error' | 'success'}
+                                   sx={{
+                                       whiteSpace: 'pre-line',
+                                       width: "fit-content",
+                                       textAlign: "center",
+                                       alignItems: "center",
+                                       justifyContent: "center",
+                                   }}
+                            >
+                                {message}
+                            </Alert>
+                        )}
                         <Stack spacing={2}>
                             <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                 <TextField
-                                    type="password"
-                                    name="password"
-                                    label="New Password"
+                                    type={isEditProfile ? "text" : "password"}
+                                    name={isEditProfile ? "name" : "password"}
+                                    label={isEditProfile ? "New Name" : "New Password"}
                                     variant="outlined"
-                                    value={input.password}
+                                    value={isEditProfile ? input.name : input.password}
                                     onChange={handleInput}
                                 />
                             </Box>
                             <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                 <TextField
-                                    type="password"
-                                    name="confirmPassword"
-                                    label="Confirm Password"
+                                    type={isEditProfile ? "text" : "password"}
+                                    name={isEditProfile ? "email" : "confirmPassword"}
+                                    label={isEditProfile ? "New Email" : "Confirm Password"}
                                     variant="outlined"
-                                    value={input.confirmPassword}
+
+                                    value={isEditProfile ? input.email : input.confirmPassword}
                                     onChange={handleInput}
                                 />
                             </Box>
                         </Stack>
-                        <Box sx={{ sidplay: "flex", gap: 2, mx: 2}}>
+                        <Box sx={{display: "center", paddingX: 1, gap: 2,}}>
                             <Button
                                 variant="contained"
                                 sx={{mt: 2}}
-                                onClick={submitChangePassword}
+                                onClick={isEditProfile ? submitEditProfile : submitChangePassword}
                             >
                                 Confirm
                             </Button>
                             <Button
-                            variant="outlined"
-                            sx={{mt: 2}}
-                            onClick={() => {
-                                setIsChangePassword(false);
-                                setInputToDefault();
-                            }}
+                                variant="outlined"
+                                sx={{mt: 2}}
+                                onClick={() => {
+                                    isEditProfile ? setIsEditProfile(false) : setIsChangePassword(false);
+                                    setInputToDefault();
+                                }}
                             >
                                 Cancel
                             </Button>
                         </Box>
                     </Box>
                 )}
-
-                {(isChangePassword || isEditProfile) && showMessage && (
-                    <Alert severity={messageType as 'error' | 'success'}
-                           sx={{
-                               whiteSpace: 'pre-line',
-                               width: "fit-content",
-                               textAlign: "center",
-                               alignItems: "center",
-                               justifyContent: "center",
-                               }}
-                    >
-                        {message}
-                    </Alert>
-                )}
-
-                {(isChangePassword || isEditProfile) && (
+                {(isEditProfile || isChangePassword) && (
                     <Divider sx={{my: 2}}/>
-
                 )}
 
                 {/* Papers and Reviews */}

@@ -91,7 +91,11 @@ export default function LoginPage() {
                                 />
                             }
                         />
-                        <Button id="login" type="submit" variant="contained" color="primary">
+                        <Button id="login"
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                        >
                             Login
                         </Button>
                         <Button
