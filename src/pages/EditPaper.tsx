@@ -4,7 +4,7 @@ import {
     Button,
     Checkbox,
     FormControlLabel,
-    Grid,
+    Grid2,
     IconButton,
     Paper,
     Radio,
@@ -140,8 +140,8 @@ export default function EditPaper() {
                 Add Paper
             </Typography>
             <form onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
-                    <Grid item xs={8}
+                <Grid2 container spacing={2}>
+                    <Grid2
                     sx={{ display: 'flex', flexDirection: 'column'}}
                     >
                         <CustomTextField
@@ -152,7 +152,7 @@ export default function EditPaper() {
                         />
                         <CustomTextField
                             required
-                            label="Authors"
+                            label="Authors/Conference"
                             value={authors}
                             onChange={(e) => setAuthors(e.target.value)}
                         />
@@ -162,59 +162,56 @@ export default function EditPaper() {
                             value={maxReviews}
                             onChange={(e) => setMaxReviews(e.target.value)}
                         />
-                        <Grid container spacing={2}>
-                            <Grid item xs={6}>
+                        <Grid2 container spacing={2}>
+                            <Grid2>
                                 <CustomTextField
                                     required
                                     label="Minimum score"
                                     value={minScore}
                                     onChange={(e) => setMinScore(e.target.value)}
                                 />
-                            </Grid>
-                            <Grid item xs={6}>
+                            </Grid2>
+                            <Grid2>
                                 <CustomTextField
                                     required
                                     label="Maximum score"
                                     value={maxScore}
                                     onChange={(e) => setMaxScore(e.target.value)}
                                 />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={4}>
+                            </Grid2>
+                        </Grid2>
+                    </Grid2>
+                    <Grid2>
                         <CustomTextField
                             label="Authors note"
                             value={authorsNote}
                             onChange={(e) => setAuthorsNote(e.target.value)}
                             multiline
-                            rows={10}
-                            sx={{ width: '100%' }}
+                            rows={9.4}
+                            sx={{ width: '130%' }}
                         />
-                    </Grid>
-                    <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                <RadioGroup
-                                    row
-                                    value={internal}
-                                    onChange={(e) => setInternal(e.target.value)}
-                                >
-                                    <FormControlLabel
-                                        value="internal"
-                                        control={<Radio />}
-                                        label="Internal"
-                                        sx={{ color: 'primary' }}
-                                    />
-                                    <FormControlLabel
-                                        value="external"
-                                        control={<Radio />}
-                                        label="External"
-                                        sx={{ color: 'primary' }}
-                                    />
-                                </RadioGroup>
-                            </Box>
-                    </Grid>
-                </Grid>
-
+                    </Grid2>
+                </Grid2>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <RadioGroup
+                        row
+                        value={internal}
+                        onChange={(e) => setInternal(e.target.value)}
+                    >
+                        <FormControlLabel
+                            value="internal"
+                            control={<Radio />}
+                            label="Internal"
+                            sx={{ color: 'primary' }}
+                        />
+                        <FormControlLabel
+                            value="external"
+                            control={<Radio />}
+                            label="External"
+                            sx={{ color: 'primary' }}
+                        />
+                    </RadioGroup>
+                </Box>
                 {files.length === 0 ? (
                     <Box {...getRootProps()}
                          sx={{
