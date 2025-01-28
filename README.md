@@ -1,10 +1,8 @@
 # Questions to Bakr
 - Why does it seem like the data is not really persisted? Is it due to server restarts? Seems wrong.
-Maybe better redirection implementation from login->dashboard necessary. but if you fiddle with jwts, f. you anyway..?
+- Maybe better redirection implementation from login->dashboard necessary. but if you fiddle with jwts, f. you anyway..?
 
 ## TODO; Auth / RegisterPage
-- Better messaging for failure in login
-- redirect for jwt dashboard
 - incosistent use of redirecting: In LoginPage/RegisterPage it's done with window.location.href, in AuthContext it's with useNavigate.
 
 ## Getting Started
