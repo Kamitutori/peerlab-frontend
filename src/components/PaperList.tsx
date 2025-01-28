@@ -11,6 +11,7 @@ import {
     Divider,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
+import { useNavigate } from "react-router-dom";
 
 interface PaperListProps {
     endpoint: string;
@@ -33,8 +34,10 @@ export default function PaperList({endpoint, title}: PaperListProps) {
         },
     });
 
+    const navigate = useNavigate();
+
     const handleClick = (paperId: number) => {
-        console.log(`Clicked on paper with ID: ${paperId}`);
+        navigate(`/paper/${paperId}`);
     };
 
     return (

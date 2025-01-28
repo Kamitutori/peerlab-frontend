@@ -1,5 +1,5 @@
-
-import {useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
@@ -12,7 +12,6 @@ import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import Divider from '@mui/material/Divider';
 import { styled } from '@mui/material/styles';
-//import RequestList from "./RequestList";
 
 interface PaperElement {
     id: number;
@@ -25,47 +24,43 @@ interface PaperElement {
     active: boolean;
     uploadDate: string;
     reviewLimit: number;
-//    requests: SinglePaperRequestListEntry
 }
 
-
-
 export default function SinglePaper() {
+    const { id } = useParams<{ id: string }>();
+
     const {
         isPending: isPaperPending,
         isError: isPaperError,
         error: paperError,
-        data: paperData} =
-        useQuery({ queryKey: ["paper"],
-            queryFn: async () => {
-                const res = await fetch(
-                    `https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paper`);
-                return (await res.json());
-            }
-        });
+        data: paperData
+    } = useQuery({
+        queryKey: ["paper", id],
+        queryFn: async () => {
+            const res = await fetch(`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paper/${id}`);
+            if (!res.ok) throw new Error("Failed to fetch paper");
+            return res.json();
+        }
+    });
 
-//TODO : set a real url do download the paper
-        const fileUrl = 'https://example.com/path/to/your/file.pdf';
-        const fileName = 'downloaded-file.pdf';
-        const handleDownload = () => {
-          // Create a link element
-          const link = document.createElement('a');
-          link.href = fileUrl;
-          link.download = fileName; // Set the filename for download
-          link.click(); // Trigger the download by simulating a click
-        };
-    
-        const Root = styled('div')(({ theme }) => ({
-          width: '95%',
-          ...theme.typography.body2,
-          color: theme.palette.text.secondary,
-          justifyContent: 'center',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: theme.spacing(2), 
-          
-        }));
+    const fileUrl = 'https://example.com/path/to/your/file.pdf';
+    const fileName = 'downloaded-file.pdf';
+    const handleDownload = () => {
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileName;
+        link.click();
+    };
 
+    const Root = styled('div')(({ theme }) => ({
+        width: '95%',
+        ...theme.typography.body2,
+        color: theme.palette.text.secondary,
+        justifyContent: 'center',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: theme.spacing(2),
+    }));
 
     if (isPaperPending) {
         return <span>Loading...</span>;
@@ -74,89 +69,77 @@ export default function SinglePaper() {
         return <span>{`Error!: ${paperError.message}`}</span>;
     }
 
-  
+    const paperObject: PaperElement = paperData;
 
-    let paperObject: PaperElement = paperData[1];
     return (
         <>
-            <Paper sx={{width: '100%'}}>
-              <h2>.</h2>
-              <h2 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{paperObject.title}</h2>
-              <h3 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Authors : ${paperObject.authors}`}</h3>
-          
-              <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-              <Stack spacing={1} sx={{ alignItems: 'center', paddingLeft: '10px', paddingRight: '10px' }}>
-                <Chip label={paperObject.internal === true ? 'Internal' : 'External'} />
-              </Stack>
-              <Button
-                component="label"
-                variant="contained"
-                tabIndex={-1}
-                onClick={handleDownload}
-                startIcon={<FileDownloadIcon />}
-                sx={{ marginRight: '20px' }} // Adding padding-left and padding-right to the button
-              >
-                Download paper
-              </Button>
-            </Stack>
+            <Paper sx={{ width: '100%' }}>
+                <h2>.</h2>
+                <h2 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{paperObject.title}</h2>
+                <h3 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Authors : ${paperObject.authors}`}</h3>
 
-            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Status :  ${paperObject.active === true ? 'active' : 'inactive'}`}</div>
-            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Review limit : X/${paperObject.reviewLimit}`}</div>
-            <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)', paddingLeft: '10px', paddingRight: '10px' }}>
-                <div>{`Preview: ${paperObject.abstractText}`}</div>
-            </Box>
-            
-            <Root>
-              <Divider>Author's Note</Divider>
-              <p>{paperObject.authorsNote}</p>
-              <Divider/>
-            </Root>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Stack spacing={1} sx={{ alignItems: 'center', paddingLeft: '10px', paddingRight: '10px' }}>
+                        <Chip label={paperObject.internal ? 'Internal' : 'External'} />
+                    </Stack>
+                    <Button
+                        component="label"
+                        variant="contained"
+                        tabIndex={-1}
+                        onClick={handleDownload}
+                        startIcon={<FileDownloadIcon />}
+                        sx={{ marginRight: '20px' }}
+                    >
+                        Download paper
+                    </Button>
+                </Stack>
 
-            
-{/*TODO: Replace this list with an actual list of reviews!!*/}
-{/*<RequestList />*/}
-            <List
-              sx={{
-              width: '100%',
-              maxWidth: 600,
-              bgcolor: 'background.paper',
-              position: 'relative',
-              overflow: 'auto',
-              maxHeight: 250,
-              '& ul': { padding: 0 },
-              }}
-              subheader={<li />}
-            >
-              {[0, 1, 2, 3, 4].map((sectionId) => (
-                <li key={`section-${sectionId}`}>
-                  <ul>
-                    <ListSubheader>{`review status ${sectionId}`}</ListSubheader>
-                    {[0, 1, 2].map((item) => (
-                      <ListItem key={`item-${sectionId}-${item}`}>
-                        <ListItemText primary={`Review ${item}`} />
-                      </ListItem>
+                <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Status :  ${paperObject.active ? 'active' : 'inactive'}`}</div>
+                <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Review limit : X/${paperObject.reviewLimit}`}</div>
+                <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)', paddingLeft: '10px', paddingRight: '10px' }}>
+                    <div>{`Preview: ${paperObject.abstractText}`}</div>
+                </Box>
+
+                <Root>
+                    <Divider>Author's Note</Divider>
+                    <p>{paperObject.authorsNote}</p>
+                    <Divider />
+                </Root>
+
+                <List
+                    sx={{
+                        width: '100%',
+                        maxWidth: 600,
+                        bgcolor: 'background.paper',
+                        position: 'relative',
+                        overflow: 'auto',
+                        maxHeight: 250,
+                        '& ul': { padding: 0 },
+                    }}
+                    subheader={<li />}
+                >
+                    {[0, 1, 2, 3, 4].map((sectionId) => (
+                        <li key={`section-${sectionId}`}>
+                            <ul>
+                                <ListSubheader>{`review status ${sectionId}`}</ListSubheader>
+                                {[0, 1, 2].map((item) => (
+                                    <ListItem key={`item-${sectionId}-${item}`}>
+                                        <ListItemText primary={`Review ${item}`} />
+                                    </ListItem>
+                                ))}
+                            </ul>
+                        </li>
                     ))}
-                  </ul>
-                </li>
-              ))}
-            </List>
+                </List>
 
-            <Stack spacing={2} direction="row" justifyContent="flex-end">
-              <Button variant="outlined"
-//TODO : right link to the edit paper page
-              href={"/api/papers"}
-              >
-                Edit
-              </Button>
-            </Stack>
+                <Stack spacing={2} direction="row" justifyContent="flex-end">
+                    <Button variant="outlined" href={"/api/papers"}>
+                        Edit
+                    </Button>
+                </Stack>
             </Paper>
-            
-            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Upload Date: ${paperObject.uploadDate}`}</div>
 
-              
+            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Upload Date: ${paperObject.uploadDate}`}</div>
         </>
     );
-
-
 }
-

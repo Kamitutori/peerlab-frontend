@@ -14,6 +14,7 @@ import RegisterPage from "./pages/RegisterPage.tsx";
 import ForgotPassword from "./pages/ForgotPassword";
 import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaper from "./pages/EditPaper.tsx";
+import PaperList from "./components/PaperList.tsx";
 
 const theme = createTheme({
     palette: {
@@ -153,17 +154,8 @@ function App() {
                                         </PrivateRoute>
                                     }
                                 />
-                                <Route
-                                    path="/single-paper"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <SinglePaper/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
+                                <Route path="/" element={<PaperList endpoint="/api/papers" title="Papers" />} />
+                                <Route path="/paper/:id" element={<SinglePaper />} />
                                 <Route
                                     path="/edit-paper"
                                     element={
