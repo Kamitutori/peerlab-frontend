@@ -164,23 +164,28 @@
   "userList": [
     {
       "id": 1,
-      "name": "Diese Junge"
+      "name": "Diese Junge",
+      "email": "diese@junge.de"
     },
     {
       "id": 2,
-      "name": "Maria (Artits) Curry"
+      "name": "Maria (Artits) Curry",
+      "email": "maria@curry.de"
     },
     {
       "id": 3,
-      "name": "Brettschneider"
+      "name": "Brettschneider",
+      "email": "brett.am@schneiden.de"
     },
     {
       "id": 4,
-      "name": "Gasriese"
+      "name": "Gasriese",
+      "email": "der.kommt@boese.de"
     },
     {
       "id": 5,
-      "name": "Prof. Henkel"
+      "name": "Prof. Henkel",
+      "email": "ich.liebe@ces.de"
     }
   ]
 }
