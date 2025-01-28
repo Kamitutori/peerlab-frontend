@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
@@ -28,6 +28,7 @@ interface PaperElement {
 
 export default function SinglePaper() {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
 
     const {
         isPending: isPaperPending,
@@ -110,7 +111,7 @@ export default function SinglePaper() {
                     sx={{
                         width: '100%',
                         maxWidth: 600,
-                        bgcolor: 'background.paper',
+                        bgColor: 'background.paper',
                         position: 'relative',
                         overflow: 'auto',
                         maxHeight: 250,
@@ -133,7 +134,7 @@ export default function SinglePaper() {
                 </List>
 
                 <Stack spacing={2} direction="row" justifyContent="flex-end">
-                    <Button variant="outlined" href={"/api/papers"}>
+                    <Button variant="outlined" onClick={() => navigate(`/edit-paper/${id}`)}>
                         Edit
                     </Button>
                 </Stack>
