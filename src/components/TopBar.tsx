@@ -135,14 +135,13 @@ export default function MenuAppBar() {
         const userJson = localStorage.getItem('user');
         if (userJson) {
             try {
-                const userObject = JSON.parse(userJson);
-                setUsername(userObject.email);
+                setUsername(JSON.parse(userJson).email);
             } catch (error) {
                 setUsername(null);
                 alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
             }
         } else {
-            alert("Unexpected behavior: User is on profile page with no user object in localStorage.");
+            alert("Unexpected behavior: User is logged in with no user object in localStorage.");
         }
     }, []);
 
@@ -166,9 +165,7 @@ export default function MenuAppBar() {
                     </IconButton>
                     <img src={PeerLabIcon} width="50" height="50" alt="logo"/>
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}} align={"left"}>
-                        {username
-                            /*Username*/
-                        }
+                        {username}
                     </Typography>
                         <div>
                             <Button variant="outlined" sx={{color : 'white', size : 'small'}} onClick={logout}>

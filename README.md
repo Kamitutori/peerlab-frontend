@@ -1,10 +1,11 @@
-# peerlab-frontend
-The frontend of PeerLab.
+# Questions to Bakr
+- Does there always have to be a 403 Request handling for every request, because someone without a jwt could call it and receive this message? Probably yes..
 
-TODO; Auth / RegisterPage
+
+## TODO; Auth / RegisterPage
 - Better messaging for failure in login
 - redirect for jwt dashboard
-- incosistent use of redirecting: In LoginPage/RegisterPage it's done with window.location.href, in AuthContext its with useNavigate.
+- incosistent use of redirecting: In LoginPage/RegisterPage it's done with window.location.href, in AuthContext it's with useNavigate.
 
 ## Getting Started
 You will need the node package manager (npm) to actually develop and run anything of the frontend.

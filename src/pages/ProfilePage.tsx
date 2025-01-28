@@ -18,19 +18,41 @@ import {
     ListItem,
     ListItemText,
     Menu,
-    MenuItem, Alert,
+    MenuItem, Alert, Grid,
 } from "@mui/material";
+import PaperList from "../components/PaperList.tsx";
+import ReviewList from "../components/ReviewList.tsx";
 
 function ProfilePage() {
     let strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
     let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [userName, setUserName] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
     const [input, setInput] = useState({
         name: "",
         email: "",
         password: "",
         confirmPassword: ""
     });
+
+    React.useEffect(() => {
+        // Retrieve and parse user object from localStorage
+        const userJson = localStorage.getItem('user');
+        if (userJson) {
+            try {
+                setUserName(JSON.parse(userJson).email);
+                setUserEmail(JSON.parse(userJson).email)
+            } catch (error) {
+                setUserName(null);
+                setUserEmail(null)
+                alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
+            }
+        } else {
+            alert("Unexpected behavior: User is on profile page with no user object in localStorage.");
+        }
+    }, []);
+
     const [isEditProfile, setIsEditProfile] = useState(false);
     const [isChangePassword, setIsChangePassword] = useState(false);
 
@@ -77,6 +99,7 @@ function ProfilePage() {
 
     const submitEditProfile = async () => {
         if (emailRegex.test(input.email)) {
+            console.log(`Authorization: Bearer ${localStorage.getItem("jwt")}`);
             try {
                 const res = await fetch("http://localhost:8080/api/user/", {
                     method: 'POST',
@@ -100,10 +123,14 @@ function ProfilePage() {
                 } else if (res.status == 400) {
                     // TODO implement good failure handling
                     setMessageProps("Failure: 400", "error");
+                } else if (res.status == 403) {
+                    setMessageProps("Your token is invalid.", "error")
                 }
             } catch (error) {
                 alert(`An error has occurred: ${error}.`)
             }
+        } else {
+            setMessageProps("Invalid email address.", "warning");
         }
     }
 
@@ -111,12 +138,13 @@ function ProfilePage() {
         if (input.password !== input.confirmPassword) {
             setMessageProps("Passwords do not match.", "warning");
             return;
-        } else if (!strongPasswordRegex.test(input.password)) {
+        } /* else if (!strongPasswordRegex.test(input.password)) {
             setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
             return;
-        } else {
+        } */ else {
             try {
-                const res = await fetch("http://localhost:8080/api/user/", {
+                console.log(`Authorization Bearer ${localStorage.getItem("jwt")}`)
+                const res = await fetch("http://localhost:8080/api/users", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -126,11 +154,15 @@ function ProfilePage() {
                         password: input.password
                     })
                 });
+                const responseData = await res.json();
                 if (res.status == 200) {
                     setMessageProps("Successfully changed password.", "success");
+                    localStorage.setItem("user", JSON.stringify(responseData))
                 } else if (res.status == 400) {
                     // TODO implement good failure handling
                     setMessageProps("Failure: 400", "error");
+                } else if (res.status == 403) {
+                    setMessageProps("Your token is invalid.", "error")
                 }
             } catch (error) {
                 alert(`An error has occurred: ${error}.`)
@@ -138,9 +170,11 @@ function ProfilePage() {
         }
     };
 
+    //const submitChanges = async () => {}
+
     const submitAccountDeletion = async () => {
         try {
-            const res = await fetch("http://localhost:8080/api/user/", {
+            const res = await fetch("http://localhost:8080/api/user/edit-user", {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -155,7 +189,7 @@ function ProfilePage() {
                 window.location.href = "http://localhost:5173/login";
             }
         } catch (error) {
-            alert(`An error has occurred: ${error}.`)
+            alert(`An error has occurred. ${error}.`)
         }
     }
 
@@ -172,12 +206,12 @@ function ProfilePage() {
                             {/*<Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4}}> */}
                             <Typography variant="h4">
                                 Name Surname
-                                {/* localStorage.get("user").name */}
+                                {/* userName */}
                             </Typography>
                             {/*</Box> */}
 
                             <Typography variant="subtitle1" sx={{mb: 2}}>
-                                email@email.kit.edu
+                                {userEmail}
                                 {/* localStorage.get("user").email */}
                             </Typography>
                         </Typography>
@@ -307,8 +341,9 @@ function ProfilePage() {
                 )}
 
                 {/* Papers and Reviews */}
+                {/*}
                 <Box sx={{display: "flex", gap: 4}}>
-                    {/* Papers */}
+
                     <Box sx={{flex: 1}}>
                         <Typography variant="h6">Papers:</Typography>
                         <Paper variant="outlined" sx={{maxHeight: "200px", overflowY: "auto", mt: 1}}>
@@ -322,7 +357,7 @@ function ProfilePage() {
                         </Paper>
                     </Box>
 
-                    {/* Reviews */}
+
                     <Box sx={{flex: 1}}>
                         <Typography variant="h6">Reviews:</Typography>
                         <Paper variant="outlined" sx={{maxHeight: "200px", overflowY: "auto", mt: 1}}>
@@ -335,7 +370,23 @@ function ProfilePage() {
                             </List>
                         </Paper>
                     </Box>
-                </Box>
+                    </Box>
+                    */}
+                <Grid container spacing={4} justifyContent="center">
+                    <Grid item xs={12} md={6}>
+                        <PaperList
+                            endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                            title="My Papers"
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <PaperList
+                            endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                            title="My Reviews"
+                        >
+                        </PaperList>
+                    </Grid>
+                </Grid>
             </Box>
         </Box>
     )
