@@ -21,7 +21,13 @@ export default function PaperList({endpoint, title}: PaperListProps) {
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
-            const res = await fetch(endpoint);
+            const res = await fetch(endpoint, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
+                },
+            });
             if (!res.ok) throw new Error("Failed to fetch papers");
             return res.json();
         },
@@ -37,7 +43,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 margin: "auto",
                 mt: 4,
                 boxShadow: 3,
-                backgroundColor: "#504e4e",
+                backgroundColor: "background.paper",
             }}
         >
             <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
@@ -48,7 +54,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                         color: "white",
                         position: 'sticky',
                         top: 0,
-                        backgroundColor: "#353535", // Highlight color
+                        backgroundColor: "background.paper",
                         zIndex: 1,
                         padding: '8px 16px',
                         width: '100%',
@@ -61,7 +67,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
-                    <List sx={{ maxHeight: 360, overflow: 'auto' }}>
+                    <List sx={{ maxHeight: 353, overflow: 'auto' }}>
                         {data.map((paper: { id: number; title: string; ownerName: string }, index: number) => (
                             <div key={paper.id}>
                                 <ListItemButton
@@ -75,7 +81,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                 >
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <ArticleIcon/>
+                                            <ArticleIcon sx={{color: 'primary.main'}}/>
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
@@ -88,13 +94,13 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                                     fontSize: "0.875rem",
                                                     textOverflow: "ellipsis",
                                                     overflow: "hidden",
-                                                    color: "white",
+                                                    color: "primary",
                                                 },
                                             },
                                             secondary: {
                                                 sx: {
                                                     fontSize: "0.75rem",
-                                                    color: "white",
+                                                    color: "primary",
                                                 },
                                             }
                                         }}
@@ -108,7 +114,4 @@ export default function PaperList({endpoint, title}: PaperListProps) {
             </CardContent>
         </Card>
     );
-}
-
-export class PaperListEntry {
 }

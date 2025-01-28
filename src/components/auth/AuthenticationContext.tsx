@@ -3,11 +3,22 @@
  * This function provides the context for access control according to the login status.
  * This means, that if the user is not logged in, they cannot access dashboard,... and will be redirected to the login page.
  */
-import React, { createContext, useContext, useState } from "react";
+import React, {
+    createContext,
+    useContext,
+    useState
+} from "react";
 import { useNavigate } from "react-router-dom";
+
+interface User {
+    id: number;
+    email: string;
+    password: string;
+}
 
 type AuthContextType = {
     token: string;
+    user: User | null;
 };
 
 type AuthUpdateContextType = {
@@ -32,6 +43,7 @@ export function useUpdateAuth() {
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
     const [token, setToken] = useState<string>(localStorage.getItem("jwt") || "");
+    const [user, setUser] = useState<User | null>(localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null);
     const navigate = useNavigate();
 
     const login = async (data: { email: string; password: string }) => {
@@ -41,11 +53,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
-            const res = await response.text();
-
+            const res = await response.json();
+            console.log(res);
             if (response.ok) {
-                setToken(res);
-                localStorage.setItem("jwt", res);
+                setToken(res.token);
+                setUser(res.user);
+                localStorage.setItem("jwt", res.token);
+                localStorage.setItem("user", JSON.stringify(res.user));
                 navigate("/dashboard");
             } else if (response.status === 400) {
                 alert("Invalid email or password.");
@@ -63,7 +77,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     };
 
     return (
-        <AuthContext.Provider value={{token }}>
+        <AuthContext.Provider value={{token, user }}>
             <AuthUpdateContext.Provider value={{ login, logout }}>
                 {children}
             </AuthUpdateContext.Provider>
