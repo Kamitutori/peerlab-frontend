@@ -40,7 +40,6 @@ export default function RegisterPage() {
         useQuery({
             queryKey: ['register'],
             queryFn: async () => {
-                console.log("Submitting...");
                 const res = await fetch("http://localhost:8080/api/auth/register", {
                     method: 'POST',
                     headers: {
@@ -76,7 +75,7 @@ export default function RegisterPage() {
     const registerUser = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        let strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
+        //let strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
 
         if (input.name === "" || input.email === "" || input.password === "" || input.rep_password === "") {
             setMessageProps("Please fill in all fields.", "warning");
@@ -90,12 +89,12 @@ export default function RegisterPage() {
             setMessageProps("Please enter a valid email address.", "warning");
             return;
         }
-
+        /*
         if (!strongPasswordRegex.test(input.password)) {
             setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
             return;
         }
-
+        */
         refetch().then(({data}) => {
             if (data == 200) {
                 setMessageProps(`Registration successful. Verify your email to authenticate and login afterward. Redirecting to login...`, "success");
@@ -110,7 +109,7 @@ export default function RegisterPage() {
         })
             .catch((err) => {
                 console.error('Error during registration:', err);
-                alert(`There was an error during registration. Please try again later. Err: ${err}`);
+                alert(`There was an error during registration. Err: ${err}`);
             })
     }
 
@@ -153,31 +152,27 @@ export default function RegisterPage() {
                             name="name"
                             label="Name"
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <TextField
                             id="email-input"
                             name="email"
                             label="Email"
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <TextField
                             id="password-input"
                             name="password"
                             label="Password"
                             type={showPassword ? 'text' : 'password'}
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <TextField
                             id="repeat-password-input"
                             name="rep_password"
                             label="Repeat Password"
                             type={showPassword ? 'text' : 'password'}
                             onChange={handleInput}
-                        >
-                        </TextField>
+                        />
                         <FormControlLabel
                             style={{color: "#b5b5b5"}}
                             label="Show Password"
