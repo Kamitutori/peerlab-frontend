@@ -10,6 +10,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
+import Divider from '@mui/material/Divider';
+import { styled } from '@mui/material/styles';
+//import RequestList from "./RequestList";
 
 interface PaperElement {
     id: number;
@@ -41,6 +44,28 @@ export default function SinglePaper() {
             }
         });
 
+//TODO : set a real url do download the paper
+        const fileUrl = 'https://example.com/path/to/your/file.pdf';
+        const fileName = 'downloaded-file.pdf';
+        const handleDownload = () => {
+          // Create a link element
+          const link = document.createElement('a');
+          link.href = fileUrl;
+          link.download = fileName; // Set the filename for download
+          link.click(); // Trigger the download by simulating a click
+        };
+    
+        const Root = styled('div')(({ theme }) => ({
+          width: '95%',
+          ...theme.typography.body2,
+          color: theme.palette.text.secondary,
+          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: theme.spacing(2), 
+          
+        }));
+
 
     if (isPaperPending) {
         return <span>Loading...</span>;
@@ -54,27 +79,42 @@ export default function SinglePaper() {
     let paperObject: PaperElement = paperData[1];
     return (
         <>
-            <Paper sx={{ width: '100%' }}>
-            <h2>{paperObject.title}</h2>
-            <h3>{`Authors : ${paperObject.authors}`}</h3>
-            <Button
-              component="label"
-              role={undefined}
-              variant="contained"
-              tabIndex={-1}
-              startIcon={<FileDownloadIcon />}
-            >
-              Download paper
-            </Button>
-            {/*<div>{`Active :  ${paperObject.active}`}</div>
-            <div>{`Internal : ${paperObject.internal}`}</div>*/}
-            <Stack spacing={1} sx={{ alignItems: 'center' }}>
-              <Chip label={paperObject.internal === true ? 'Internal' : 'External'}/>
+            <Paper sx={{width: '100%'}}>
+              <h2>.</h2>
+              <h2 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{paperObject.title}</h2>
+              <h3 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Authors : ${paperObject.authors}`}</h3>
+          
+              <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+              <Stack spacing={1} sx={{ alignItems: 'center', paddingLeft: '10px', paddingRight: '10px' }}>
+                <Chip label={paperObject.internal === true ? 'Internal' : 'External'} />
+              </Stack>
+              <Button
+                component="label"
+                variant="contained"
+                tabIndex={-1}
+                onClick={handleDownload}
+                startIcon={<FileDownloadIcon />}
+                sx={{ marginRight: '20px' }} // Adding padding-left and padding-right to the button
+              >
+                Download paper
+              </Button>
             </Stack>
-            <div>{`Reviews : X/${paperObject.reviewLimit}`}</div>
-            <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)' }}>
+
+            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Status :  ${paperObject.active === true ? 'active' : 'inactive'}`}</div>
+            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Review limit : X/${paperObject.reviewLimit}`}</div>
+            <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)', paddingLeft: '10px', paddingRight: '10px' }}>
                 <div>{`Preview: ${paperObject.abstractText}`}</div>
             </Box>
+            
+            <Root>
+              <Divider>Author's Note</Divider>
+              <p>{paperObject.authorsNote}</p>
+              <Divider/>
+            </Root>
+
+            
+{/*TODO: Replace this list with an actual list of reviews!!*/}
+{/*<RequestList />*/}
             <List
               sx={{
               width: '100%',
@@ -100,19 +140,20 @@ export default function SinglePaper() {
                 </li>
               ))}
             </List>
-            <Box>
-                <div>{`Authors note: ${paperObject.authorsNote}`}</div>
-            </Box>
+
+            <Stack spacing={2} direction="row" justifyContent="flex-end">
+              <Button variant="outlined"
+//TODO : right link to the edit paper page
+              href={"/api/papers"}
+              >
+                Edit
+              </Button>
+            </Stack>
             </Paper>
             
-            <div>{`Upload Date: ${paperObject.uploadDate}`}</div>
+            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Upload Date: ${paperObject.uploadDate}`}</div>
 
-            {/*
-                <RequestList />
-                <Button href={"/api/papers"}>
-                    {"Edit"}
-                </Button>
-                */}
+              
         </>
     );
 
