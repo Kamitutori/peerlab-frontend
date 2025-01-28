@@ -99,7 +99,6 @@ function ProfilePage() {
 
     const submitEditProfile = async () => {
         if (emailRegex.test(input.email)) {
-            console.log(`Authorization: Bearer ${localStorage.getItem("jwt")}`);
             try {
                 const res = await fetch("http://localhost:8080/api/user/", {
                     method: 'POST',
@@ -143,8 +142,7 @@ function ProfilePage() {
             return;
         } */ else {
             try {
-                console.log(`Authorization Bearer ${localStorage.getItem("jwt")}`)
-                const res = await fetch("http://localhost:8080/api/users", {
+                const res = await fetch("http://localhost:8080/api/user/", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -174,7 +172,7 @@ function ProfilePage() {
 
     const submitAccountDeletion = async () => {
         try {
-            const res = await fetch("http://localhost:8080/api/user/edit-user", {
+            const res = await fetch("http://localhost:8080/api/users", {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
