@@ -13,8 +13,26 @@ import TopMenuBar from "./components/TopBar";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import ForgotPassword from "./pages/ForgotPassword";
 import SinglePaper from "./components/SinglePaper.tsx";
+import EditPaper from "./pages/EditPaper.tsx";
 
 const theme = createTheme({
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#90caf9',
+        },
+        secondary: {
+            main: '#f48fb1',
+        },
+        background: {
+            default: '#121212',
+            paper: '#1d1d1d',
+        },
+
+    },
+    typography: {
+        fontFamily: 'Source Sans 3, sans-serif',
+    },
     components: {
         MuiTextField: {
             defaultProps: {
@@ -68,25 +86,25 @@ function App() {
                                 <Route
                                     index
                                     element={
-                                            <LoginPage />
+                                        <LoginPage/>
                                     }
                                 />
                                 <Route
                                     path="/login"
                                     element={
-                                            <LoginPage />
+                                        <LoginPage/>
                                     }
                                 />
                                 <Route
                                     path="/register"
                                     element={
-                                            <RegisterPage />
+                                        <RegisterPage/>
                                     }
                                 />
                                 <Route
                                     path="/forgot-password"
                                     element={
-                                            <ForgotPassword />
+                                        <ForgotPassword/>
                                     }
                                 />
 
@@ -96,8 +114,8 @@ function App() {
                                     element={
                                         <PrivateRoute>
                                             <>
-                                                <TopMenuBar />
-                                                <Dashboard />
+                                                <TopMenuBar/>
+                                                <Dashboard/>
                                             </>
                                         </PrivateRoute>
                                     }
@@ -107,8 +125,8 @@ function App() {
                                     element={
                                         <PrivateRoute>
                                             <>
-                                                <TopMenuBar />
-                                                <Profile />
+                                                <TopMenuBar/>
+                                                <Profile/>
                                             </>
                                         </PrivateRoute>
                                     }
@@ -118,8 +136,8 @@ function App() {
                                     element={
                                         <PrivateRoute>
                                             <>
-                                                <TopMenuBar />
-                                                <MyPapers />
+                                                <TopMenuBar/>
+                                                <MyPapers/>
                                             </>
                                         </PrivateRoute>
                                     }
@@ -129,8 +147,8 @@ function App() {
                                     element={
                                         <PrivateRoute>
                                             <>
-                                                <TopMenuBar />
-                                                <MyReviews />
+                                                <TopMenuBar/>
+                                                <MyReviews/>
                                             </>
                                         </PrivateRoute>
                                     }
@@ -140,13 +158,23 @@ function App() {
                                     element={
                                         <PrivateRoute>
                                             <>
-                                                <TopMenuBar />
-                                                <SinglePaper />
+                                                <TopMenuBar/>
+                                                <SinglePaper/>
                                             </>
                                         </PrivateRoute>
                                     }
                                 />
-
+                                <Route
+                                    path="/edit-paper"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar/>
+                                                <EditPaper/>
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
                                 {/* Fallback Route */}
                                 <Route path="*" element={<NoPage/>}/>
                             </Routes>

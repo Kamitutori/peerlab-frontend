@@ -61,6 +61,7 @@ const AppBar = styled(MuiAppBar, {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+    backgroundColor: '#1976d2',
     variants: [
       {
         props: ({ open }) => open,
@@ -125,7 +126,7 @@ export default function MenuAppBar() {
         setOpen(false);
       };
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const redirect = () => {
         navigate('/profile');
     }
@@ -187,9 +188,6 @@ export default function MenuAppBar() {
             </AppBar>
 
             <Drawer variant="permanent" open={open}>
-      
-      
-      
                 <DrawerHeader>
                 <IconButton onClick={handleDrawerClose}>
                     {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -207,7 +205,7 @@ export default function MenuAppBar() {
                             {
                                 minHeight: 48,
                                 px: 2.5,
-                                color:"black",
+                                color:"white",
                             },
                             open
                                 ? {
@@ -263,7 +261,7 @@ export default function MenuAppBar() {
                           {
                             minHeight: 48,
                             px: 2.5,
-                            color:"black",
+                            color:"white",
                           },
                           open
                             ? {
