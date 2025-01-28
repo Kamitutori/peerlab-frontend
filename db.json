@@ -131,56 +131,61 @@
       "authorName": "Prof. Henkel"
     },
     {
-        "id": 6,
-        "paperId": 6,
-        "paperName": "On Lebesgue Polynomials",
-        "authorName": "Der Witzemer"
-        },
-        {
-        "id": 7,
-        "paperId": 7,
-        "paperName": "On coping with theoretical computer science",
-        "authorName": "Jules"
-        },
-        {
-        "id": 8,
-        "paperId": 8,
-        "paperName": "On JSON Server mocks",
-        "authorName": "Brettschneider"
-        },
-        {
-        "id": 9,
-        "paperId": 9,
-        "paperName": "A Method for Obtaining Digital Signatures and Public-Key Cryptosystems",
-        "authorName": "Ronald McDonald"
-        },
-        {
-        "id": 10,
-        "paperId": 10,
-        "paperName": "On energy efficient circuit designs in micro controllers",
-        "authorName": "Prof. Henkel"
+      "id": 6,
+      "paperId": 6,
+      "paperName": "On Lebesgue Polynomials",
+      "authorName": "Der Witzemer"
+    },
+    {
+      "id": 7,
+      "paperId": 7,
+      "paperName": "On coping with theoretical computer science",
+      "authorName": "Jules"
+    },
+    {
+      "id": 8,
+      "paperId": 8,
+      "paperName": "On JSON Server mocks",
+      "authorName": "Brettschneider"
+    },
+    {
+      "id": 9,
+      "paperId": 9,
+      "paperName": "A Method for Obtaining Digital Signatures and Public-Key Cryptosystems",
+      "authorName": "Ronald McDonald"
+    },
+    {
+      "id": 10,
+      "paperId": 10,
+      "paperName": "On energy efficient circuit designs in micro controllers",
+      "authorName": "Prof. Henkel"
     }
   ],
   "userList": [
     {
       "id": 1,
-      "name": "Diese Junge"
+      "name": "Diese Junge",
+      "email": "diese@junge.de"
     },
     {
       "id": 2,
-      "name": "Maria (Artits) Curry"
+      "name": "Maria (Artits) Curry",
+      "email": "maria@curry.de"
     },
     {
       "id": 3,
-      "name": "Brettschneider"
+      "name": "Brettschneider",
+      "email": "brett.am@schneiden.de"
     },
     {
       "id": 4,
-      "name": "Gasriese"
+      "name": "Gasriese",
+      "email": "der.kommt@boese.de"
     },
     {
       "id": 5,
-      "name": "Prof. Henkel"
+      "name": "Prof. Henkel",
+      "email": "ich.liebe@ces.de"
     }
   ]
 }
