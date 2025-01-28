@@ -1,9 +1,4 @@
-// TODO: change password (functionality, styling, input fields)
-// TODO: change user data
-// TODO: user deletion
-// TODO: styling
-// TODO: implement the actual paper and review tables
-// TODO: orientation and design of Options button
+// TODO proper implementation of lists
 
 import React, {useState} from "react";
 import {
