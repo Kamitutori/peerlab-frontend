@@ -12,50 +12,56 @@ import {
     Button,
     TextField,
     Stack,
-    Paper,
     Divider,
-    List,
-    ListItem,
-    ListItemText,
     Menu,
     MenuItem, Alert, Grid,
 } from "@mui/material";
 import PaperList from "../components/PaperList.tsx";
-import ReviewList from "../components/ReviewList.tsx";
 
+/** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */
 function ProfilePage() {
-    let strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
-    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const INVALID_TOKEN_MSG = "Your token is invalid. Logging out and in again might solve the issue.";
+    const LOCAL_STORAGE_UPDATE_EVENT = "localStorageUpdate";
+
+    /** This effect updates the account information on the page if the user changed it. */
     const [userName, setUserName] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
-    const [input, setInput] = useState({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-    });
 
     React.useEffect(() => {
-        // Retrieve and parse user object from localStorage
-        const userJson = localStorage.getItem('user');
-        if (userJson) {
-            try {
-                setUserName(JSON.parse(userJson).email);
-                setUserEmail(JSON.parse(userJson).email)
-            } catch (error) {
-                setUserName(null);
-                setUserEmail(null)
-                alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
+        const updateProfile = () => {
+            const userJson = localStorage.getItem('user');
+            if (userJson) {
+                try {
+                    setUserName(JSON.parse(userJson).name);
+                    setUserEmail(JSON.parse(userJson).email)
+                } catch (error) {
+                    setUserName(null);
+                    setUserEmail(null);
+                    alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
+                }
+            } else {
+                alert("Unexpected behavior: User is on profile page with no user object in localStorage.");
             }
-        } else {
-            alert("Unexpected behavior: User is on profile page with no user object in localStorage.");
         }
+        updateProfile();
+        const handleStorageChange = () => {
+            updateProfile();
+        }
+        window.addEventListener(LOCAL_STORAGE_UPDATE_EVENT, handleStorageChange);
+        // Cleanup the event listener on component unmount
+        return () => {
+            window.removeEventListener(LOCAL_STORAGE_UPDATE_EVENT, handleStorageChange);
+        };
     }, []);
 
+    /** These attributes indicate which part of his account the user currently edits. */
     const [isEditProfile, setIsEditProfile] = useState(false);
     const [isChangePassword, setIsChangePassword] = useState(false);
+    const [isAccountDeletion, setIsAccountDeletion] = useState(false);
 
+    /** The props of a message the user receives as feedback on changing his account. */
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<'error' | 'success' | 'warning' | ''>('');
     const [showMessage, setShowMessage] = useState(false);
@@ -66,8 +72,8 @@ function ProfilePage() {
         setShowMessage(true);
     }
 
-    const papers = ["paper_1", "paper_2", "paper_3", "paper_4"];
-    const reviews = ["reviewed_paper_1", "reviewed_paper_2", "reviewed_paper_3", "reviewed_paper_4"];
+    /** These functions manage the interactions with the account menu. */
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -78,6 +84,21 @@ function ProfilePage() {
         setAnchorEl(null);
         setShowMessage(false);
     };
+
+    const handleCancellation = () => {
+        setIsEditProfile(false);
+        setIsChangePassword(false);
+        setIsAccountDeletion(false);
+        setShowMessage(false);
+    }
+
+    /** These functions handle the input of account changes. */
+    const [input, setInput] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -97,33 +118,47 @@ function ProfilePage() {
         });
     };
 
+    /** These functions implement the account settings functionality. */
+    const handleSubmit = () => {
+        if (isEditProfile) {
+            submitEditProfile();
+        } else if (isChangePassword) {
+            submitChangePassword();
+        } else if (isAccountDeletion) {
+            submitAccountDeletion();
+        }
+    }
+
     const submitEditProfile = async () => {
         if (emailRegex.test(input.email)) {
             try {
-                const res = await fetch("http://localhost:8080/api/user/", {
-                    method: 'POST',
+                const res = await fetch("http://localhost:8080/api/users", {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem("jwt")}`
                     },
                     body: JSON.stringify({
-                        // TODO this implementation assumes that the current values are inserted. Decide, whether empty fields will be ignored.
+                        // TODO how to handle empty fields? just fill them up? or fill fields by default?
                         name: input.name,
                         email: input.email
                     })
                 });
                 if (res.status == 200) {
                     setMessageProps("Successfully edited profile.", "success");
-                    localStorage.setItem("user", JSON.stringify({
-                        // id: localStorage.getItem("user").id,
-                        name: input.name,
-                        email: input.email,
-                    }));
+                    const responseData = await res.json();
+                    localStorage.setItem("user", JSON.stringify(responseData));
+                    window.dispatchEvent(new Event(LOCAL_STORAGE_UPDATE_EVENT));
+                    setTimeout(() => {
+                        handleMenuClose();
+                        setIsEditProfile(false);
+                    }, 3000);
                 } else if (res.status == 400) {
-                    // TODO implement good failure handling
-                    setMessageProps("Failure: 400", "error");
+                    setMessageProps("Your inputs are invalid.", "error");
                 } else if (res.status == 403) {
-                    setMessageProps("Your token is invalid.", "error")
+                    setMessageProps(INVALID_TOKEN_MSG, "error")
+                } else {
+                    setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
                 }
             } catch (error) {
                 alert(`An error has occurred: ${error}.`)
@@ -137,13 +172,13 @@ function ProfilePage() {
         if (input.password !== input.confirmPassword) {
             setMessageProps("Passwords do not match.", "warning");
             return;
-        } /* else if (!strongPasswordRegex.test(input.password)) {
+        } else if (!strongPasswordRegex.test(input.password)) {
             setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
             return;
-        } */ else {
+        } else {
             try {
-                const res = await fetch("http://localhost:8080/api/user/", {
-                    method: 'POST',
+                const res = await fetch("http://localhost:8080/api/users", {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem("jwt")}`
@@ -152,15 +187,20 @@ function ProfilePage() {
                         password: input.password
                     })
                 });
-                const responseData = await res.json();
                 if (res.status == 200) {
+                    const responseData = await res.json();
                     setMessageProps("Successfully changed password.", "success");
-                    localStorage.setItem("user", JSON.stringify(responseData))
+                    localStorage.setItem("user", JSON.stringify(responseData));
+                    setTimeout(() => {
+                        handleMenuClose();
+                        setIsChangePassword(false);
+                    }, 3000);
                 } else if (res.status == 400) {
-                    // TODO implement good failure handling
-                    setMessageProps("Failure: 400", "error");
+                    setMessageProps("The password was invalid.", "error");
                 } else if (res.status == 403) {
-                    setMessageProps("Your token is invalid.", "error")
+                    setMessageProps(INVALID_TOKEN_MSG, "error")
+                } else {
+                    setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
                 }
             } catch (error) {
                 alert(`An error has occurred: ${error}.`)
@@ -168,128 +208,194 @@ function ProfilePage() {
         }
     };
 
-    //const submitChanges = async () => {}
+    /* An attempt to combine edit profile and change password (it's basically the same number of lines but less readable). Also unfinished.
+    const submitChanges = async () => {
+        if (isEditProfile) {
+            if (!emailRegex.test(input.email)) {
+                setMessageProps("Invalid email address.", "warning");
+                return;
+            }
+            const res = await fetch("http://localhost:8080/api/users", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
+                },
+                body: JSON.stringify({
+                    password: input.password
+                })
+            });
+        } else {
+            if (input.password !== input.confirmPassword) {
+                setMessageProps("Passwords do not match.", "warning");
+                return;
+            } else if (!strongPasswordRegex.test(input.password)) {
+                setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
+                return;
+            }
+            const res = await fetch("http://localhost:8080/api/users", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
+                },
+                body: JSON.stringify({
+                    password: input.password
+                })
+            });
+        }
+
+        try {
+            const res = await fetch("http://localhost:8080/api/users", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
+                },
+                body: JSON.stringify({
+                    password: input.password
+                })
+            });
+            if (res.status == 200) {
+                const responseData = await res.json();
+                setMessageProps("Successfully changed password.", "success");
+                localStorage.setItem("user", JSON.stringify(responseData));
+                setTimeout(() => {
+                    handleMenuClose();
+                    setIsChangePassword(false);
+                }, 3000);
+            } else if (res.status == 400) {
+                setMessageProps("The password was invalid.", "error");
+            } else if (res.status == 403) {
+                setMessageProps(INVALID_TOKEN_MSG, "error")
+            } else {
+                setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
+            }
+        } catch (error) {
+            alert(`An error has occurred: ${error}.`)
+        }
+    }
+    */
 
     const submitAccountDeletion = async () => {
         try {
             const res = await fetch("http://localhost:8080/api/users", {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem("jwt")}`
-                    }
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
                 }
-            )
+            })
             if (res.status == 200) {
-                setMessageProps("Successfully deleted account.", "success");
-                localStorage.removeItem("jwt");
-                localStorage.removeItem("user");
-                window.location.href = "http://localhost:5173/login";
+                setMessageProps("Successfully deleted account. You will be logged out.", "success");
+                setTimeout(() => {
+                    localStorage.removeItem("jwt");
+                    localStorage.removeItem("user");
+                    window.location.href = "http://localhost:5173/login";
+                }, 3000);
+            } else if (res.status == 403) {
+                setMessageProps(INVALID_TOKEN_MSG, "error");
+            } else {
+                setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
             }
         } catch (error) {
             alert(`An error has occurred. ${error}.`)
         }
     }
 
+    /** The profile page components. */
     return (
-        <Box sx={{width: "800px", display: "flex", height: "flex", backgroundColor: "#777", marginTop: 10}}>
-            {/* Content */}
+        <Box sx={{
+            width: "800px",
+            display: "flex",
+            height: "flex",
+            backgroundColor: "#777",
+            marginTop: 10,
+        }}
+        >
+            {/** Content */}
             <Box sx={{flexGrow: 1, padding: 4}}>
 
-                <Box sx={{display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2}}>
-
+                {/** Wraps header and options */}
+                <Box sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: 2
+                }}
+                >
                     <Box>
-                        {/* Header */}
+                        {/** Header */}
                         <Typography variant="subtitle1" sx={{mb: 2}}>
-                            {/*<Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4}}> */}
-                            <Typography variant="h4">
-                                Name Surname
-                                {/* userName */}
+                            <Typography variant="h4" sx={{mb: 2}}>
+                                {userName}
                             </Typography>
-                            {/*</Box> */}
-
                             <Typography variant="subtitle1" sx={{mb: 2}}>
                                 {userEmail}
-                                {/* localStorage.get("user").email */}
                             </Typography>
                         </Typography>
                     </Box>
 
-                    {/* Options Menu */}
-                    <Box sx={{mt: 1}}>
-                        <Button
-                            variant="outlined"
-                            aria-controls="options-menu"
-                            aria-haspopup="true"
-                            onClick={handleMenuOpen}
+                    {/** Options Menu */}
+
+                    <Button
+                        variant="outlined"
+                        aria-controls="options-menu"
+                        aria-haspopup="true"
+                        onClick={handleMenuOpen}
+                        sx={{justifySelf: "end", height: "fit-content"}}
+                    >
+                        Options
+                    </Button>
+                    <Menu
+                        id="options-menu"
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={() => setAnchorEl(null)}
+                    >
+                        <MenuItem
+                            onClick={() => {
+                                handleMenuClose();
+                                setIsEditProfile(!isEditProfile);
+                                setIsChangePassword(false);
+                            }}
                         >
-                            Options
-                        </Button>
-                        <Menu
-                            id="options-menu"
-                            anchorEl={anchorEl}
-                            open={Boolean(anchorEl)}
-                            onClose={() => setAnchorEl(null)}
+                            Edit Profile
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() => {
+                                handleMenuClose();
+                                setIsChangePassword(!isChangePassword);
+                                setIsEditProfile(false);
+                            }}
                         >
-                            <MenuItem
-                                onClick={() => {
-                                    handleMenuClose();
-                                    setIsEditProfile(!isEditProfile);
-                                    setIsChangePassword(false);
-                                }}
-                            >
-                                Edit Profile
-                            </MenuItem>
-                            <MenuItem
-                                onClick={() => {
-                                    handleMenuClose();
-                                    setIsChangePassword(!isChangePassword);
-                                    setIsEditProfile(false);
-                                }}
-                            >
-                                Change Password
-                            </MenuItem>
-                            <MenuItem
-                                onClick={() => {
-                                    handleMenuClose();
-                                    submitAccountDeletion()
-                                    console.log("Delete Profile Clicked");
-                                }}
-                            >
-                                Delete Profile
-                            </MenuItem>
-                        </Menu>
-                    </Box>
+                            Change Password
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() => {
+                                handleMenuClose();
+                                setIsAccountDeletion(!isAccountDeletion);
+                                setIsChangePassword(false);
+                                setIsEditProfile(false);
+                            }}
+                        >
+                            Delete Profile
+                        </MenuItem>
+                    </Menu>
 
                 </Box>
-
                 <Divider sx={{my: 2}}/>
 
-                {/* Optional Change Menus */}
+                {/** Optional Account Setting Menus */}
                 {(isEditProfile || isChangePassword) && (
                     <Box sx={{
                         display: "grid",
                         justifyContent: "center",
-
-                        /* display: "flex", justifyContent: "space-between", */
-                        /* mb: 4 */
-                    }}>
-                        <Typography variant="h6" sx={{mb: 2}}>
+                    }}
+                    >
+                        <Typography variant="h6" sx={{mb: 2, justifySelf: "center"}}>
                             {isEditProfile ? "Edit Profile" : "Change Password"}
                         </Typography>
-                        {showMessage && (
-                            <Alert severity={messageType as 'error' | 'success'}
-                                   sx={{
-                                       whiteSpace: 'pre-line',
-                                       width: "fit-content",
-                                       textAlign: "center",
-                                       alignItems: "center",
-                                       justifyContent: "center",
-                                   }}
-                            >
-                                {message}
-                            </Alert>
-                        )}
+
                         <Stack spacing={2}>
                             <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                 <TextField
@@ -313,63 +419,64 @@ function ProfilePage() {
                                 />
                             </Box>
                         </Stack>
-                        <Box sx={{display: "center", paddingX: 1, gap: 2,}}>
-                            <Button
-                                variant="contained"
-                                sx={{mt: 2}}
-                                onClick={isEditProfile ? submitEditProfile : submitChangePassword}
-                            >
-                                Confirm
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                sx={{mt: 2}}
-                                onClick={() => {
-                                    isEditProfile ? setIsEditProfile(false) : setIsChangePassword(false);
-                                    setInputToDefault();
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                        </Box>
                     </Box>
                 )}
-                {(isEditProfile || isChangePassword) && (
+
+                {/** Confirmation and Cancellation Buttons */}
+                {(isEditProfile || (isChangePassword || isAccountDeletion)) && (
+                    <Box sx={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, 1fr)",
+                        justifyContent: "center", // Centers grid items horizontally
+                        alignItems: "center",     // Centers grid items vertically
+                        paddingX: 1,
+                        gap: 2,
+                    }}>
+                        <Button
+                            variant="contained"
+                            sx={{mt: 2, width: "fit-content", justifySelf: "end"}}
+                            onClick={handleSubmit}
+                        >
+                            Confirm
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            sx={{mt: 2, width: "fit-content", justifySelf: "start"}}
+                            onClick={() => {
+                                handleCancellation();
+                                setInputToDefault();
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                    </Box>
+                )}
+                {/** Feedback Message */}
+                {showMessage && (
+                    <Box
+                        sx={{
+                            my: '1rem',
+                            display: 'flex',
+                        }}
+                    >
+                        <Alert
+                            severity={messageType as 'error' | 'success'}
+                            sx={{
+                                whiteSpace: 'pre-line',
+                                width: "fit-content",
+                                textAlign: "center",
+                                alignItems: "center"
+                            }}
+                        >
+                            {message}
+                        </Alert>
+                    </Box>
+                )}
+                {(isEditProfile || (isChangePassword || isAccountDeletion)) && (
                     <Divider sx={{my: 2}}/>
                 )}
 
-                {/* Papers and Reviews */}
-                {/*}
-                <Box sx={{display: "flex", gap: 4}}>
-
-                    <Box sx={{flex: 1}}>
-                        <Typography variant="h6">Papers:</Typography>
-                        <Paper variant="outlined" sx={{maxHeight: "200px", overflowY: "auto", mt: 1}}>
-                            <List>
-                                {papers.map((paper, index) => (
-                                    <ListItem key={index} divider>
-                                        <ListItemText primary={paper}/>
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Paper>
-                    </Box>
-
-
-                    <Box sx={{flex: 1}}>
-                        <Typography variant="h6">Reviews:</Typography>
-                        <Paper variant="outlined" sx={{maxHeight: "200px", overflowY: "auto", mt: 1}}>
-                            <List>
-                                {reviews.map((review, index) => (
-                                    <ListItem key={index} divider>
-                                        <ListItemText primary={review}/>
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </Paper>
-                    </Box>
-                    </Box>
-                    */}
+                {/** Papers and Reviews */}
                 <Grid container spacing={4} justifyContent="center">
                     <Grid item xs={12} md={6}>
                         <PaperList

@@ -1,3 +1,6 @@
+// TODO proper response messages (not the alert bs from authcontext)
+// TODO maybe better redirection implementation necessary. but if you fiddle with jwts, f. you
+
 import {Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
@@ -11,16 +14,15 @@ function goToRegister() {
 export default function LoginPage() {
     const {login} = useUpdateAuth();
     const [showPassword, setShowPassword] = useState(false);
+
+    /** The login input and it's handling function. */
     const [input, setInput] = useState({
         email: "",
         password: "",
     });
 
-    if (localStorage.getItem("jwt")) {
-        window.location.href = "http://localhost:5173/dashboard";
-    }
-
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+
         const {name, value} = e.target;
         setInput((prev) => ({
             ...prev,
@@ -28,6 +30,14 @@ export default function LoginPage() {
         }));
     };
 
+    /**
+     * Redirection in case of present jwt (assuming, the user is logged in).
+     */
+    if (localStorage.getItem("jwt")) {
+        window.location.href = "http://localhost:5173/dashboard";
+    }
+
+    /** This function performs basic checks before calling the login routine. */
     const loginToApplication = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const {email, password} = input;
@@ -39,6 +49,7 @@ export default function LoginPage() {
         // TODO Statements here are not reached if successful. Remove alerts and insert error message here. Problem: how to transfer the response code?
     };
 
+    /** The login page components. */
     return (
         <Box>
             <Paper sx={{

@@ -1,6 +1,6 @@
 # Questions to Bakr
-- Does there always have to be a 403 Request handling for every request, because someone without a jwt could call it and receive this message? Probably yes..
-
+- Why does it seem like the data is not really persisted? Is it due to server restarts? Seems wrong.
+Maybe better redirection implementation from login->dashboard necessary. but if you fiddle with jwts, f. you anyway..?
 
 ## TODO; Auth / RegisterPage
 - Better messaging for failure in login
@@ -59,3 +59,13 @@ Implementation not 1:1 possible as await needs to be called in an async function
         }
     }
 ```
+
+# Frontend Tech Stack
+- Language: TypeScript
+- Framework: React
+- State Management: Context API
+- Runtime: Node.js
+- Package Manager: npm
+- (specific) Libraries: react-router-dom, react-query, react-material-ui
+- Test Framework: Jest (not yet implemented)
+- Setup: Vite
