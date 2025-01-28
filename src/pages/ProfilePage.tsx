@@ -100,7 +100,7 @@ function ProfilePage() {
     const submitEditProfile = async () => {
         if (emailRegex.test(input.email)) {
             try {
-                const res = await fetch("http://localhost:8080/api/user/", {
+                const res = await fetch("http://localhost:8080/api/users", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ function ProfilePage() {
             return;
         } */ else {
             try {
-                const res = await fetch("http://localhost:8080/api/user/", {
+                const res = await fetch("http://localhost:8080/api/users", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
