@@ -1,4 +1,5 @@
 // TODO proper implementation of lists
+// TODO styling of page
 
 import React, {useState} from "react";
 import {
