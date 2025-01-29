@@ -15,6 +15,7 @@ import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
 import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
+import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 
 
@@ -197,6 +198,17 @@ function App() {
                                             <>
                                                 <TopMenuBar/>
                                                 <AddPaperPage/>
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/add-review"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar/>
+                                                <AddReviewPage/>
                                             </>
                                         </PrivateRoute>
                                     }
