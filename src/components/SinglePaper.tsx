@@ -101,7 +101,6 @@ export default function SinglePaper() {
             </Stack>
 
             <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Status :  ${paperObject.active === true ? 'active' : 'inactive'}`}</div>
-            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Review limit : X/${paperObject.reviewLimit}`}</div>
             <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)', paddingLeft: '10px', paddingRight: '10px' }}>
                 <div>{`Preview: ${paperObject.abstractText}`}</div>
             </Box>
@@ -112,7 +111,7 @@ export default function SinglePaper() {
               <Divider/>
             </Root>
 
-            
+            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Review limit : X/${paperObject.reviewLimit}`}</div>
 {/*TODO: Replace this list with an actual list of reviews!!*/}
 {/*<RequestList />*/}
             <List
