@@ -1,7 +1,8 @@
 import PaperForm from '../components/PaperForm';
+import { PaperData } from '../components/PaperForm';
 
 export default function AddPaperPage() {
-    const handleSubmit = async (paperData: any) => {
+    const handleSubmit = async (paperData: PaperData) => {
         try {
             const response = await fetch('http://localhost:8080/api/papers', {
                 method: 'POST',

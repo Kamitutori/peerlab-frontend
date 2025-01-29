@@ -1,10 +1,10 @@
 import { useParams } from 'react-router-dom';
-import PaperForm from '../components/PaperForm';
-import {useEffect, useState} from "react";
+import PaperForm, { PaperData } from '../components/PaperForm';
+import { useEffect, useState } from 'react';
 
 export default function EditPaperPage() {
     const { id } = useParams<{ id: string }>();
-    const [initialData, setInitialData] = useState<any>(null);
+    const [initialData, setInitialData] = useState<PaperData | null>(null);
 
     useEffect(() => {
         // Fetch the paper data to edit
@@ -20,7 +20,7 @@ export default function EditPaperPage() {
             .catch(error => console.error('Error fetching paper data:', error));
     }, [id]);
 
-    const handleSubmit = async (paperData: any) => {
+    const handleSubmit = async (paperData: PaperData) => {
         try {
             const response = await fetch(`http://localhost:8080/api/papers/${id}`, {
                 method: 'PUT',
@@ -43,7 +43,7 @@ export default function EditPaperPage() {
     if (!initialData) {
         return <div>Loading...</div>;
     }
-    console.log(initialData)
+
     return (
         <PaperForm
             initialData={initialData}

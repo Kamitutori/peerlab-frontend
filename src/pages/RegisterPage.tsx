@@ -74,7 +74,7 @@ export default function RegisterPage() {
 
     const registerUser = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         //let strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
 
         if (input.name === "" || input.email === "" || input.password === "" || input.rep_password === "") {

@@ -138,7 +138,7 @@ export default function MenuAppBar() {
             try {
                 const userObject = JSON.parse(userJson);
                 setUsername(userObject.email);
-            } catch (error) {
+            } catch {
                 setUsername(null);
                 alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
             }

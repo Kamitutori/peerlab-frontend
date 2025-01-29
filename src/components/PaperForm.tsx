@@ -27,9 +27,22 @@ interface Reviewer {
     email: string;
 }
 
+export interface PaperData {
+    id?: string;
+    title: string;
+    authors: string;
+    reviewLimit: number;
+    minScore: number;
+    maxScore: number;
+    internal: boolean;
+    authorsNote: string;
+    abstractText: string;
+    requests: string[];
+}
+
 interface PaperFormProps {
-    initialData?: any;
-    onSubmit: (data: any) => void;
+    initialData?: PaperData;
+    onSubmit: (data: PaperData) => void;
     fetchReviewersUrl: string;
 }
 
@@ -61,20 +74,30 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
             .catch(error => console.error('Error fetching reviewers:', error));
     }, [fetchReviewersUrl]);
 
+    useEffect(() => {
+        if (internal === 'internal') {
+            setMinScore('');
+            setMaxScore('');
+        }
+    }, [internal]);
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        const minScoreNum = parseInt(minScore);
-        const maxScoreNum = parseInt(maxScore);
-        const reviewLimitNum = parseInt(reviewLimit);
 
-        if (isNaN(minScoreNum) || isNaN(maxScoreNum) || minScoreNum >= maxScoreNum) {
-            if (internal === 'external') {
-                setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
-                return;
-            }
+        const minScoreNumber = Number(minScore);
+        const maxScoreNumber = Number(maxScore);
+        const reviewLimitNumber = Number(reviewLimit);
+
+        if (internal === 'external' && (isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
+            setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
+            return;
+        }
+        if (isNaN(reviewLimitNumber) || reviewLimitNumber <= 0) {
+            setWarning('Please enter a valid number for the maximum number of reviews.');
+            return;
         }
 
-        if (isNaN(reviewLimitNum)) {
+        if (!reviewLimit) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
         }
@@ -102,9 +125,9 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
             authors,
             authorsNote,
             abstractText,
-            reviewLimit: reviewLimitNum,
-            minScore: minScoreNum,
-            maxScore: maxScoreNum,
+            reviewLimit,
+            minScore: minScoreNumber,
+            maxScore: maxScoreNumber,
             fileId: "1",
             active: true,
             internal: internal === 'internal',
@@ -258,7 +281,6 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
                     </RadioGroup>
                 </Box>
                 <CustomTextField
-                    required
                     label="Abstract Text"
                     value={abstractText}
                     onChange={(e) => setAbstractText(e.target.value)}
