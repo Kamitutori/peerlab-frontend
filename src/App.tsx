@@ -115,90 +115,90 @@ function App() {
                                 <Route
                                     path="/dashboard"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <Dashboard/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
                                 />
                                 <Route
                                     path="/profile"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <Profile/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
                                 />
                                 <Route
                                     path="/papers"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <MyPapersPage/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
                                 />
                                 <Route
                                     path="/reviews"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <MyReviewsPage/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
                                 />
                                 <Route
                                     path="/"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <PaperList endpoint="/api/papers" title="Papers"/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
 
                                 />
                                 <Route
                                     path="/paper/:id"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <SinglePaper/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
                                 />
                                 <Route
                                     path="/edit-paper/:id"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <EditPaperPage/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
                                 />
                                 <Route
                                     path="/add-paper"
                                     element={
-                                        <PrivateRoute>
+                                        
                                             <>
                                                 <TopMenuBar/>
                                                 <AddPaperPage/>
                                             </>
-                                        </PrivateRoute>
+                                        
                                     }
                                 />
                                 {/* Fallback Route */}

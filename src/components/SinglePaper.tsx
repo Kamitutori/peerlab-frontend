@@ -79,42 +79,6 @@ export default function SinglePaper() {
                 <h2 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{paperObject.title}</h2>
                 <h3 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Authors : ${paperObject.authors}`}</h3>
 
-<<<<<<< HEAD
-            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Status :  ${paperObject.active === true ? 'active' : 'inactive'}`}</div>
-            <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)', paddingLeft: '10px', paddingRight: '10px' }}>
-                <div>{`Preview: ${paperObject.abstractText}`}</div>
-            </Box>
-            
-            <Root>
-              <Divider>Author's Note</Divider>
-              <p>{paperObject.authorsNote}</p>
-              <Divider/>
-            </Root>
-
-            <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Review limit : X/${paperObject.reviewLimit}`}</div>
-{/*TODO: Replace this list with an actual list of reviews!!*/}
-{/*<RequestList />*/}
-            <List
-              sx={{
-              width: '100%',
-              maxWidth: 600,
-              bgcolor: 'background.paper',
-              position: 'relative',
-              overflow: 'auto',
-              maxHeight: 250,
-              '& ul': { padding: 0 },
-              }}
-              subheader={<li />}
-            >
-              {[0, 1, 2, 3, 4].map((sectionId) => (
-                <li key={`section-${sectionId}`}>
-                  <ul>
-                    <ListSubheader>{`review status ${sectionId}`}</ListSubheader>
-                    {[0, 1, 2].map((item) => (
-                      <ListItem key={`item-${sectionId}-${item}`}>
-                        <ListItemText primary={`Review ${item}`} />
-                      </ListItem>
-=======
                 <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
                     <Stack spacing={1} sx={{ alignItems: 'center', paddingLeft: '10px', paddingRight: '10px' }}>
                         <Chip label={paperObject.internal ? 'Internal' : 'External'} />
@@ -166,7 +130,6 @@ export default function SinglePaper() {
                                 ))}
                             </ul>
                         </li>
->>>>>>> 0d0317d98044b64e415f51a16a8dba2ab7ae7630
                     ))}
                 </List>
 
