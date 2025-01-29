@@ -20,6 +20,7 @@ import {
 import {useDropzone} from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
+// import {useNavigate} from "react-router-dom";
 
 interface Reviewer {
     id: string;
@@ -80,6 +81,8 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {}, fetchReviewersUr
             setMaxScore('');
         }
     }, [internal]);
+
+    // const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -159,12 +162,10 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {}, fetchReviewersUr
                 throw new Error('Network response was not ok');
             }
 
-            const result = await response.text();
-            if (result) {
-                console.log('Success:', JSON.parse(result));
-            } else {
-                console.log('Success: No content returned');
-            }
+            const result = await response.json();
+            console.log('Success:', result);
+            // TODO wait for backend to send id of result
+            // navigate(`/paper/${result.id}`);
         } catch (error) {
             console.error('Error:', error);
         }
