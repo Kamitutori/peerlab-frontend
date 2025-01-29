@@ -6,14 +6,17 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 import LoginPage from "./pages/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import MyPapers from "./pages/MyPapers";
-import MyReviews from "./pages/MyReviews";
+import MyPapersPage from "./pages/MyPapersPage.tsx";
+import MyReviewsPage from "./pages/MyReviewsPage.tsx";
 import NoPage from "./pages/NoPage";
 import TopMenuBar from "./components/TopBar";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import ForgotPassword from "./pages/ForgotPassword";
 import SinglePaper from "./components/SinglePaper.tsx";
-import EditPaper from "./pages/EditPaper.tsx";
+import EditPaperPage from "./pages/EditPaperPage.tsx";
+import PaperList from "./components/PaperList.tsx";
+import AddPaperPage from "./pages/AddPaperPage.tsx";
+
 
 const theme = createTheme({
     palette: {
@@ -137,7 +140,7 @@ function App() {
                                         <PrivateRoute>
                                             <>
                                                 <TopMenuBar/>
-                                                <MyPapers/>
+                                                <MyPapersPage/>
                                             </>
                                         </PrivateRoute>
                                     }
@@ -148,13 +151,25 @@ function App() {
                                         <PrivateRoute>
                                             <>
                                                 <TopMenuBar/>
-                                                <MyReviews/>
+                                                <MyReviewsPage/>
                                             </>
                                         </PrivateRoute>
                                     }
                                 />
                                 <Route
-                                    path="/single-paper"
+                                    path="/"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar/>
+                                                <PaperList endpoint="/api/papers" title="Papers"/>
+                                            </>
+                                        </PrivateRoute>
+                                    }
+
+                                />
+                                <Route
+                                    path="/paper/:id"
                                     element={
                                         <PrivateRoute>
                                             <>
@@ -165,12 +180,23 @@ function App() {
                                     }
                                 />
                                 <Route
-                                    path="/edit-paper"
+                                    path="/edit-paper/:id"
                                     element={
                                         <PrivateRoute>
                                             <>
                                                 <TopMenuBar/>
-                                                <EditPaper/>
+                                                <EditPaperPage/>
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/add-paper"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar/>
+                                                <AddPaperPage/>
                                             </>
                                         </PrivateRoute>
                                     }
