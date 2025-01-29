@@ -71,7 +71,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
                     <List sx={{ maxHeight: 353, overflow: 'auto' }}>
-                        {data.map((paper: { id: number; title: string; ownerName: string }, index: number) => (
+                        {data.map((paper: { id: number; title: string; owner: {name: string} }, index: number) => (
                             <div key={paper.id}>
                                 <ListItemButton
                                     onClick={() => handleClick(paper.id)}
@@ -89,7 +89,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                     </ListItemAvatar>
                                     <ListItemText
                                         primary={paper.title}
-                                        secondary={`Author: ${paper.ownerName}`}
+                                        secondary={`Author: ${paper.owner.name}`}
                                         slotProps={{
                                             primary: {
                                                 noWrap: true,

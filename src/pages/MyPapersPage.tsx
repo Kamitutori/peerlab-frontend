@@ -11,7 +11,7 @@ export default function MyPapersPage() {
     return (
         <Box sx={{ flexGrow: 1, padding: 4 }}>
             <PaperList
-                endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                endpoint={`http://localhost:8080/api/papers`}
                 title={"Recently Reviewed"} />
             <Grid2 container spacing={4} justifyContent="center">
                 <Grid2>
@@ -22,7 +22,7 @@ export default function MyPapersPage() {
                 </Grid2>
                 <Grid2>
                     <PaperList
-                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        endpoint={`http://localhost:8080/api/papers`}
                         title="Finished Papers"
                     />
                 </Grid2>
