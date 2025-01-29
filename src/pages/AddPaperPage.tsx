@@ -43,12 +43,19 @@ export default function AddPaperPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        // Fetch reviewers from an API
-        fetch('https://my-json-server.typicode.com/kamitutori/peerlab-frontend/userList')
+        // Fetch reviewers from the database
+        fetch('http://localhost:8080/api/users/all', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            }
+        })
             .then(response => response.json())
             .then(data => setReviewers(data))
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
+
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -74,17 +81,34 @@ export default function AddPaperPage() {
         // }
 
         setWarning('');
+
+        // Retrieve the user information from local storage
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user || !user.id) {
+            setWarning('User is not logged in.');
+            return;
+        }
+
+        const owner = {
+            id: user.id,
+            name: user.name,
+            email: user.email
+        };
+        console.log(requests)
+
         const paperData = {
             title,
+            owner,
             authors,
-            reviewLimit: maxScoreNum,
+            abstractText: authorsNote, // Assuming authorsNote is the abstract text
+            authorsNote,
+            reviewLimit: maxReviewsNum,
             minScore: minScoreNum,
             maxScore: maxScoreNum,
-            internal,
-            authorsNote,
-            //files,
+            fileId: "1", // Replace with actual file ID
             requests: requests.map(requesteeId => {
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
+                console.log(requesteeId, reviewer?.name, reviewer?.email)
                 return {
                     status: "PENDING",
                     paper: { id: 0 }, // Replace with actual paper ID if available
@@ -98,7 +122,6 @@ export default function AddPaperPage() {
         };
 
         try {
-            console.log(requests);
             const response = await fetch('http://localhost:8080/api/papers', {
                 method: 'POST',
                 headers: {
