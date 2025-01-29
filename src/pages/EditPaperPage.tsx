@@ -20,6 +20,7 @@ import {
 import {useDropzone} from 'react-dropzone';
 import CustomTextField from '../components/CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
+import {useParams} from 'react-router-dom';
 
 // Define a type for the reviewer
 interface Reviewer {
@@ -27,7 +28,8 @@ interface Reviewer {
     name: string;
 }
 
-export default function EditPaper() {
+export default function EditPaperPage() {
+    const {id} = useParams<{ id: string }>();
     const [paperName, setPaperName] = useState('');
     const [authors, setAuthors] = useState('');
     const [maxReviews, setMaxReviews] = useState('');
@@ -48,6 +50,24 @@ export default function EditPaper() {
             .then(data => setReviewers(data))
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
+
+    useEffect(() => {
+        // Fetch paper data based on the paper ID
+        fetch(`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paper/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                setPaperName(data.title);
+                setAuthors(data.authors);
+                setMaxReviews(data.reviewLimit.toString());
+                setAuthorsNote(data.authorsNote);
+                setInternal(data.internal ? 'internal' : 'external');
+                if (data.minScore && data.maxScore) {
+                    setMinScore(data.minScore.toString());
+                    setMaxScore(data.maxScore.toString());
+                }
+            })
+            .catch(error => console.error('Error fetching paper data:', error));
+    }, [id]);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -93,7 +113,6 @@ export default function EditPaper() {
                 body: JSON.stringify(paperData)
             });
 
-
             const result = await response.json();
             console.log('Success:', result);
             // Handle success (e.g., show a success message, redirect, etc.)
@@ -107,7 +126,7 @@ export default function EditPaper() {
         setFiles(acceptedFiles);
     };
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop });
+    const {getRootProps, getInputProps} = useDropzone({onDrop});
 
     const handleUploadClick = () => {
         if (fileInputRef.current) {
@@ -136,14 +155,14 @@ export default function EditPaper() {
     };
 
     return (
-        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
-            <Typography variant="h4" component="h1" sx={{ color: 'white' }} fontWeight={"bold"}>
-                Add Paper
+        <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10}}>
+            <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
+                Edit Paper
             </Typography>
             <form onSubmit={handleSubmit}>
                 <Grid2 container spacing={2}>
                     <Grid2
-                    sx={{ display: 'flex', flexDirection: 'column'}}
+                        sx={{display: 'flex', flexDirection: 'column'}}
                     >
                         <CustomTextField
                             required
@@ -191,11 +210,11 @@ export default function EditPaper() {
                             onChange={(e) => setAuthorsNote(e.target.value)}
                             multiline
                             rows={9.4}
-                            sx={{ width: '130%' }}
+                            sx={{width: '130%'}}
                         />
                     </Grid2>
                 </Grid2>
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Box sx={{display: 'flex', justifyContent: 'center'}}>
                     <RadioGroup
                         row
                         value={internal}
@@ -203,15 +222,15 @@ export default function EditPaper() {
                     >
                         <FormControlLabel
                             value="internal"
-                            control={<Radio />}
+                            control={<Radio/>}
                             label="Internal"
-                            sx={{ color: 'primary' }}
+                            sx={{color: 'primary'}}
                         />
                         <FormControlLabel
                             value="external"
-                            control={<Radio />}
+                            control={<Radio/>}
                             label="External"
-                            sx={{ color: 'primary' }}
+                            sx={{color: 'primary'}}
                         />
                     </RadioGroup>
                 </Box>
@@ -224,20 +243,20 @@ export default function EditPaper() {
                              marginTop: 2
                          }}>
                         <input {...getInputProps()} />
-                        <Typography sx={{ color: 'primary' }}>
+                        <Typography sx={{color: 'primary'}}>
                             Drag & drop some files here, or click to select files
                         </Typography>
-                        <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{ mt: 2 }}>
+                        <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
                             Upload File
                         </Button>
                     </Box>
                 ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
-                        <Typography sx={{ color: 'primary', fontWeight: 'bold'}}>
+                    <Box sx={{display: 'flex', alignItems: 'center', marginTop: 2}}>
+                        <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
                             Uploaded file: {files[0].name}
                         </Typography>
-                        <IconButton onClick={handleRemoveFile} sx={{ ml: 1 }}>
-                            <CloseIcon />
+                        <IconButton onClick={handleRemoveFile} sx={{ml: 1}}>
+                            <CloseIcon/>
                         </IconButton>
                     </Box>
                 )}
@@ -245,18 +264,18 @@ export default function EditPaper() {
                     type="file"
                     accept={'.pdf'}
                     ref={fileInputRef}
-                    style={{ display: 'none' }}
+                    style={{display: 'none'}}
                     onChange={(e) => {
                         if (e.target.files) {
                             setFiles(Array.from(e.target.files));
                         }
                     }}
                 />
-                <TableContainer component={Paper} sx={{ marginTop: 4 }}>
+                <TableContainer component={Paper} sx={{marginTop: 4}}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Reviewer</TableCell>
+                                <TableCell>Request review from:</TableCell>
                                 <TableCell
                                     align="right"
                                     sx={{
@@ -278,7 +297,7 @@ export default function EditPaper() {
                                         />
                                         <Typography
                                             variant="body2"
-                                            sx={{ mr: 1 }}
+                                            sx={{mr: 1}}
                                         >
                                             Select all
                                         </Typography>
@@ -288,11 +307,11 @@ export default function EditPaper() {
                         </TableHead>
                     </Table>
                 </TableContainer>
-                <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
+                <TableContainer component={Paper} sx={{maxHeight: 350, overflow: 'auto'}}>
                     <Table>
                         <TableBody>
                             {reviewers.map((reviewer) => (
-                                <TableRow key={reviewer.id} sx={{ height: 40 }}>
+                                <TableRow key={reviewer.id} sx={{height: 40}}>
                                     <TableCell>{reviewer.name}</TableCell>
                                     <TableCell align="right">
                                         <Checkbox
@@ -306,11 +325,11 @@ export default function EditPaper() {
                     </Table>
                 </TableContainer>
                 {warning && (
-                    <Typography color="error" sx={{ mt: 2 }}>
+                    <Typography color="error" sx={{mt: 2}}>
                         {warning}
                     </Typography>
                 )}
-                <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+                <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
                     Submit
                 </Button>
             </form>

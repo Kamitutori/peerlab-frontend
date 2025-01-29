@@ -3,10 +3,10 @@ import {Box, Fab, Grid2} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import {useNavigate} from "react-router-dom";
 
-export default function MyPapers() {
+export default function MyPapersPage() {
     const navigate = useNavigate();
     const handleAddPaperClick = () => {
-        navigate('/edit-paper')
+        navigate('/add-paper');
     }
     return (
         <Box sx={{ flexGrow: 1, padding: 4 }}>
