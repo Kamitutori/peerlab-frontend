@@ -21,7 +21,6 @@ import { useDropzone } from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Define a type for the reviewer
 interface Reviewer {
     id: string;
     name: string;
@@ -37,11 +36,12 @@ interface PaperFormProps {
 const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersUrl }) => {
     const [title, setTitle] = useState(initialData.title || '');
     const [authors, setAuthors] = useState(initialData.authors || '');
-    const [maxReviews, setMaxReviews] = useState(initialData.maxReviews || '');
+    const [reviewLimit, setReviewLimit] = useState(initialData.reviewLimit || '');
     const [minScore, setMinScore] = useState(initialData.minScore || '');
     const [maxScore, setMaxScore] = useState(initialData.maxScore || '');
-    const [internal, setInternal] = useState(initialData.internal || 'internal');
+    const [internal, setInternal] = useState(initialData.internal !== undefined ? (initialData.internal ? 'internal' : 'external') : 'internal');
     const [authorsNote, setAuthorsNote] = useState(initialData.authorsNote || '');
+    const [abstractText, setAbstractText] = useState(initialData.abstractText || '');
     const [files, setFiles] = useState<File[]>([]);
     const [warning, setWarning] = useState('');
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
@@ -49,7 +49,6 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        // Fetch reviewers from the database
         fetch(fetchReviewersUrl, {
             method: 'GET',
             headers: {
@@ -66,7 +65,7 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
         event.preventDefault();
         const minScoreNum = parseInt(minScore);
         const maxScoreNum = parseInt(maxScore);
-        const maxReviewsNum = parseInt(maxReviews);
+        const reviewLimitNum = parseInt(reviewLimit);
 
         if (isNaN(minScoreNum) || isNaN(maxScoreNum) || minScoreNum >= maxScoreNum) {
             if (internal === 'external') {
@@ -75,14 +74,13 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
             }
         }
 
-        if (isNaN(maxReviewsNum)) {
+        if (isNaN(reviewLimitNum)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
         }
 
         setWarning('');
 
-        // Retrieve the user information from local storage
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user || !user.id) {
             setWarning('User is not logged in.');
@@ -102,19 +100,19 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
             owner,
             uploadDate,
             authors,
-            abstractText: authorsNote,
             authorsNote,
-            reviewLimit: maxReviewsNum,
+            abstractText,
+            reviewLimit: reviewLimitNum,
             minScore: minScoreNum,
             maxScore: maxScoreNum,
-            fileId: "1", // Replace with actual file ID
+            fileId: "1",
             active: true,
             internal: internal === 'internal',
             requests: requests.map(requesteeId => {
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
                 return {
                     status: "PENDING",
-                    paper: { id: 0 }, // Replace with actual paper ID if available
+                    paper: { id: 0 },
                     requestee: {
                         id: requesteeId,
                         name: reviewer?.name || "",
@@ -125,8 +123,8 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
         };
 
         try {
-            const response = await fetch('http://localhost:8080/api/papers', {
-                method: 'POST',
+            const response = await fetch(`http://localhost:8080/api/papers${initialData.id ? `/${initialData.id}` : ''}`, {
+                method: initialData.id ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
@@ -144,10 +142,8 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
             } else {
                 console.log('Success: No content returned');
             }
-            // Handle success (e.g., show a success message, redirect, etc.)
         } catch (error) {
             console.error('Error:', error);
-            // Handle error (e.g., show an error message)
         }
     };
 
@@ -206,8 +202,8 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
                         <CustomTextField
                             required
                             label="Maximum number of reviews"
-                            value={maxReviews}
-                            onChange={(e) => setMaxReviews(e.target.value)}
+                            value={reviewLimit}
+                            onChange={(e) => setReviewLimit(e.target.value)}
                         />
                         <Grid2 container spacing={2}>
                             <Grid2>
@@ -261,6 +257,15 @@ const PaperForm: React.FC<PaperFormProps> = ({ initialData = {}, fetchReviewersU
                         />
                     </RadioGroup>
                 </Box>
+                <CustomTextField
+                    required
+                    label="Abstract Text"
+                    value={abstractText}
+                    onChange={(e) => setAbstractText(e.target.value)}
+                    multiline
+                    rows={4}
+                    sx={{ width: '100%', marginTop: 2 }}
+                />
                 {files.length === 0 ? (
                     <Box {...getRootProps()}
                          sx={{

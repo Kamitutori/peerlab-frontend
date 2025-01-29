@@ -22,7 +22,7 @@ export default function EditPaperPage() {
 
     const handleSubmit = async (paperData: any) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/papers`, {
+            const response = await fetch(`http://localhost:8080/api/papers/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export default function EditPaperPage() {
     if (!initialData) {
         return <div>Loading...</div>;
     }
-
+    console.log(initialData)
     return (
         <PaperForm
             initialData={initialData}

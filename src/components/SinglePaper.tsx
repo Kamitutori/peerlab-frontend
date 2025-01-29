@@ -38,7 +38,13 @@ export default function SinglePaper() {
     } = useQuery({
         queryKey: ["paper", id],
         queryFn: async () => {
-            const res = await fetch(`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paper/${id}`);
+            const res = await fetch(`http://localhost:8080/api/papers/${id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                }
+            });
             if (!res.ok) throw new Error("Failed to fetch paper");
             return res.json();
         }
