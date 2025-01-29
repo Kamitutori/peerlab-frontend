@@ -3,15 +3,15 @@ import {createTheme, ThemeProvider} from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
 
-import LoginPage from "./pages/LoginPage.tsx";
+import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
+import ProfilePage from "./pages/ProfilePage.tsx";
 import MyPapers from "./pages/MyPapers";
 import MyReviews from "./pages/MyReviews";
 import NoPage from "./pages/NoPage";
 import TopMenuBar from "./components/TopBar";
-import RegisterPage from "./pages/RegisterPage.tsx";
-import ForgotPassword from "./pages/ForgotPassword";
+import RegisterPage from "./pages/auth/RegisterPage.tsx";
+import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaper from "./pages/EditPaper.tsx";
 
@@ -126,7 +126,7 @@ function App() {
                                         <PrivateRoute>
                                             <>
                                                 <TopMenuBar/>
-                                                <Profile/>
+                                                <ProfilePage/>
                                             </>
                                         </PrivateRoute>
                                     }

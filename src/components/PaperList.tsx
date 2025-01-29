@@ -58,6 +58,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                         zIndex: 1,
                         padding: '8px 16px',
                         width: '100%',
+                        textAlign: 'center',
                     }}
                 >
                     {title}

@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../assets/peerlabLogo_transparent.svg";
+import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
 import {useQuery} from "@tanstack/react-query";
 
 function backToLogin() {
@@ -19,13 +19,26 @@ function backToLogin() {
 }
 
 export default function RegisterPage() {
+    /** The registration input and it's handling function. */
     const [input, setInput] = useState({
         name: "",
         email: "",
         password: "",
         rep_password: ""
     });
+
+    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target;
+        setInput((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+        console.log(input);
+    };
+
     const [showPassword, setShowPassword] = useState(false);
+
+    /** The props of a message the user receives as feedback on trying to register. */
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<'error' | 'success' | 'warning' | ''>('');
     const [showMessage, setShowMessage] = useState(false);
@@ -36,6 +49,7 @@ export default function RegisterPage() {
         setShowMessage(true);
     }
 
+    /** The register query function. */
     const {refetch} =
         useQuery({
             queryKey: ['register'],
@@ -51,7 +65,6 @@ export default function RegisterPage() {
                         password: input.password,
                     })
                 })
-                console.log(res.status)
                 return (res.status);
             },
             enabled: false,
@@ -63,15 +76,7 @@ export default function RegisterPage() {
 
         });
 
-    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        setInput((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-        console.log(input);
-    };
-
+    /** The register service routine. */
     const registerUser = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -113,6 +118,7 @@ export default function RegisterPage() {
             })
     }
 
+    /** The register page components. */
     return (
         <Box>
             <Paper sx={{
@@ -167,9 +173,9 @@ export default function RegisterPage() {
                             onChange={handleInput}
                         />
                         <TextField
-                            id="repeat-password-input"
+                            id="confirm-password-input"
                             name="rep_password"
-                            label="Repeat Password"
+                            label="Confirm Password"
                             type={showPassword ? 'text' : 'password'}
                             onChange={handleInput}
                         />
