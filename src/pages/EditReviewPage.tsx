@@ -48,7 +48,6 @@ export default function EditReviewPage() {
         <ReviewForm
             initialData={initialData}
             onSubmit={handleSubmit}
-            fetchReviewersUrl="http://localhost:8080/api/users/all"
         />
     );
 }

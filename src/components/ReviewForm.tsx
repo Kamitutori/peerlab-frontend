@@ -4,13 +4,13 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
     Box,
     Button,
-    Checkbox,
+    Checkbox, FormControl,
     FormControlLabel,
     Grid2,
-    IconButton,
+    IconButton, InputLabel, MenuItem,
     Paper,
     Radio,
-    RadioGroup,
+    RadioGroup, Select, SelectChangeEvent,
     Table,
     TableBody,
     TableCell,
@@ -22,6 +22,7 @@ import {
 import {useDropzone} from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
+import {Label} from "@mui/icons-material";
 
 // Define a type for the reviewer
 interface Reviewer {
@@ -39,8 +40,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
     const [title, setTitle] = useState(initialData.title || '');
     const [authors, setAuthors] = useState(initialData.authors || '');
     const [maxReviews, setMaxReviews] = useState(initialData.maxReviews || '');
-    const [minScore, setMinScore] = useState(initialData.minScore || '');
-    const [maxScore, setMaxScore] = useState(initialData.maxScore || '');
+
     const [internal, setInternal] = useState(initialData.internal || 'internal');
     const [authorsNote, setAuthorsNote] = useState(initialData.authorsNote || '');
     const [files, setFiles] = useState<File[]>([]);
@@ -55,8 +55,18 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
     const [comments, setComments] = useState(initialData.comments || '');
     const [questions, setQuestions] = useState(initialData.questions || '');
     const [score, setScore] = useState(initialData.score || '');
+
     const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
     const [fileIds, setFileIds] = useState(initialData.fileIds || Array(5).fill(null));
+    const [isExternal] = useState(!initialData.isInternal || false);
+
+    const [minScore] = useState(initialData.minScore || '');
+    const [maxScore] = useState(initialData.maxScore || '');
+
+    const confidenceLevels = ['High', 'Medium', 'Low'];
+    const handleConfidenceLevel = (event: SelectChangeEvent) => {
+        setConfidenceLevel(event.target.value as string);
+    };
     // TODO review code from here..
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -171,182 +181,159 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
         );
     };
 
-    const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            setRequests(reviewers.map(reviewer => reviewer.id));
-        } else {
-            setRequests([]);
-        }
-    };
     // TODO ... til here
     return (
-        <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10}}>
-            <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
-                {initialData.title ? 'Edit Review' : 'Add Review'}
-            </Typography>
-            <form onSubmit={handleSubmit}>
-                <Grid2 container spacing={2} sx={{maxWidth: "800px"}}>
-                    <CustomTextField
-                        required
-                        label="Summary"
-                        value={summary}
-                        onChange={(e) => setSummary(e.target.value)}
-                    />
-                    <Grid2 sx={{display: 'flex', flexDirection: 'row'}}>
+        <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%"}}>
+            <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10,}}>
+                <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
+                    {initialData.title ? 'Edit Review' : 'Add Review'}
+                </Typography>
+                <form onSubmit={handleSubmit}>
+                    <Grid2 container spacing={1} sx={{maxWidth: "800px"}}>
                         <CustomTextField
                             required
-                            label="Strenghts"
-                            value={strengths}
-                            onChange={(e) => setStrengths(e.target.value)}
-                        />
-                        <CustomTextField
-                            required
-                            label="Weaknesses"
-                            value={weaknesses}
-                            onChange={(e) => setWeaknesses(e.target.value)}
-                        />
-                        <Grid2 container spacing={2}>
-
-                        </Grid2>
-                    </Grid2>
-                    <Grid2>
-                        <CustomTextField
-                            label="Authors note"
-                            value={authorsNote}
-                            onChange={(e) => setAuthorsNote(e.target.value)}
+                            label="Summary"
+                            value={summary}
                             multiline
-                            rows={9.4}
-                            sx={{width: '130%'}}
+                            rows={5.4}
+                            onChange={(e) => setSummary(e.target.value)}
                         />
+                        <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%",}}>
+                            <CustomTextField
+                                required
+                                label="Strenghts"
+                                value={strengths}
+                                multiline
+                                rows={9.4}
+                                onChange={(e) => setStrengths(e.target.value)}
+                            />
+                            <CustomTextField
+                                required
+                                label="Weaknesses"
+                                value={weaknesses}
+                                multiline
+                                rows={9.4}
+                                onChange={(e) => setWeaknesses(e.target.value)}
+                            />
+                        </Grid2>
+                        <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
+                            <CustomTextField
+                                required
+                                label="Comments"
+                                value={comments}
+                                multiline
+                                rows={5.4}
+                                onChange={(e) => setComments(e.target.value)}
+                            />
+                            <CustomTextField
+                                required
+                                label="Questions"
+                                value={questions}
+                                multiline
+                                rows={5.4}
+                                onChange={(e) => setQuestions(e.target.value)}
+                            />
+                        </Grid2>
+                        <Box sx={{display: "flex", alignItems: "center", gap: 2, width: "100%"}}>
+                            <FormControl sx={{minWidth: "150px", flexGrow: 1}}>
+                                <InputLabel id="confidence-level-label">Confidence Level</InputLabel>
+                                <Select
+                                    labelId="confidence-level-label"
+                                    id="confidence-level-select"
+                                    label="Confidence Level"
+                                    value={confidenceLevel}
+                                    onChange={handleConfidenceLevel}
+                                    sx={{width: "30%"}}
+                                >
+                                    {confidenceLevels.map((level) => (
+                                        <MenuItem key={level} value={level}>
+                                            {level}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            {isExternal && (
+                                <>
+                                    <CustomTextField
+                                        sx={{width: "150px"}}
+                                        required
+                                        label="Score"
+                                        value={score}
+                                        onChange={(e) => setScore(e.target.value)}
+                                    />
+                                    <Typography sx={{whiteSpace: "nowrap"}}>
+                                        {`∈ [${minScore || 1}, ${maxScore || 5}]`}
+                                    </Typography>
+                                </>
+                            )}
+                        </Box>
                     </Grid2>
-                    <CustomTextField
-                        required
-                        label="Score"
-                        value={score}
-                        onChange={(e) => setScore(e.target.value)}
-                        disabled={internal === 'internal'}
+
+                    {files.length === 0 ? (
+                        <Box {...getRootProps()}
+                             sx={{
+                                 border: '2px dashed grey',
+                                 padding: 4,
+                                 textAlign: 'center',
+                                 marginTop: 2
+                             }}>
+                            <input {...getInputProps()} />
+                            <Typography sx={{color: 'primary'}}>
+                                Drag & drop some files here, or click to select files
+                            </Typography>
+                            <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
+                                Upload File
+                            </Button>
+                        </Box>
+                    ) : (
+                        <Box sx={{display: 'flex', alignItems: 'center', marginTop: 2}}>
+                            <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
+                                Uploaded file: {files[0].name}
+                            </Typography>
+                            <IconButton onClick={handleRemoveFile} sx={{ml: 1}}>
+                                <CloseIcon/>
+                            </IconButton>
+                        </Box>
+                    )}
+                    <input
+                        type="file"
+                        accept={'.pdf'}
+                        ref={fileInputRef}
+                        style={{display: 'none'}}
+                        onChange={(e) => {
+                            if (e.target.files) {
+                                setFiles(Array.from(e.target.files));
+                            }
+                        }}
                     />
-                </Grid2>
-                <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                    <RadioGroup
-                        row
-                        value={internal}
-                        onChange={(e) => setInternal(e.target.value)}
-                    >
-                        <FormControlLabel
-                            value="internal"
-                            control={<Radio/>}
-                            label="Internal"
-                            sx={{color: 'primary'}}
-                        />
-                        <FormControlLabel
-                            value="external"
-                            control={<Radio/>}
-                            label="External"
-                            sx={{color: 'primary'}}
-                        />
-                    </RadioGroup>
-                </Box>
-                {files.length === 0 ? (
-                    <Box {...getRootProps()}
-                         sx={{
-                             border: '2px dashed grey',
-                             padding: 4,
-                             textAlign: 'center',
-                             marginTop: 2
-                         }}>
-                        <input {...getInputProps()} />
-                        <Typography sx={{color: 'primary'}}>
-                            Drag & drop some files here, or click to select files
+                    <TableContainer component={Paper} sx={{maxHeight: 350, overflow: 'auto'}}>
+                        <Table>
+                            <TableBody>
+                                {reviewers.map((reviewer) => (
+                                    <TableRow key={reviewer.id} sx={{height: 40}}>
+                                        <TableCell>{reviewer.name}</TableCell>
+                                        <TableCell align="right">
+                                            <Checkbox
+                                                checked={requests.includes(reviewer.id)}
+                                                onChange={() => handleReviewerChange(reviewer.id)}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    {warning && (
+                        <Typography color="error" sx={{mt: 2}}>
+                            {warning}
                         </Typography>
-                        <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
-                            Upload File
-                        </Button>
-                    </Box>
-                ) : (
-                    <Box sx={{display: 'flex', alignItems: 'center', marginTop: 2}}>
-                        <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
-                            Uploaded file: {files[0].name}
-                        </Typography>
-                        <IconButton onClick={handleRemoveFile} sx={{ml: 1}}>
-                            <CloseIcon/>
-                        </IconButton>
-                    </Box>
-                )}
-                <input
-                    type="file"
-                    accept={'.pdf'}
-                    ref={fileInputRef}
-                    style={{display: 'none'}}
-                    onChange={(e) => {
-                        if (e.target.files) {
-                            setFiles(Array.from(e.target.files));
-                        }
-                    }}
-                />
-                <TableContainer component={Paper} sx={{marginTop: 4}}>
-                    <Table stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Request review from:</TableCell>
-                                <TableCell
-                                    align="right"
-                                    sx={{
-                                        position: 'sticky',
-                                        top: 0,
-                                        backgroundColor: 'background',
-                                        zIndex: 1
-                                    }}>
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            flexDirection: 'row-reverse'
-                                        }}>
-                                        <Checkbox
-                                            checked={requests.length === reviewers.length}
-                                            indeterminate={requests.length > 0 && requests.length < reviewers.length}
-                                            onChange={handleSelectAll}
-                                        />
-                                        <Typography
-                                            variant="body2"
-                                            sx={{mr: 1}}
-                                        >
-                                            Select all
-                                        </Typography>
-                                    </Box>
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                    </Table>
-                </TableContainer>
-                <TableContainer component={Paper} sx={{maxHeight: 350, overflow: 'auto'}}>
-                    <Table>
-                        <TableBody>
-                            {reviewers.map((reviewer) => (
-                                <TableRow key={reviewer.id} sx={{height: 40}}>
-                                    <TableCell>{reviewer.name}</TableCell>
-                                    <TableCell align="right">
-                                        <Checkbox
-                                            checked={requests.includes(reviewer.id)}
-                                            onChange={() => handleReviewerChange(reviewer.id)}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                {warning && (
-                    <Typography color="error" sx={{mt: 2}}>
-                        {warning}
-                    </Typography>
-                )}
-                <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
-                    Submit
-                </Button>
-            </form>
-        </Paper>
+                    )}
+                    <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
+                        Submit
+                    </Button>
+                </form>
+            </Paper>
+        </Box>
     );
 };
 
