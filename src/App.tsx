@@ -5,7 +5,6 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 
 import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
 import MyPapersPage from "./pages/MyPapersPage.tsx";
 import MyReviewsPage from "./pages/MyReviewsPage.tsx";
 import NoPage from "./pages/NoPage";
@@ -16,6 +15,7 @@ import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
 import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
 
 
 const theme = createTheme({
@@ -129,7 +129,7 @@ function App() {
                                         <PrivateRoute>
                                             <>
                                                 <TopMenuBar/>
-                                                <Profile/>
+                                                <ProfilePage />
                                             </>
                                         </PrivateRoute>
                                     }
