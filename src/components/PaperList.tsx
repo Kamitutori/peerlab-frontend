@@ -11,7 +11,7 @@ import {
     Divider,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 interface PaperListProps {
     endpoint: string;
@@ -49,7 +49,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 backgroundColor: "background.paper",
             }}
         >
-            <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
+            <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -66,12 +66,12 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     {title}
                 </Typography>
                 {isLoading ? (
-                    <Typography sx={{ color: "white" }}>Loading papers...</Typography>
+                    <Typography sx={{color: "white"}}>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
-                    <List sx={{ maxHeight: 353, overflow: 'auto' }}>
-                        {data.map((paper: { id: number; title: string; owner: {name: string} }, index: number) => (
+                    <List sx={{maxHeight: 353, overflow: 'auto'}}>
+                        {data.map((paper: { id: number; title: string; owner: { name: string } }, index: number) => (
                             <div key={paper.id}>
                                 <ListItemButton
                                     onClick={() => handleClick(paper.id)}

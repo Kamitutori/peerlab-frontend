@@ -1,9 +1,9 @@
-import { useParams } from 'react-router-dom';
-import PaperForm, { PaperData } from '../components/PaperForm';
-import { useEffect, useState } from 'react';
+import {useParams} from 'react-router-dom';
+import PaperForm, {PaperData} from '../components/PaperForm';
+import {useEffect, useState} from 'react';
 
 export default function EditPaperPage() {
-    const { id } = useParams<{ id: string }>();
+    const {id} = useParams<{ id: string }>();
     const [initialData, setInitialData] = useState<PaperData | null>(null);
 
     useEffect(() => {
