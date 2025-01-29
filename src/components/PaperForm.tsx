@@ -47,7 +47,7 @@ interface PaperFormProps {
     fetchReviewersUrl: string;
 }
 
-const PaperForm: React.FC<PaperFormProps> = ({initialData = {}, fetchReviewersUrl}) => {
+const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData, fetchReviewersUrl}) => {
     const [title, setTitle] = useState(initialData.title || '');
     const [authors, setAuthors] = useState(initialData.authors || '');
     const [reviewLimit, setReviewLimit] = useState(initialData.reviewLimit || '');
