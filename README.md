@@ -1,10 +1,9 @@
-# peerlab-frontend
-The frontend of PeerLab.
+# Questions to Bakr
+- Why does it seem like the data is not really persisted? Is it due to server restarts? Seems wrong.
+- Maybe better redirection implementation from login->dashboard necessary. but if you fiddle with jwts, f. you anyway..?
 
-TODO; Auth / RegisterPage
-- Better messaging for failure in login
-- redirect for jwt dashboard
-- incosistent use of redirecting: In LoginPage/RegisterPage it's done with window.location.href, in AuthContext its with useNavigate.
+## TODO; Auth / RegisterPage
+- incosistent use of redirecting: In LoginPage/RegisterPage it's done with window.location.href, in AuthContext it's with useNavigate.
 
 ## Getting Started
 You will need the node package manager (npm) to actually develop and run anything of the frontend.
@@ -58,3 +57,13 @@ Implementation not 1:1 possible as await needs to be called in an async function
         }
     }
 ```
+
+# Frontend Tech Stack
+- Language: TypeScript
+- Framework: React
+- State Management: Context API
+- Runtime: Node.js
+- Package Manager: npm
+- (specific) Libraries: react-router-dom, react-query, react-material-ui
+- Test Framework: Jest (not yet implemented)
+- Setup: Vite

@@ -72,7 +72,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
     const logout = () => {
         setToken("");
+        setUser(null);
         localStorage.removeItem("jwt");
+        localStorage.removeItem("user");
         navigate("/login");
     };
 

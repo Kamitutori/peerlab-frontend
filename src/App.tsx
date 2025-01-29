@@ -3,15 +3,15 @@ import {createTheme, ThemeProvider} from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
 
-import LoginPage from "./pages/LoginPage.tsx";
+import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import MyPapersPage from "./pages/MyPapersPage.tsx";
 import MyReviewsPage from "./pages/MyReviewsPage.tsx";
 import NoPage from "./pages/NoPage";
 import TopMenuBar from "./components/TopBar";
-import RegisterPage from "./pages/RegisterPage.tsx";
-import ForgotPassword from "./pages/ForgotPassword";
+import RegisterPage from "./pages/auth/RegisterPage.tsx";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
 import PaperList from "./components/PaperList.tsx";
