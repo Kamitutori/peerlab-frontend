@@ -20,6 +20,7 @@ import {
 import { useDropzone } from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
+import {useNavigate} from "react-router-dom";
 
 // Interface for Reviewer data
 interface Reviewer {
@@ -85,6 +86,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             setMaxScore('');
         }
     }, [internal]);
+
+    const navigate = useNavigate();
 
     // Handle form submission
     const handleSubmit = async (event: React.FormEvent) => {
@@ -160,6 +163,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             });
 
             const result = await response.json();
+            navigate(`/paper/${result.id}`);
             console.log('Success:', result);
         } catch (error) {
             console.error('Error:', error);
