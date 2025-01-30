@@ -491,7 +491,7 @@ function ProfilePage() {
                 )}
 
                 {/** Papers and Reviews */}
-                <Grid2 container spacing={4} justifyContent="center">
+                <Grid2 container spacing={4} justifyContent="center" flexDirection={"column"}>
                     <Grid2>
                         <PaperList
                             endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}

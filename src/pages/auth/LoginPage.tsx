@@ -61,6 +61,7 @@ export default function LoginPage() {
             return;
         }
         const response = await login({email, password});
+        console.log(response);
         if (response.success) {
             window.location.href = "http://localhost:5173/dashboard";
         } else {

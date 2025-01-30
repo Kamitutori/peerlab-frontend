@@ -61,7 +61,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 localStorage.setItem("user", JSON.stringify(res.user));
                 return {success: true};
             } else {
-                return {success: false, HTTPcode: response.status, message: response.statusText};
+                return {success: false, HTTPcode: response.status, message: await response.text()};
             }
         } catch (error) {
             return {success: false, message: `Login error: ${error}`};
