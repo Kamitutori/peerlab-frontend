@@ -1,35 +1,23 @@
 // TODO number of review files may be limited to 5
 // TODO whether score is disabled has to be set accordingly to the internal/external value (which is not typical for a review to know)
+// TODO what if the user deletes his token right before submission?
+
 import React, {useEffect, useRef, useState} from 'react';
 import {
     Box,
     Button,
-    Checkbox, FormControl,
-    FormControlLabel,
+    FormControl,
     Grid2,
     IconButton, InputLabel, MenuItem,
     Paper,
-    Radio,
-    RadioGroup, Select, SelectChangeEvent,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
+    Select,
+    SelectChangeEvent,
     Typography
 } from '@mui/material';
 import {useDropzone} from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
-import {Label} from "@mui/icons-material";
-
-// Define a type for the reviewer
-interface Reviewer {
-    id: string;
-    name: string;
-    email: string;
-}
+import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 
 interface ReviewFormProps {
     initialData?: any;
@@ -37,126 +25,96 @@ interface ReviewFormProps {
 }
 
 const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
-    const [title, setTitle] = useState(initialData.title || '');
-    const [authors, setAuthors] = useState(initialData.authors || '');
-    const [maxReviews, setMaxReviews] = useState(initialData.maxReviews || '');
-
-    const [internal, setInternal] = useState(initialData.internal || 'internal');
-    const [authorsNote, setAuthorsNote] = useState(initialData.authorsNote || '');
-    const [files, setFiles] = useState<File[]>([]);
+    const { logout } = useUpdateAuth();
     const [warning, setWarning] = useState('');
-    const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-    const [requests, setRequests] = useState<string[]>(initialData.requests || []);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
+    /** Input fields of a review */
     const [summary, setSummary] = useState(initialData.summary || '');
     const [strengths, setStrengths] = useState(initialData.strengths || '');
     const [weaknesses, setWeaknesses] = useState(initialData.weaknesses || '');
     const [comments, setComments] = useState(initialData.comments || '');
     const [questions, setQuestions] = useState(initialData.questions || '');
     const [score, setScore] = useState(initialData.score || '');
-
     const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
-    const [fileIds, setFileIds] = useState(initialData.fileIds || Array(5).fill(null));
-    const [isExternal] = useState(!initialData.isInternal || false);
+    const [fileIds, setFileIds] = useState(initialData.fileIds || Array<string>(5).fill(''));
+    const [files, setFiles] = useState<File[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
+    /** Properties of the corresponding request needed for a correct submission of a review */
+    const [request] = useState(initialData.request || '');
+    const [isExternal] = useState(!initialData.isInternal || true);
     const [minScore] = useState(initialData.minScore || '');
     const [maxScore] = useState(initialData.maxScore || '');
 
+    /** Checks whether the text fields have to be filled out or a file is uploaded */
+    const [isTextRequired, setIsTextRequired] = useState(true);
+    useEffect(() => {
+        setIsTextRequired(files.length === 0);
+    }, [files]);
+
+    /** Confidence levels for the select field */
     const confidenceLevels = ['High', 'Medium', 'Low'];
     const handleConfidenceLevel = (event: SelectChangeEvent) => {
         setConfidenceLevel(event.target.value as string);
     };
-    // TODO review code from here..
+
+    /** Handles the submission of the review */
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        const minScoreNum = parseInt(minScore);
-        const maxScoreNum = parseInt(maxScore);
-        const maxReviewsNum = parseInt(maxReviews);
+        const scoreNum = parseInt(score);
 
-        if (isNaN(minScoreNum) || isNaN(maxScoreNum) || minScoreNum >= maxScoreNum) {
-            if (internal === 'external') {
-                setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
+        if (isNaN(scoreNum) || scoreNum < minScore || scoreNum > maxScore) {
+            if (isExternal) {
+                setWarning('Please enter a valid score.');
                 return;
             }
         }
 
-        if (isNaN(maxReviewsNum)) {
-            setWarning('Please enter a valid number for the maximum number of reviews.');
-            return;
-        }
-
         setWarning('');
 
-        // Retrieve the user information from local storage
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!user || !user.id) {
-            setWarning('User is not logged in.');
-            return;
-        }
-
-        const owner = {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        };
-
-        const uploadDate = new Date().toISOString();
-
-        const paperData = {
-            title,
-            owner,
-            uploadDate,
-            authors,
-            abstractText: authorsNote,
-            authorsNote,
-            reviewLimit: maxReviewsNum,
-            minScore: minScoreNum,
-            maxScore: maxScoreNum,
-            fileId: "1", // Replace with actual file ID
-            active: true,
-            internal: internal === 'internal',
-            requests: requests.map(requesteeId => {
-                const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
-                return {
-                    status: "PENDING",
-                    paper: {id: 0}, // Replace with actual paper ID if available
-                    requestee: {
-                        id: requesteeId,
-                        name: reviewer?.name || "",
-                        email: reviewer?.email || ""
-                    }
-                };
-            })
+        const reviewData = {
+            summary: summary,
+            strengths: strengths,
+            weaknesses: weaknesses,
+            comments: comments,
+            confidenceLevel: confidenceLevel,
+            score: score,
+            fileIds: ["1", "2"], //fileIds
+            submissionDate: new Date().toISOString(),
+            request: request
         };
 
         try {
-            const response = await fetch('http://localhost:8080/api/papers', {
+            const response = await fetch('http://localhost:8080/api/reviews', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                 },
-                body: JSON.stringify(paperData)
+                body: JSON.stringify(reviewData)
             });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const result = await response.text();
-            if (result) {
-                console.log('Success:', JSON.parse(result));
+            if (response.ok)  {
+                const result = await response.text();
+                if (result) {
+                    console.log('Success:', JSON.parse(result));
+                } else {
+                    console.log('Success: No content returned');
+                }
+            } else if (response.status === 400) {
+                setWarning(`Your inputs are invalid: ${await response.text()}`);
+            } else if(response.status === 401) {
+                setWarning('Your token is invalid. You are being logged out.');
+                setTimeout(() => { logout(); }, 3000);
             } else {
-                console.log('Success: No content returned');
+                setWarning(`Unknown error: ${response.status} ${await response.text()}`);
             }
-            // Handle success (e.g., show a success message, redirect, etc.)
         } catch (error) {
-            console.error('Error:', error);
-            // Handle error (e.g., show an error message)
+            alert(`An error has occurred: ${error}`);
         }
     };
 
+    /** These functions handle the file upload */
     const onDrop = (acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
     };
@@ -173,25 +131,23 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
         setFiles([]);
     };
 
-    const handleReviewerChange = (reviewerId: string) => {
-        setRequests(prevSelected =>
-            prevSelected.includes(reviewerId)
-                ? prevSelected.filter(id => id !== reviewerId)
-                : [...prevSelected, reviewerId]
-        );
+    /** Handles the cancellation of the review */
+    const handleCancel = () => {
+        // TODO show confirmation pop up and then redirect to the previous page
     };
 
-    // TODO ... til here
     return (
         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%"}}>
             <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10,}}>
                 <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
                     {initialData.title ? 'Edit Review' : 'Add Review'}
                 </Typography>
+
+                {/* Review Form */}
                 <form onSubmit={handleSubmit}>
                     <Grid2 container spacing={1} sx={{maxWidth: "800px"}}>
                         <CustomTextField
-                            required
+                            required={isTextRequired}
                             label="Summary"
                             value={summary}
                             multiline
@@ -200,7 +156,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                         />
                         <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%",}}>
                             <CustomTextField
-                                required
+                                required={isTextRequired}
                                 label="Strenghts"
                                 value={strengths}
                                 multiline
@@ -208,7 +164,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                                 onChange={(e) => setStrengths(e.target.value)}
                             />
                             <CustomTextField
-                                required
+                                required={isTextRequired}
                                 label="Weaknesses"
                                 value={weaknesses}
                                 multiline
@@ -218,7 +174,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                         </Grid2>
                         <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
                             <CustomTextField
-                                required
+                                required={isTextRequired}
                                 label="Comments"
                                 value={comments}
                                 multiline
@@ -226,7 +182,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                                 onChange={(e) => setComments(e.target.value)}
                             />
                             <CustomTextField
-                                required
+                                required={isTextRequired}
                                 label="Questions"
                                 value={questions}
                                 multiline
@@ -235,15 +191,16 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                             />
                         </Grid2>
                         <Box sx={{display: "flex", alignItems: "center", gap: 2, width: "100%"}}>
-                            <FormControl sx={{minWidth: "150px", flexGrow: 1}}>
+                            <FormControl required sx={{minWidth: "175px", flexGrow: 1}}>
                                 <InputLabel id="confidence-level-label">Confidence Level</InputLabel>
                                 <Select
+                                    required={true}
                                     labelId="confidence-level-label"
                                     id="confidence-level-select"
-                                    label="Confidence Level"
+                                    label="Confidence Level *"
                                     value={confidenceLevel}
                                     onChange={handleConfidenceLevel}
-                                    sx={{width: "30%"}}
+                                    sx={{width: "33%"}}
                                 >
                                     {confidenceLevels.map((level) => (
                                         <MenuItem key={level} value={level}>
@@ -256,7 +213,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                                 <>
                                     <CustomTextField
                                         sx={{width: "150px"}}
-                                        required
+                                        required={isExternal}
                                         label="Score"
                                         value={score}
                                         onChange={(e) => setScore(e.target.value)}
@@ -269,6 +226,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                         </Box>
                     </Grid2>
 
+                    {/* File Upload */}
                     {files.length === 0 ? (
                         <Box {...getRootProps()}
                              sx={{
@@ -306,31 +264,26 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                             }
                         }}
                     />
-                    <TableContainer component={Paper} sx={{maxHeight: 350, overflow: 'auto'}}>
-                        <Table>
-                            <TableBody>
-                                {reviewers.map((reviewer) => (
-                                    <TableRow key={reviewer.id} sx={{height: 40}}>
-                                        <TableCell>{reviewer.name}</TableCell>
-                                        <TableCell align="right">
-                                            <Checkbox
-                                                checked={requests.includes(reviewer.id)}
-                                                onChange={() => handleReviewerChange(reviewer.id)}
-                                            />
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
                     {warning && (
                         <Typography color="error" sx={{mt: 2}}>
                             {warning}
                         </Typography>
                     )}
-                    <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
-                        Submit
-                    </Button>
+
+                    {/* Submission Note */}
+                    <Typography sx={{ mt: 2, color: 'gray', fontSize: '0.875rem' }}>
+                        To submit your review, either fill in all text fields or upload at least one review file.
+                    </Typography>
+
+                    {/* Submit & Cancel Buttons */}
+                    <Box sx={{display: "flex", gap: 2, mt: 2}}>
+                        <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
+                            Submit
+                        </Button>
+                        <Button variant="outlined" color="secondary" onClick={handleCancel} sx={{mt: 2}}>
+                            Cancel
+                        </Button>
+                    </Box>
                 </form>
             </Paper>
         </Box>

@@ -61,7 +61,7 @@ Implementation not 1:1 possible as await needs to be called in an async function
 # Frontend Tech Stack
 - Language: TypeScript
 - Framework: React
-- State Management: Context API
+- State Management: Context API?
 - Runtime: Node.js
 - Package Manager: npm
 - (specific) Libraries: react-router-dom, react-query, react-material-ui

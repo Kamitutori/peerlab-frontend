@@ -17,6 +17,7 @@ import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
 import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
+import EditReviewPage from "./pages/EditReviewPage.tsx";
 
 
 const theme = createTheme({
@@ -209,6 +210,17 @@ function App() {
                                             <>
                                                 <TopMenuBar/>
                                                 <AddReviewPage/>
+                                            </>
+                                        </PrivateRoute>
+                                    }
+                                />
+                                <Route
+                                    path="/edit-review"
+                                    element={
+                                        <PrivateRoute>
+                                            <>
+                                                <TopMenuBar/>
+                                                <EditReviewPage/>
                                             </>
                                         </PrivateRoute>
                                     }

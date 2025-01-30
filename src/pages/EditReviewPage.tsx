@@ -20,7 +20,7 @@ export default function EditReviewPage() {
             .catch(error => console.error('Error fetching review data:', error));
     }, [id]);
 
-    const handleSubmit = async (paperData: any) => {
+    const handleSubmit = async (reviewData: any) => {
         try {
             const response = await fetch(`http://localhost:8080/api/reviews`, {
                 method: 'PUT',
@@ -28,7 +28,7 @@ export default function EditReviewPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                 },
-                body: JSON.stringify(paperData)
+                body: JSON.stringify(reviewData)
             });
 
             const result = await response.json();

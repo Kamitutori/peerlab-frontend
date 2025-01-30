@@ -1,15 +1,16 @@
 import ReviewForm from '../components/ReviewForm.tsx';
+// TODO Why is there a submission func in the form but also the add review page?
+export default function AddReviewPage() {
 
-export default function AddPaperPage() {
-    const handleSubmit = async (paperData: any) => {
+    const handleSubmit = async (reviewData: any) => {
         try {
-            const response = await fetch('http://localhost:8080/api/papers', {
+            const response = await fetch('http://localhost:8080/api/reviews', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                 },
-                body: JSON.stringify(paperData)
+                body: JSON.stringify(reviewData)
             });
 
             const result = await response.json();
