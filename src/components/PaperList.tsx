@@ -47,6 +47,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 mt: 4,
                 boxShadow: 3,
                 backgroundColor: "background.paper",
+                minWidth: 300,
             }}
         >
             <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
