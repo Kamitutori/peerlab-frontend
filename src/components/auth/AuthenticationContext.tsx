@@ -5,7 +5,7 @@
  */
 import React, {
     createContext,
-    useContext,
+    useContext, useEffect,
     useState
 } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ interface User {
 }
 
 type AuthContextType = {
-    token: string;
+    token: string | null;
     user: User | null;
 };
 
@@ -42,9 +42,23 @@ export function useUpdateAuth() {
 }
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [token, setToken] = useState<string>(localStorage.getItem("jwt") || "");
+    const [token, setToken] = useState<string | null>(localStorage.getItem("jwt"));
     const [user, setUser] = useState<User | null>(localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (token) {
+            localStorage.setItem("jwt", token);
+        } else {
+            localStorage.removeItem("jwt");
+        }
+
+        if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+        } else {
+            localStorage.removeItem("user");
+        }
+    }, [token, user]);
 
     const login = async (data: { email: string; password: string }) => {
         try {
@@ -54,12 +68,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 body: JSON.stringify(data),
             });
             const res = await response.json();
-            console.log(res);
+
             if (response.ok) {
                 setToken(res.token);
                 setUser(res.user);
-                localStorage.setItem("jwt", res.token);
-                localStorage.setItem("user", JSON.stringify(res.user));
                 navigate("/dashboard");
             } else if (response.status === 400) {
                 alert("Invalid email or password.");
@@ -71,11 +83,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     };
 
     const logout = () => {
-        setToken("");
-        setUser(null);
         localStorage.removeItem("jwt");
         localStorage.removeItem("user");
-        navigate("/login");
+        window.location.href = "http://localhost:5173/login";
     };
 
     return (
