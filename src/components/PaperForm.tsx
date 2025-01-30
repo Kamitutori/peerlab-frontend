@@ -20,7 +20,17 @@ import {
 import {useDropzone} from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
+// import * as Minio from 'minio';
 // import {useNavigate} from "react-router-dom";
+
+// const minioClient = new Minio.Client({
+//     endPoint: import.meta.env.VITE_MINIO_ENDPOINT,
+//     port: parseInt(import.meta.env.VITE_MINIO_PORT, 10),
+//     useSSL: true,
+//     accessKey: import.meta.env.VITE_MINIO_ACCESS_KEY,
+//     secretKey: import.meta.env.VITE_MINIO_SECRET_KEY
+// });
+
 
 interface Reviewer {
     id: string;
@@ -158,12 +168,23 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData, fet
                 body: JSON.stringify(paperData)
             });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            // if (!response.ok) {
+            //     throw new Error('Network response was not ok');
+            // }
 
             const result = await response.json();
             console.log('Success:', result);
+            // TODO Upload file to Minio
+            // if (files.length > 0) {
+            //     const file = files[0];
+            //     const metaData = {
+            //         'Content-Type': 'application/pdf',
+            //         'X-Amz-Meta-Testing': 1234,
+            //         example: 5678
+            //     };
+            //     const fileStat = await minioClient.putObject('peerlab-papers', result.fileId, file, undefined, metaData);
+            //     console.log('Uploaded file:', fileStat);
+            // }
             // TODO wait for backend to send id of result
             // navigate(`/paper/${result.id}`);
         } catch (error) {
