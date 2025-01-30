@@ -53,11 +53,10 @@ export interface PaperData {
 
 interface PaperFormProps {
     initialData?: PaperData;
-    onSubmit: (data: PaperData) => void;
-    fetchReviewersUrl: string;
+    // onSubmit: (data: PaperData) => void;
 }
 
-const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData, fetchReviewersUrl}) => {
+const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) => {
     const [title, setTitle] = useState(initialData.title || '');
     const [authors, setAuthors] = useState(initialData.authors || '');
     const [reviewLimit, setReviewLimit] = useState(initialData.reviewLimit || '');
@@ -73,7 +72,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData, fet
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        fetch(fetchReviewersUrl, {
+        fetch("http://localhost:8080/api/users/all", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,7 +82,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData, fet
             .then(response => response.json())
             .then(data => setReviewers(data))
             .catch(error => console.error('Error fetching reviewers:', error));
-    }, [fetchReviewersUrl]);
+    }, []);
 
     useEffect(() => {
         if (internal === 'internal') {
@@ -92,35 +91,28 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData, fet
         }
     }, [internal]);
 
-    // const navigate = useNavigate();
-
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
         const minScoreNumber = Number(minScore);
         const maxScoreNumber = Number(maxScore);
         const reviewLimitNumber = Number(reviewLimit);
-
-        if (internal === 'external' && (isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
-            setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
-            return;
-        }
-        if (isNaN(reviewLimitNumber) || reviewLimitNumber <= 0) {
-            setWarning('Please enter a valid number for the maximum number of reviews.');
-            return;
-        }
-
-        if (!reviewLimit) {
-            setWarning('Please enter a valid number for the maximum number of reviews.');
-            return;
-        }
-
-        setWarning('');
-
         const user = JSON.parse(localStorage.getItem('user') || '{}');
+
         if (!user || !user.id) {
             setWarning('User is not logged in.');
             return;
+        } else if (internal === 'external' && (isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
+            setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
+            return;
+        } else if (isNaN(reviewLimitNumber) || reviewLimitNumber <= 0) {
+            setWarning('Please enter a valid number for the maximum number of reviews.');
+            return;
+        } else if (!reviewLimit) {
+            setWarning('Please enter a valid number for the maximum number of reviews.');
+            return;
+        } else {
+            setWarning('');
         }
 
         const owner = {
@@ -141,6 +133,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData, fet
             reviewLimit,
             minScore: minScoreNumber,
             maxScore: maxScoreNumber,
+            // TODO get fileId from Minio
             fileId: "1",
             active: true,
             internal: internal === 'internal',
