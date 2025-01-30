@@ -168,23 +168,23 @@
       "paperId" : 1
     },
     {
-      "id": 1,
+      "id": 2,
       "status" : "ACCEPTED",
-      "paperId" : 3
+      "paperId" : 1
     },
     {
-      "id": 1,
+      "id": 3,
       "status" : "SUBMITTED",
       "paperId" : 1,
       "reviewId": 1
     },
     {
-      "id": 1,
+      "id": 4,
       "status" : "REJECTED",
       "paperId" : 1
     },
     {
-      "id": 1,
+      "id": 5,
       "status" : "EXPIRED",
       "paperId" : 1
     }
