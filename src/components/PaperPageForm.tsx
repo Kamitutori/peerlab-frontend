@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Box,
     Button,
@@ -17,27 +17,18 @@ import {
     TableRow,
     Typography
 } from '@mui/material';
-import {useDropzone} from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
-// import * as Minio from 'minio';
-// import {useNavigate} from "react-router-dom";
 
-// const minioClient = new Minio.Client({
-//     endPoint: import.meta.env.VITE_MINIO_ENDPOINT,
-//     port: parseInt(import.meta.env.VITE_MINIO_PORT, 10),
-//     useSSL: true,
-//     accessKey: import.meta.env.VITE_MINIO_ACCESS_KEY,
-//     secretKey: import.meta.env.VITE_MINIO_SECRET_KEY
-// });
-
-
+// Interface for Reviewer data
 interface Reviewer {
     id: string;
     name: string;
     email: string;
 }
 
+// Interface for Paper data
 export interface PaperData {
     id?: string;
     title: string;
@@ -51,12 +42,14 @@ export interface PaperData {
     requests: string[];
 }
 
+// Props interface for PaperPageForm component
 interface PaperFormProps {
     initialData?: PaperData;
-    // onSubmit: (data: PaperData) => void;
 }
 
-const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) => {
+// PaperPageForm component
+const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData }) => {
+    // State variables for form fields
     const [title, setTitle] = useState(initialData.title || '');
     const [authors, setAuthors] = useState(initialData.authors || '');
     const [reviewLimit, setReviewLimit] = useState(initialData.reviewLimit || '');
@@ -71,6 +64,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
     const [requests, setRequests] = useState<string[]>(initialData.requests || []);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Fetch reviewers data on component mount
     useEffect(() => {
         fetch("http://localhost:8080/api/users/all", {
             method: 'GET',
@@ -84,6 +78,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
 
+    // Reset min and max scores if internal is selected
     useEffect(() => {
         if (internal === 'internal') {
             setMinScore('');
@@ -91,6 +86,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
         }
     }, [internal]);
 
+    // Handle form submission
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
@@ -99,6 +95,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
         const reviewLimitNumber = Number(reviewLimit);
         const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+        // Validate form fields
         if (!user || !user.id) {
             setWarning('User is not logged in.');
             return;
@@ -115,6 +112,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
             setWarning('');
         }
 
+        // Prepare paper data for submission
         const owner = {
             id: user.id,
             name: user.name,
@@ -133,7 +131,6 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
             reviewLimit,
             minScore: minScoreNumber,
             maxScore: maxScoreNumber,
-            // TODO get fileId from Minio
             fileId: "1",
             active: true,
             internal: internal === 'internal',
@@ -141,7 +138,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
                 return {
                     status: "PENDING",
-                    paper: {id: 0},
+                    paper: { id: 0 },
                     requestee: {
                         id: requesteeId,
                         name: reviewer?.name || "",
@@ -151,6 +148,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
             })
         };
 
+        // Submit paper data to the server
         try {
             const response = await fetch(`http://localhost:8080/api/papers${initialData.id ? `/${initialData.id}` : ''}`, {
                 method: initialData.id ? 'PUT' : 'POST',
@@ -161,46 +159,33 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                 body: JSON.stringify(paperData)
             });
 
-            // if (!response.ok) {
-            //     throw new Error('Network response was not ok');
-            // }
-
             const result = await response.json();
             console.log('Success:', result);
-            // TODO Upload file to Minio
-            // if (files.length > 0) {
-            //     const file = files[0];
-            //     const metaData = {
-            //         'Content-Type': 'application/pdf',
-            //         'X-Amz-Meta-Testing': 1234,
-            //         example: 5678
-            //     };
-            //     const fileStat = await minioClient.putObject('peerlab-papers', result.fileId, file, undefined, metaData);
-            //     console.log('Uploaded file:', fileStat);
-            // }
-            // TODO wait for backend to send id of result
-            // navigate(`/paper/${result.id}`);
         } catch (error) {
             console.error('Error:', error);
         }
     };
 
+    // Handle file drop
     const onDrop = (acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
     };
 
-    const {getRootProps, getInputProps} = useDropzone({onDrop});
+    const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
+    // Handle file upload button click
     const handleUploadClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
     };
 
+    // Handle file removal
     const handleRemoveFile = () => {
         setFiles([]);
     };
 
+    // Handle reviewer selection change
     const handleReviewerChange = (reviewerId: string) => {
         setRequests(prevSelected =>
             prevSelected.includes(reviewerId)
@@ -209,6 +194,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
         );
     };
 
+    // Handle select all reviewers checkbox change
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
             setRequests(reviewers.map(reviewer => reviewer.id));
@@ -218,13 +204,13 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
     };
 
     return (
-        <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10}}>
-            <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
+        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
+            <Typography variant="h4" component="h1" sx={{ color: 'white' }} fontWeight={"bold"}>
                 {initialData.title ? 'Edit Paper' : 'Add Paper'}
             </Typography>
             <form onSubmit={handleSubmit}>
                 <Grid2 container spacing={2}>
-                    <Grid2 sx={{display: 'flex', flexDirection: 'column'}}>
+                    <Grid2 sx={{ display: 'flex', flexDirection: 'column' }}>
                         <CustomTextField
                             required
                             label="Paper name"
@@ -271,11 +257,11 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                             onChange={(e) => setAuthorsNote(e.target.value)}
                             multiline
                             rows={9.4}
-                            sx={{width: '130%'}}
+                            sx={{ width: '130%' }}
                         />
                     </Grid2>
                 </Grid2>
-                <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <RadioGroup
                         row
                         value={internal}
@@ -283,15 +269,15 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                     >
                         <FormControlLabel
                             value="internal"
-                            control={<Radio/>}
+                            control={<Radio disabled={!!initialData.id} />}
                             label="Internal"
-                            sx={{color: 'primary'}}
+                            sx={{ color: 'primary' }}
                         />
                         <FormControlLabel
                             value="external"
-                            control={<Radio/>}
+                            control={<Radio disabled={!!initialData.id} />}
                             label="External"
-                            sx={{color: 'primary'}}
+                            sx={{ color: 'primary' }}
                         />
                     </RadioGroup>
                 </Box>
@@ -301,46 +287,57 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                     onChange={(e) => setAbstractText(e.target.value)}
                     multiline
                     rows={4}
-                    sx={{width: '100%', marginTop: 2}}
+                    sx={{ width: '100%', marginTop: 2 }}
                 />
-                {files.length === 0 ? (
-                    <Box {...getRootProps()}
-                         sx={{
-                             border: '2px dashed grey',
-                             padding: 4,
-                             textAlign: 'center',
-                             marginTop: 2
-                         }}>
-                        <input {...getInputProps()} />
-                        <Typography sx={{color: 'primary'}}>
-                            Drag & drop some files here, or click to select files
+                {initialData.id ? (
+                    //TODO: Implement file upload
+                    <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                        <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
+                            Uploaded file: {'This is yet to be implemented'}
                         </Typography>
-                        <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
-                            Upload File
-                        </Button>
                     </Box>
                 ) : (
-                    <Box sx={{display: 'flex', alignItems: 'center', marginTop: 2}}>
-                        <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
-                            Uploaded file: {files[0].name}
-                        </Typography>
-                        <IconButton onClick={handleRemoveFile} sx={{ml: 1}}>
-                            <CloseIcon/>
-                        </IconButton>
-                    </Box>
+                    <>
+                        {files.length === 0 ? (
+                            <Box {...getRootProps()}
+                                 sx={{
+                                     border: '2px dashed grey',
+                                     padding: 4,
+                                     textAlign: 'center',
+                                     marginTop: 2
+                                 }}>
+                                <input {...getInputProps()} />
+                                <Typography sx={{ color: 'primary' }}>
+                                    Drag & drop some files here, or click to select files
+                                </Typography>
+                                <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{ mt: 2 }}>
+                                    Upload File
+                                </Button>
+                            </Box>
+                        ) : (
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                                <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
+                                    Uploaded file: {files[0].name}
+                                </Typography>
+                                <IconButton onClick={handleRemoveFile} sx={{ ml: 1 }}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </Box>
+                        )}
+                    </>
                 )}
                 <input
                     type="file"
                     accept={'.pdf'}
                     ref={fileInputRef}
-                    style={{display: 'none'}}
+                    style={{ display: 'none' }}
                     onChange={(e) => {
                         if (e.target.files) {
                             setFiles(Array.from(e.target.files));
                         }
                     }}
                 />
-                <TableContainer component={Paper} sx={{marginTop: 4}}>
+                <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
@@ -366,7 +363,7 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                                         />
                                         <Typography
                                             variant="body2"
-                                            sx={{mr: 1}}
+                                            sx={{ mr: 1 }}
                                         >
                                             Select all
                                         </Typography>
@@ -376,11 +373,11 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                         </TableHead>
                     </Table>
                 </TableContainer>
-                <TableContainer component={Paper} sx={{maxHeight: 350, overflow: 'auto'}}>
+                <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
                     <Table>
                         <TableBody>
                             {reviewers.map((reviewer) => (
-                                <TableRow key={reviewer.id} sx={{height: 40}}>
+                                <TableRow key={reviewer.id} sx={{ height: 40 }}>
                                     <TableCell>{reviewer.name}</TableCell>
                                     <TableCell align="right">
                                         <Checkbox
@@ -394,11 +391,11 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
                     </Table>
                 </TableContainer>
                 {warning && (
-                    <Typography color="error" sx={{mt: 2}}>
+                    <Typography color="error" sx={{ mt: 2 }}>
                         {warning}
                     </Typography>
                 )}
-                <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
+                <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
                     Submit
                 </Button>
             </form>
@@ -406,4 +403,4 @@ const PaperForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) =>
     );
 };
 
-export default PaperForm;
+export default PaperPageForm;

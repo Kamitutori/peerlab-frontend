@@ -1,5 +1,5 @@
 import {useParams} from 'react-router-dom';
-import PaperForm, {PaperData} from '../components/PaperForm';
+import PaperPageForm, {PaperData} from '../components/PaperPageForm.tsx';
 import {useEffect, useState} from 'react';
 
 export default function EditPaperPage() {
@@ -25,7 +25,7 @@ export default function EditPaperPage() {
     }
 
     return (
-        <PaperForm
+        <PaperPageForm
             initialData={initialData}
         />
     );
