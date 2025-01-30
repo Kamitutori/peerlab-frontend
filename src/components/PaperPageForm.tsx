@@ -256,7 +256,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                             onChange={(e) => setAuthors(e.target.value)}
                         />
                         <CustomTextField
-                            required
                             label="Maximum number of reviews"
                             value={reviewLimit}
                             onChange={(e) => setReviewLimit(e.target.value)}
