@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Box,
     Button,
@@ -17,19 +17,17 @@ import {
     TableRow,
     Typography
 } from '@mui/material';
-import {useDropzone} from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-// Interface for Reviewer data
 interface Reviewer {
     id: string;
     name: string;
     email: string;
 }
 
-// Interface for Paper data
 export interface PaperData {
     id?: string;
     title: string;
@@ -41,16 +39,14 @@ export interface PaperData {
     authorsNote: string;
     abstractText: string;
     requests: string[];
+    fileId: string;
 }
 
-// Props interface for PaperPageForm component
 interface PaperFormProps {
     initialData?: PaperData;
 }
 
-// PaperPageForm component
-const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}) => {
-    // State variables for form fields
+const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData }) => {
     const [title, setTitle] = useState(initialData.title || '');
     const [authors, setAuthors] = useState(initialData.authors || '');
     const [reviewLimit, setReviewLimit] = useState(initialData.reviewLimit || '');
@@ -65,7 +61,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
     const [requests, setRequests] = useState<string[]>(initialData.requests || []);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Fetch reviewers data on component mount
     useEffect(() => {
         fetch("http://localhost:8080/api/users/all", {
             method: 'GET',
@@ -87,7 +82,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
 
-    // Reset min and max scores if internal is selected
     useEffect(() => {
         if (internal === 'internal') {
             setMinScore('');
@@ -97,7 +91,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
 
     const navigate = useNavigate();
 
-    // Handle form submission
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
@@ -106,24 +99,19 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
         const reviewLimitNumber = Number(reviewLimit);
         const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-        // Validate form fields
         if (!user || !user.id) {
             setWarning('User is not logged in.');
             return;
         } else if (internal === 'external' && (isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
             setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
             return;
-        } else if (isNaN(reviewLimitNumber) || reviewLimitNumber <= 0) {
-            setWarning('Please enter a valid number for the maximum number of reviews.');
-            return;
-        } else if (!reviewLimit) {
+        } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
         } else {
             setWarning('');
         }
 
-        // Prepare paper data for submission
         const owner = {
             id: user.id,
             name: user.name,
@@ -149,7 +137,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
                 return {
                     status: "PENDING",
-                    paper: {id: 0},
+                    paper: { id: 0 },
                     requestee: {
                         id: requesteeId,
                         name: reviewer?.name || "",
@@ -159,7 +147,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
             })
         };
 
-        // Submit paper data to the server
         try {
             const response = await fetch(`http://localhost:8080/api/papers${initialData.id ? `/${initialData.id}` : ''}`, {
                 method: initialData.id ? 'PUT' : 'POST',
@@ -170,9 +157,46 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                 body: JSON.stringify(paperData)
             });
 
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
             const result = await response.json();
-            navigate(`/paper/${result.id}`);
+            event.preventDefault();
+
+            if (files.length === 0) {
+                setWarning("Please upload a file.");
+                return;
+            }
+
+            const file = files[0];
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                    }
+                });
+
+                const uploadUrl = await response.text();
+
+                await fetch(uploadUrl, {
+                    method: "PUT",
+                    body: file,
+                    headers: {
+                        "Content-Type": file.type
+                    }
+                });
+
+                console.log("File uploaded successfully");
+
+            } catch (error) {
+                console.error("Error uploading file:", error);
+            }
             console.log('Success:', result);
+
+            navigate(`/paper/${result.id}`);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -192,7 +216,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                 throw new Error('Network response was not ok');
             }
 
-            // Check if the response has content before parsing
             const text = await response.text();
             const result = text ? JSON.parse(text) : {};
 
@@ -204,26 +227,22 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
         }
     }
 
-    // Handle file drop
     const onDrop = (acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
     };
 
-    const {getRootProps, getInputProps} = useDropzone({onDrop});
+    const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
-    // Handle file upload button click
     const handleUploadClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
     };
 
-    // Handle file removal
     const handleRemoveFile = () => {
         setFiles([]);
     };
 
-    // Handle reviewer selection change
     const handleReviewerChange = (reviewerId: string) => {
         setRequests(prevSelected =>
             prevSelected.includes(reviewerId)
@@ -232,7 +251,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
         );
     };
 
-    // Handle select all reviewers checkbox change
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
             setRequests(reviewers.map(reviewer => reviewer.id));
@@ -241,14 +259,37 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
         }
     };
 
+    const handleDownloadClick = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${initialData.fileId}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                }
+            });
+
+            const downloadUrl = await response.text();
+
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = initialData.title;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error("Error downloading file:", error);
+        }
+    };
+
     return (
-        <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10}}>
-            <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
+        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
+            <Typography variant="h4" component="h1" sx={{ color: 'white' }} fontWeight={"bold"}>
                 {initialData.title ? 'Edit Paper' : 'Add Paper'}
             </Typography>
             <form onSubmit={handleSubmit}>
                 <Grid2 container spacing={2}>
-                    <Grid2 sx={{display: 'flex', flexDirection: 'column'}}>
+                    <Grid2 sx={{ display: 'flex', flexDirection: 'column' }}>
                         <CustomTextField
                             required
                             label="Paper name"
@@ -294,11 +335,11 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                             onChange={(e) => setAuthorsNote(e.target.value)}
                             multiline
                             rows={9.4}
-                            sx={{width: '130%'}}
+                            sx={{ width: '130%' }}
                         />
                     </Grid2>
                 </Grid2>
-                <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <RadioGroup
                         row
                         value={internal}
@@ -306,15 +347,15 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                     >
                         <FormControlLabel
                             value="internal"
-                            control={<Radio disabled={!!initialData.id}/>}
+                            control={<Radio disabled={!!initialData.id} />}
                             label="Internal"
-                            sx={{color: 'primary'}}
+                            sx={{ color: 'primary' }}
                         />
                         <FormControlLabel
                             value="external"
-                            control={<Radio disabled={!!initialData.id}/>}
+                            control={<Radio disabled={!!initialData.id} />}
                             label="External"
-                            sx={{color: 'primary'}}
+                            sx={{ color: 'primary' }}
                         />
                     </RadioGroup>
                 </Box>
@@ -324,14 +365,16 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                     onChange={(e) => setAbstractText(e.target.value)}
                     multiline
                     rows={4}
-                    sx={{width: '100%', marginTop: 2}}
+                    sx={{ width: '100%', marginTop: 2 }}
                 />
                 {initialData.id ? (
-                    //TODO: Implement file upload
-                    <Box sx={{display: 'flex', alignItems: 'center', marginTop: 2}}>
-                        <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
-                            Uploaded file: {'This is yet to be implemented'}
+                    <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                        <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
+                            Uploaded file: {initialData.title}
                         </Typography>
+                        <Button variant="contained" color="secondary" onClick={handleDownloadClick} sx={{ ml: 2 }}>
+                            Download File
+                        </Button>
                     </Box>
                 ) : (
                     <>
@@ -344,20 +387,20 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                                      marginTop: 2
                                  }}>
                                 <input {...getInputProps()} />
-                                <Typography sx={{color: 'primary'}}>
+                                <Typography sx={{ color: 'primary' }}>
                                     Drag & drop some files here, or click to select files
                                 </Typography>
-                                <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
+                                <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{ mt: 2 }}>
                                     Upload File
                                 </Button>
                             </Box>
                         ) : (
-                            <Box sx={{display: 'flex', alignItems: 'center', marginTop: 2}}>
-                                <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                                <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
                                     Uploaded file: {files[0].name}
                                 </Typography>
-                                <IconButton onClick={handleRemoveFile} sx={{ml: 1}}>
-                                    <CloseIcon/>
+                                <IconButton onClick={handleRemoveFile} sx={{ ml: 1 }}>
+                                    <CloseIcon />
                                 </IconButton>
                             </Box>
                         )}
@@ -367,14 +410,14 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                     type="file"
                     accept={'.pdf'}
                     ref={fileInputRef}
-                    style={{display: 'none'}}
+                    style={{ display: 'none' }}
                     onChange={(e) => {
                         if (e.target.files) {
                             setFiles(Array.from(e.target.files));
                         }
                     }}
                 />
-                <TableContainer component={Paper} sx={{marginTop: 4}}>
+                <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
@@ -400,7 +443,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                                         />
                                         <Typography
                                             variant="body2"
-                                            sx={{mr: 1}}
+                                            sx={{ mr: 1 }}
                                         >
                                             Select all
                                         </Typography>
@@ -410,11 +453,11 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                         </TableHead>
                     </Table>
                 </TableContainer>
-                <TableContainer component={Paper} sx={{maxHeight: 350, overflow: 'auto'}}>
+                <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
                     <Table>
                         <TableBody>
                             {reviewers.map((reviewer) => (
-                                <TableRow key={reviewer.id} sx={{height: 40}}>
+                                <TableRow key={reviewer.id} sx={{ height: 40 }}>
                                     <TableCell>{reviewer.name}</TableCell>
                                     <TableCell align="right">
                                         <Checkbox
@@ -428,11 +471,11 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                     </Table>
                 </TableContainer>
                 {warning && (
-                    <Typography color="error" sx={{mt: 2}}>
+                    <Typography color="error" sx={{ mt: 2 }}>
                         {warning}
                     </Typography>
                 )}
-                <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                     <Button type="submit" variant="contained" color="primary">
                         Submit
                     </Button>
