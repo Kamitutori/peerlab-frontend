@@ -78,9 +78,12 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                return response.json();
+                return response.text();
             })
-            .then(data => setReviewers(data))
+            .then(text => {
+                const data = text ? JSON.parse(text) : [];
+                setReviewers(data);
+            })
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
 
@@ -189,7 +192,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({initialData = {} as PaperData}
                 throw new Error('Network response was not ok');
             }
 
-            const result = await response.json();
+            // Check if the response has content before parsing
+            const text = await response.text();
+            const result = text ? JSON.parse(text) : {};
+
             navigate(`/papers`);
             console.log('Success:', result);
         } catch (error) {
