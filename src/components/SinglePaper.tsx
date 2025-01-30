@@ -26,6 +26,7 @@ interface PaperElement {
     reviewLimit: number;
 }
 
+
 export default function SinglePaper() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();

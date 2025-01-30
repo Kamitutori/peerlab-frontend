@@ -1,7 +1,7 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {createTheme, ThemeProvider} from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
-import PrivateRoute from "./components/auth/PrivateRoute";
+//import PrivateRoute from "./components/auth/PrivateRoute";
 
 import LoginPage from "./pages/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
@@ -16,6 +16,7 @@ import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
 import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
+import SinglePaperRequest from "./components/SinglePaperRequest";
 
 
 const theme = createTheme({
@@ -177,6 +178,17 @@ function App() {
                                                 <SinglePaper/>
                                             </>
                                         
+                                    }
+                                />
+                                <Route
+                                    path="/request/:id"
+                                    element={
+
+                                        <>
+                                            <TopMenuBar/>
+                                            <SinglePaperRequest/>
+                                        </>
+
                                     }
                                 />
                                 <Route
