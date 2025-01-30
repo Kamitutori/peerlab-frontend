@@ -16,6 +16,7 @@ import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
 import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
+import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
 
 
 const theme = createTheme({
@@ -83,128 +84,130 @@ function App() {
             <BrowserRouter>
                 <ThemeProvider theme={theme}>
                     <AuthProvider>
-                        <div className="container">
-                            <Routes>
-                                {/* Public Routes */}
-                                <Route
-                                    index
-                                    element={
-                                        <LoginPage/>
-                                    }
-                                />
-                                <Route
-                                    path="/login"
-                                    element={
-                                        <LoginPage/>
-                                    }
-                                />
-                                <Route
-                                    path="/register"
-                                    element={
-                                        <RegisterPage/>
-                                    }
-                                />
-                                <Route
-                                    path="/forgot-password"
-                                    element={
-                                        <ForgotPassword/>
-                                    }
-                                />
+                        <AlertDialogProvider>
+                            <div className="container">
+                                <Routes>
+                                    {/* Public Routes */}
+                                    <Route
+                                        index
+                                        element={
+                                            <LoginPage/>
+                                        }
+                                    />
+                                    <Route
+                                        path="/login"
+                                        element={
+                                            <LoginPage/>
+                                        }
+                                    />
+                                    <Route
+                                        path="/register"
+                                        element={
+                                            <RegisterPage/>
+                                        }
+                                    />
+                                    <Route
+                                        path="/forgot-password"
+                                        element={
+                                            <ForgotPassword/>
+                                        }
+                                    />
 
-                                {/* Private Routes with TopMenuBar */}
-                                <Route
-                                    path="/dashboard"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <Dashboard/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/profile"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <Profile/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/papers"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <MyPapersPage/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/reviews"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <MyReviewsPage/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <PaperList endpoint="/api/papers" title="Papers"/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
+                                    {/* Private Routes with TopMenuBar */}
+                                    <Route
+                                        path="/dashboard"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <Dashboard/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/profile"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <Profile/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/papers"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <MyPapersPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/reviews"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <MyReviewsPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <PaperList endpoint="/api/papers" title="Papers"/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
 
-                                />
-                                <Route
-                                    path="/paper/:id"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <SinglePaper/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/edit-paper/:id"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <EditPaperPage/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                <Route
-                                    path="/add-paper"
-                                    element={
-                                        <PrivateRoute>
-                                            <>
-                                                <TopMenuBar/>
-                                                <AddPaperPage/>
-                                            </>
-                                        </PrivateRoute>
-                                    }
-                                />
-                                {/* Fallback Route */}
-                                <Route path="*" element={<NoPage/>}/>
-                            </Routes>
-                        </div>
+                                    />
+                                    <Route
+                                        path="/paper/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <SinglePaper/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/edit-paper/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <EditPaperPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/add-paper"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar/>
+                                                    <AddPaperPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    {/* Fallback Route */}
+                                    <Route path="*" element={<NoPage/>}/>
+                                </Routes>
+                            </div>
+                        </AlertDialogProvider>
                     </AuthProvider>
                 </ThemeProvider>
             </BrowserRouter>

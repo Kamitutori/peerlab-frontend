@@ -428,11 +428,11 @@ function ProfilePage() {
                 <Grid2 container spacing={4} justifyContent="center"
                        sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
                     <PaperList
-                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        endpoint={`http://localhost:8080/api/papers`}
                         title="My Papers"
                     />
                     <PaperList
-                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        endpoint={`http://localhost:8080/api/papers`}
                         title="My Reviews"
                     >
                     </PaperList>
