@@ -16,32 +16,48 @@ import {
     Typography,
 } from "@mui/material";
 import PaperList from "../components/PaperList.tsx";
+import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
+import {useAlertDialog} from "../components/AlertDialogProvider.tsx";
 
 /** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */
 function ProfilePage() {
     const strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const INVALID_TOKEN_MSG = "Your token is invalid. Logging out and in again might solve the issue.";
+    const INVALID_TOKEN_MSG = "Your token is invalid. You will be logged out soon.";
+    const ACCOUNT_DELETION_ALERT_TITLE = "Account Deletion";
+    const ACCOUNT_DELETION_ALERT_MESSAGE = "Are you sure you want to delete your account? All data will be deleted.";
+    const ACCOUNT_DELETION_CONFIRM_TEXT = "Delete";
+    const ACCOUNT_DELETION_CANCEL_TEXT = "Cancel";
     const LOCAL_STORAGE_UPDATE_EVENT = "localStorageUpdate";
 
     /** This effect updates the account information on the page if the user changed it. */
     const [userName, setUserName] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
 
+    const { showAlert } = useAlertDialog();
+    const {logout} = useUpdateAuth();
+
     React.useEffect(() => {
         const updateProfile = () => {
             const userJson = localStorage.getItem('user');
             if (userJson) {
                 try {
+                    if (JSON.parse(userJson).name === undefined || JSON.parse(userJson).email === undefined) {
+                        alert("Unexpected behavior: User object in localStorage is missing name or email. You will be logged out.");
+                        setTimeout(() => {
+                                logout()
+                            },
+                            3000)
+                    }
                     setUserName(JSON.parse(userJson).name);
                     setUserEmail(JSON.parse(userJson).email)
                 } catch (error) {
-                    setUserName(null);
-                    setUserEmail(null);
-                    alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
+                    alert("Unexpected behavior: User object in localStorage is not a valid JSON object. You will be logged out.");
+                    logout();
                 }
             } else {
-                alert("Unexpected behavior: User is on profile page with no user object in localStorage.");
+                alert("Unexpected behavior: User is on profile page with no user object in localStorage. You will be logged out.");
+                logout();
             }
         }
         updateProfile();
@@ -125,8 +141,6 @@ function ProfilePage() {
             submitEditProfile();
         } else if (isChangePassword) {
             submitChangePassword();
-        } else if (isAccountDeletion) {
-            submitAccountDeletion();
         }
     }
 
@@ -156,8 +170,8 @@ function ProfilePage() {
                     }, 3000);
                 } else if (res.status == 400) {
                     setMessageProps("Your inputs are invalid.", "error");
-                } else if (res.status == 403) {
-                    setMessageProps(INVALID_TOKEN_MSG, "error")
+                } else if (res.status == 401) {
+                    handleUnauthenticatedLogout()
                 } else {
                     setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
                 }
@@ -198,8 +212,8 @@ function ProfilePage() {
                     }, 3000);
                 } else if (res.status == 400) {
                     setMessageProps("The password was invalid.", "error");
-                } else if (res.status == 403) {
-                    setMessageProps(INVALID_TOKEN_MSG, "error")
+                } else if (res.status == 401) {
+                    handleUnauthenticatedLogout()
                 } else {
                     setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
                 }
@@ -209,74 +223,10 @@ function ProfilePage() {
         }
     };
 
-    /* An attempt to combine edit profile and change password (it's basically the same number of lines but less readable). Also unfinished.
-    const submitChanges = async () => {
-        if (isEditProfile) {
-            if (!emailRegex.test(input.email)) {
-                setMessageProps("Invalid email address.", "warning");
-                return;
-            }
-            const res = await fetch("http://localhost:8080/api/users", {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
-                },
-                body: JSON.stringify({
-                    password: input.password
-                })
-            });
-        } else {
-            if (input.password !== input.confirmPassword) {
-                setMessageProps("Passwords do not match.", "warning");
-                return;
-            } else if (!strongPasswordRegex.test(input.password)) {
-                setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
-                return;
-            }
-            const res = await fetch("http://localhost:8080/api/users", {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
-                },
-                body: JSON.stringify({
-                    password: input.password
-                })
-            });
-        }
-
-        try {
-            const res = await fetch("http://localhost:8080/api/users", {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
-                },
-                body: JSON.stringify({
-                    password: input.password
-                })
-            });
-            if (res.status == 200) {
-                const responseData = await res.json();
-                setMessageProps("Successfully changed password.", "success");
-                localStorage.setItem("user", JSON.stringify(responseData));
-                setTimeout(() => {
-                    handleMenuClose();
-                    setIsChangePassword(false);
-                }, 3000);
-            } else if (res.status == 400) {
-                setMessageProps("The password was invalid.", "error");
-            } else if (res.status == 403) {
-                setMessageProps(INVALID_TOKEN_MSG, "error")
-            } else {
-                setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
-            }
-        } catch (error) {
-            alert(`An error has occurred: ${error}.`)
-        }
+    const handleAccountDeletion = async () => {
+        const result = await showAlert(ACCOUNT_DELETION_ALERT_TITLE, ACCOUNT_DELETION_ALERT_MESSAGE, ACCOUNT_DELETION_CONFIRM_TEXT, ACCOUNT_DELETION_CANCEL_TEXT);
+        result ? submitAccountDeletion() : setIsAccountDeletion(false);
     }
-    */
 
     const submitAccountDeletion = async () => {
         try {
@@ -294,8 +244,8 @@ function ProfilePage() {
                     localStorage.removeItem("user");
                     window.location.href = "http://localhost:5173/login";
                 }, 3000);
-            } else if (res.status == 403) {
-                setMessageProps(INVALID_TOKEN_MSG, "error");
+            } else if (res.status == 401) {
+                handleUnauthenticatedLogout();
             } else {
                 setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
             }
@@ -304,10 +254,19 @@ function ProfilePage() {
         }
     }
 
+    /* This function is called to log out users that sent requests with invalid tokens. */
+    const handleUnauthenticatedLogout = () => {
+        setMessageProps(INVALID_TOKEN_MSG, "error");
+        setTimeout(() => {
+            logout();
+        }, 3000)
+    }
+
     /** The profile page components. */
     return (
         <Box sx={{
-            width: "800px",
+            width: "flex",
+            minWidth: "1215px",
             display: "flex",
             height: "flex",
             backgroundColor: "#777",
@@ -326,7 +285,7 @@ function ProfilePage() {
                 >
                     <Box>
                         {/** Header */}
-                        <Typography variant="subtitle1" sx={{mb: 2}}>
+                        <Typography variant="subtitle1" sx={{mb: 2, maxWidth: "100%"}}>
                             <Typography variant="h4" sx={{mb: 2}}>
                                 {userName}
                             </Typography>
@@ -377,6 +336,7 @@ function ProfilePage() {
                                 setIsAccountDeletion(!isAccountDeletion);
                                 setIsChangePassword(false);
                                 setIsEditProfile(false);
+                                handleAccountDeletion();
                             }}
                         >
                             Delete Profile
@@ -437,7 +397,7 @@ function ProfilePage() {
                 )}
 
                 {/** Confirmation and Cancellation Buttons */}
-                {(isEditProfile || (isChangePassword || isAccountDeletion)) && (
+                {(isEditProfile || isChangePassword) && (
                     <Box sx={{
                         display: "grid",
                         gridTemplateColumns: "repeat(2, 1fr)",
@@ -471,6 +431,7 @@ function ProfilePage() {
                         sx={{
                             my: '1rem',
                             display: 'flex',
+                            justifyContent: 'center',
                         }}
                     >
                         <Alert
@@ -486,30 +447,26 @@ function ProfilePage() {
                         </Alert>
                     </Box>
                 )}
-                {(isEditProfile || (isChangePassword || isAccountDeletion)) && (
+                {(isEditProfile || isChangePassword) && (
                     <Divider sx={{my: 2}}/>
                 )}
 
                 {/** Papers and Reviews */}
-                <Grid2 container spacing={4} justifyContent="center" flexDirection={"column"}>
-                    <Grid2>
-                        <PaperList
-                            endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
-                            title="My Papers"
-                        />
-                    </Grid2>
-                    <Grid2>
-                        <PaperList
-                            endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
-                            title="My Reviews"
-                        >
-                        </PaperList>
-                    </Grid2>
+                <Grid2 container spacing={4} justifyContent="center"
+                       sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
+                    <PaperList
+                        endpoint={`http://localhost:8080/api/papers`}
+                        title="My Papers"
+                    />
+                    <PaperList
+                        endpoint={`http://localhost:8080/api/papers`}
+                        title="My Reviews"
+                    >
+                    </PaperList>
                 </Grid2>
             </Box>
         </Box>
-    )
-        ;
+    );
 }
 
 export default ProfilePage;

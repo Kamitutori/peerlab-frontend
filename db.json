@@ -161,31 +161,32 @@
       "authorName": "Prof. Henkel"
     }
   ],
-  "userList": [
+  "request": [
     {
       "id": 1,
-      "name": "Diese Junge",
-      "email": "diese@junge.de"
+      "status" : "PENDING",
+      "paperId" : 1
     },
     {
       "id": 2,
-      "name": "Maria (Artits) Curry",
-      "email": "maria@curry.de"
+      "status" : "ACCEPTED",
+      "paperId" : 1
     },
     {
       "id": 3,
-      "name": "Brettschneider",
-      "email": "brett.am@schneiden.de"
+      "status" : "SUBMITTED",
+      "paperId" : 1,
+      "reviewId": 1
     },
     {
       "id": 4,
-      "name": "Gasriese",
-      "email": "der.kommt@boese.de"
+      "status" : "REJECTED",
+      "paperId" : 1
     },
     {
       "id": 5,
-      "name": "Prof. Henkel",
-      "email": "ich.liebe@ces.de"
+      "status" : "EXPIRED",
+      "paperId" : 1
     }
   ]
 }

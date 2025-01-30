@@ -11,7 +11,7 @@ import {
     Divider,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 interface PaperListProps {
     endpoint: string;
@@ -52,9 +52,10 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 mt: 4,
                 boxShadow: 3,
                 backgroundColor: "background.paper",
+                minWidth: 300,
             }}
         >
-            <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
+            <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -64,19 +65,24 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                         top: 0,
                         backgroundColor: "background.paper",
                         zIndex: 1,
-                        padding: '8px 16px',
+                        px: "2px",
                         width: '100%',
+                        textAlign: 'center',
+                        display: 'flex', // Enables flexbox for vertical centering
+                        justifyContent: 'center', // Centers content horizontally
+                        alignItems: 'center',
+                        minHeight: '50px', // Ensures enough height for vertical centering
                     }}
                 >
                     {title}
                 </Typography>
                 {isLoading ? (
-                    <Typography sx={{ color: "white" }}>Loading papers...</Typography>
+                    <Typography sx={{color: "white"}}>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (
-                    <List sx={{ maxHeight: 353, overflow: 'auto' }}>
-                        {data.map((paper: { id: number; title: string; ownerName: string }, index: number) => (
+                    <List sx={{maxHeight: 353, overflow: 'auto'}}>
+                        {data.map((paper: { id: number; title: string; owner: { name: string } }, index: number) => (
                             <div key={paper.id}>
                                 <ListItemButton
                                     onClick={() => handleClick(paper.id)}
@@ -94,7 +100,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                     </ListItemAvatar>
                                     <ListItemText
                                         primary={paper.title}
-                                        secondary={`Author: ${paper.ownerName}`}
+                                        secondary={`Author: ${paper.owner.name}`}
                                         slotProps={{
                                             primary: {
                                                 noWrap: true,

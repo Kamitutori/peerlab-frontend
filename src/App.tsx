@@ -18,6 +18,7 @@ import AddPaperPage from "./pages/AddPaperPage.tsx";
 import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import EditReviewPage from "./pages/EditReviewPage.tsx";
+import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
 
 
 const theme = createTheme({
@@ -85,33 +86,34 @@ function App() {
             <BrowserRouter>
                 <ThemeProvider theme={theme}>
                     <AuthProvider>
-                        <div className="container">
-                            <Routes>
-                                {/* Public Routes */}
-                                <Route
-                                    index
-                                    element={
-                                        <LoginPage/>
-                                    }
-                                />
-                                <Route
-                                    path="/login"
-                                    element={
-                                        <LoginPage/>
-                                    }
-                                />
-                                <Route
-                                    path="/register"
-                                    element={
-                                        <RegisterPage/>
-                                    }
-                                />
-                                <Route
-                                    path="/forgot-password"
-                                    element={
-                                        <ForgotPassword/>
-                                    }
-                                />
+                        <AlertDialogProvider>
+                            <div className="container">
+                                <Routes>
+                                    {/* Public Routes */}
+                                    <Route
+                                        index
+                                        element={
+                                            <LoginPage/>
+                                        }
+                                    />
+                                    <Route
+                                        path="/login"
+                                        element={
+                                            <LoginPage/>
+                                        }
+                                    />
+                                    <Route
+                                        path="/register"
+                                        element={
+                                            <RegisterPage/>
+                                        }
+                                    />
+                                    <Route
+                                        path="/forgot-password"
+                                        element={
+                                            <ForgotPassword/>
+                                        }
+                                    />
 
                                 {/* Private Routes with TopMenuBar */}
                                 <Route
@@ -229,6 +231,7 @@ function App() {
                                 <Route path="*" element={<NoPage/>}/>
                             </Routes>
                         </div>
+                        </AlertDialogProvider>
                     </AuthProvider>
                 </ThemeProvider>
             </BrowserRouter>

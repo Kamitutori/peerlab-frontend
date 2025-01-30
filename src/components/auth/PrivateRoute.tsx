@@ -7,8 +7,15 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-    const { token } = useAuth();
-    return token ? children : <Navigate to="/login" />;
+    const { token, user } = useAuth();
+
+    if (!token || !user) {
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("user");
+        return <Navigate to="/login" />;
+    }
+
+    return children;
 };
 
 export default PrivateRoute;
