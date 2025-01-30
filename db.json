@@ -187,5 +187,33 @@
       "name": "Prof. Henkel",
       "email": "ich.liebe@ces.de"
     }
+  ],
+  "request": [
+    {
+      "id": 1,
+      "status" : "PENDING",
+      "paperId" : 1
+    },
+    {
+      "id": 1,
+      "status" : "ACCEPTED",
+      "paperId" : 3
+    },
+    {
+      "id": 1,
+      "status" : "SUBMITTED",
+      "paperId" : 1,
+      "reviewId": 1
+    },
+    {
+      "id": 1,
+      "status" : "REJECTED",
+      "paperId" : 1
+    },
+    {
+      "id": 1,
+      "status" : "EXPIRED",
+      "paperId" : 1
+    }
   ]
 }
