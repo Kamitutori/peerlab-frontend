@@ -12,6 +12,7 @@ function goToRegister() {
 }
 
 export default function LoginPage() {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const {login} = useUpdateAuth();
     const [showPassword, setShowPassword] = useState(false);
 
@@ -33,7 +34,7 @@ export default function LoginPage() {
     /**
      * Redirection in case of present jwt (assuming, the user is logged in).
      */
-    if (localStorage.getItem("jwt")) {
+    if (localStorage.getItem("jwt") && localStorage.getItem("user")) {
         window.location.href = "http://localhost:5173/dashboard";
     }
 
@@ -45,6 +46,9 @@ export default function LoginPage() {
             alert("Please fill in all fields.");
             return;
         }
+        /* if (emailRegex.test(email)) {
+            alert("Your email has no valid format.")
+        }*/
         await login({email, password});
         // TODO Statements here are not reached if successful. Remove alerts and insert error message here. Problem: how to transfer the response code?
     };

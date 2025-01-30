@@ -231,7 +231,7 @@ function ProfilePage() {
                     window.location.href = "http://localhost:5173/login";
                 }, 3000);
             } else if (res.status == 401) {
-                handleUnauthenticatedLogout()
+                handleUnauthenticatedLogout();
             } else {
                 setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
             }
