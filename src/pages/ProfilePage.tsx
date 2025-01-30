@@ -5,19 +5,25 @@ import React, {useState} from "react";
 import {Alert, Box, Button, Divider, Grid2, Menu, MenuItem, Stack, TextField, Typography,} from "@mui/material";
 import PaperList from "../components/PaperList.tsx";
 import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
+import {useAlertDialog} from "../components/AlertDialogProvider.tsx";
 
 /** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */
 function ProfilePage() {
     const strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const INVALID_TOKEN_MSG = "Your token is invalid. You will be logged out soon.";
+    const ACCOUNT_DELETION_ALERT_TITLE = "Account Deletion";
+    const ACCOUNT_DELETION_ALERT_MESSAGE = "Are you sure you want to delete your account? All data will be deleted.";
+    const ACCOUNT_DELETION_CONFIRM_TEXT = "Delete";
+    const ACCOUNT_DELETION_CANCEL_TEXT = "Cancel";
     const LOCAL_STORAGE_UPDATE_EVENT = "localStorageUpdate";
 
     /** This effect updates the account information on the page if the user changed it. */
     const [userName, setUserName] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
 
-    const { logout } = useUpdateAuth();
+    const { showAlert } = useAlertDialog();
+    const {logout} = useUpdateAuth();
 
     React.useEffect(() => {
         const updateProfile = () => {
@@ -27,8 +33,9 @@ function ProfilePage() {
                     if (JSON.parse(userJson).name === undefined || JSON.parse(userJson).email === undefined) {
                         alert("Unexpected behavior: User object in localStorage is missing name or email. You will be logged out.");
                         setTimeout(() => {
-                            logout()},
-                        3000)
+                                logout()
+                            },
+                            3000)
                     }
                     setUserName(JSON.parse(userJson).name);
                     setUserEmail(JSON.parse(userJson).email)
@@ -120,8 +127,6 @@ function ProfilePage() {
             submitEditProfile();
         } else if (isChangePassword) {
             submitChangePassword();
-        } else if (isAccountDeletion) {
-            submitAccountDeletion();
         }
     }
 
@@ -204,7 +209,10 @@ function ProfilePage() {
         }
     };
 
-
+    const handleAccountDeletion = async () => {
+        const result = await showAlert(ACCOUNT_DELETION_ALERT_TITLE, ACCOUNT_DELETION_ALERT_MESSAGE, ACCOUNT_DELETION_CONFIRM_TEXT, ACCOUNT_DELETION_CANCEL_TEXT);
+        result ? submitAccountDeletion() : setIsAccountDeletion(false);
+    }
 
     const submitAccountDeletion = async () => {
         try {
@@ -243,7 +251,8 @@ function ProfilePage() {
     /** The profile page components. */
     return (
         <Box sx={{
-            width: "800px",
+            width: "flex",
+            minWidth: "1215px",
             display: "flex",
             height: "flex",
             backgroundColor: "#777",
@@ -313,6 +322,7 @@ function ProfilePage() {
                                 setIsAccountDeletion(!isAccountDeletion);
                                 setIsChangePassword(false);
                                 setIsEditProfile(false);
+                                handleAccountDeletion();
                             }}
                         >
                             Delete Profile
@@ -360,7 +370,7 @@ function ProfilePage() {
                 )}
 
                 {/** Confirmation and Cancellation Buttons */}
-                {(isEditProfile || (isChangePassword || isAccountDeletion)) && (
+                {(isEditProfile || isChangePassword) && (
                     <Box sx={{
                         display: "grid",
                         gridTemplateColumns: "repeat(2, 1fr)",
@@ -394,6 +404,7 @@ function ProfilePage() {
                         sx={{
                             my: '1rem',
                             display: 'flex',
+                            justifyContent: 'center',
                         }}
                     >
                         <Alert
@@ -409,25 +420,22 @@ function ProfilePage() {
                         </Alert>
                     </Box>
                 )}
-                {(isEditProfile || (isChangePassword || isAccountDeletion)) && (
+                {(isEditProfile || isChangePassword) && (
                     <Divider sx={{my: 2}}/>
                 )}
 
                 {/** Papers and Reviews */}
-                <Grid2 container spacing={4} justifyContent="center">
-                    <Grid2>
-                        <PaperList
-                            endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
-                            title="My Papers"
-                        />
-                    </Grid2>
-                    <Grid2>
-                        <PaperList
-                            endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
-                            title="My Reviews"
-                        >
-                        </PaperList>
-                    </Grid2>
+                <Grid2 container spacing={4} justifyContent="center"
+                       sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
+                    <PaperList
+                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        title="My Papers"
+                    />
+                    <PaperList
+                        endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/paperList`}
+                        title="My Reviews"
+                    >
+                    </PaperList>
                 </Grid2>
             </Box>
         </Box>

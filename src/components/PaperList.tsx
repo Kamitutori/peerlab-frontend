@@ -59,8 +59,13 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                         top: 0,
                         backgroundColor: "background.paper",
                         zIndex: 1,
-                        padding: '8px 16px',
+                        px: "2px",
                         width: '100%',
+                        textAlign: 'center',
+                        display: 'flex', // Enables flexbox for vertical centering
+                        justifyContent: 'center', // Centers content horizontally
+                        alignItems: 'center',
+                        minHeight: '50px', // Ensures enough height for vertical centering
                     }}
                 >
                     {title}
