@@ -29,6 +29,11 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
                 },
             });
+            if (res.status === 401) {
+                localStorage.removeItem("jwt");
+                localStorage.removeItem("user");
+                window.location.href = "http://localhost:5173/login";
+            }
             if (!res.ok) throw new Error("Failed to fetch papers");
             return res.json();
         },

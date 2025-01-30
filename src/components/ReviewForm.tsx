@@ -36,7 +36,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
     const [questions, setQuestions] = useState(initialData.questions || '');
     const [score, setScore] = useState(initialData.score || '');
     const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
-    const [fileIds, setFileIds] = useState(initialData.fileIds || Array<string>(5).fill(''));
+    //const [fileIds, setFileIds] = useState(initialData.fileIds || Array<string>(5).fill(''));
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 

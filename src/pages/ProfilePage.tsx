@@ -2,7 +2,19 @@
 // TODO styling of page
 
 import React, {useState} from "react";
-import {Alert, Box, Button, Divider, Grid2, Menu, MenuItem, Stack, TextField, Typography,} from "@mui/material";
+import {
+    Alert,
+    Box,
+    Button,
+    Checkbox,
+    Divider, FormControlLabel,
+    Grid2,
+    Menu,
+    MenuItem,
+    Stack,
+    TextField,
+    Typography,
+} from "@mui/material";
 import PaperList from "../components/PaperList.tsx";
 
 /** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */
@@ -104,6 +116,8 @@ function ProfilePage() {
             confirmPassword: ""
         });
     };
+
+    const [showPassword, setShowPassword] = useState(false);
 
     /** These functions implement the account settings functionality. */
     const handleSubmit = () => {
@@ -386,7 +400,7 @@ function ProfilePage() {
                         <Stack spacing={2}>
                             <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                 <TextField
-                                    type={isEditProfile ? "text" : "password"}
+                                    type={(showPassword) ? "text" : "password"}
                                     name={isEditProfile ? "name" : "password"}
                                     label={isEditProfile ? "New Name" : "New Password"}
                                     variant="outlined"
@@ -396,7 +410,7 @@ function ProfilePage() {
                             </Box>
                             <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                 <TextField
-                                    type={isEditProfile ? "text" : "password"}
+                                    type={(showPassword) ? "text" : "password"}
                                     name={isEditProfile ? "email" : "confirmPassword"}
                                     label={isEditProfile ? "New Email" : "Confirm Password"}
                                     variant="outlined"
@@ -405,6 +419,19 @@ function ProfilePage() {
                                     onChange={handleInput}
                                 />
                             </Box>
+                            {isChangePassword && (
+                                <Box sx={{display: "flex", justifyContent: "center", gap: 1}}>
+                                    <FormControlLabel
+                                        style={{color: "#b5b5b5"}}
+                                        label="Show Password"
+                                        control={
+                                            <Checkbox style={{color: "#cdcdcd"}}
+                                                      onChange={() => setShowPassword(!showPassword)}
+                                            />
+                                        }
+                                    />
+                                </Box>
+                            )}
                         </Stack>
                     </Box>
                 )}
@@ -481,7 +508,8 @@ function ProfilePage() {
                 </Grid2>
             </Box>
         </Box>
-    );
+    )
+        ;
 }
 
 export default ProfilePage;
