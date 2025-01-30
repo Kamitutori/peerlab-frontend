@@ -67,7 +67,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
-            const res = await response.json();
 
             if (response.ok) {
                 const res = await response.json();
