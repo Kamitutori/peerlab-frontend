@@ -10,7 +10,7 @@ import MyPapersPage from "./pages/MyPapersPage.tsx";
 import MyReviewsPage from "./pages/MyReviewsPage.tsx";
 import NoPage from "./pages/NoPage";
 import TopMenuBar from "./components/TopBar";
-import RegisterPage from "./pages/RegisterPage.tsx";
+import RegisterPage from "./pages/auth/RegisterPage.tsx";
 import ForgotPassword from "./pages/ForgotPassword";
 import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
