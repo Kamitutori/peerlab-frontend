@@ -68,7 +68,7 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                                     sx={{
                                         borderRadius: 2,
                                         "&:hover": {
-                                            backgroundColor: "background.default",
+                                            backgroundColor: "background.paper",
                                         },
                                     }}
                                 >
