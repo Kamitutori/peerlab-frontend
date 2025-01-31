@@ -11,6 +11,8 @@ import {
     Divider,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
+import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
+import {useNavigate} from "react-router-dom";
 
 interface ReviewListProps {
     endpoint: string;
@@ -18,17 +20,22 @@ interface ReviewListProps {
 }
 
 export default function ReviewList({endpoint, title}: ReviewListProps) {
+    const {logout} = useUpdateAuth();
+    const navigate = useNavigate();
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
             const res = await fetch(endpoint);
+            if (res.status === 401) {
+                logout();
+            }
             if (!res.ok) throw new Error("Failed to fetch reviews");
             return res.json();
         },
     });
 
-    const handleClick = (paperId: number) => {
-        console.log(`Clicked on review with ID: ${paperId}`);
+    const handleClick = (reviewId: number) => {
+        navigate(`/review/${reviewId}`);
     };
 
     return (

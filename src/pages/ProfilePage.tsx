@@ -25,7 +25,7 @@ function ProfilePage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const INVALID_TOKEN_MSG = "Your token is invalid. You will be logged out soon.";
     const ACCOUNT_DELETION_ALERT_TITLE = "Account Deletion";
-    const ACCOUNT_DELETION_ALERT_MESSAGE = "Are you sure you want to delete your account? All data will be deleted.";
+    const ACCOUNT_DELETION_ALERT_MESSAGE = "Are you sure you want to delete your account? All data will be lost.";
     const ACCOUNT_DELETION_CONFIRM_TEXT = "Delete";
     const ACCOUNT_DELETION_CANCEL_TEXT = "Cancel";
     const LOCAL_STORAGE_UPDATE_EVENT = "localStorageUpdate";
@@ -236,7 +236,7 @@ function ProfilePage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem("jwt")}`
                 }
-            })
+            });
             if (res.status == 200) {
                 setMessageProps("Successfully deleted account. You will be logged out.", "success");
                 setTimeout(() => {
@@ -269,7 +269,7 @@ function ProfilePage() {
             minWidth: "1215px",
             display: "flex",
             height: "flex",
-            backgroundColor: "#777",
+            backgroundColor: "#555",
             marginTop: 10,
         }}
         >

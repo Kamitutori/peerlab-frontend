@@ -25,7 +25,7 @@ interface ReviewFormProps {
 }
 
 const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
-    const { logout } = useUpdateAuth();
+    const {logout} = useUpdateAuth();
     const [warning, setWarning] = useState('');
 
     /** Input fields of a review */
@@ -63,8 +63,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
         event.preventDefault();
         const scoreNum = parseInt(score);
 
-        if (isNaN(scoreNum) || scoreNum < minScore || scoreNum > maxScore) {
-            if (isExternal) {
+        if (isExternal) {
+            if (isNaN(scoreNum) || scoreNum < minScore || scoreNum > maxScore) {
                 setWarning('Please enter a valid score.');
                 return;
             }
@@ -94,7 +94,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                 body: JSON.stringify(reviewData)
             });
 
-            if (response.ok)  {
+            if (response.ok) {
                 const result = await response.text();
                 if (result) {
                     console.log('Success:', JSON.parse(result));
@@ -103,9 +103,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                 }
             } else if (response.status === 400) {
                 setWarning(`Your inputs are invalid: ${await response.text()}`);
-            } else if(response.status === 401) {
+            } else if (response.status === 401) {
                 setWarning('Your token is invalid. You are being logged out.');
-                setTimeout(() => { logout(); }, 3000);
+                setTimeout(() => {
+                    logout();
+                }, 3000);
             } else {
                 setWarning(`Unknown error: ${response.status} ${await response.text()}`);
             }
@@ -271,7 +273,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                     )}
 
                     {/* Submission Note */}
-                    <Typography sx={{ mt: 2, color: 'gray', fontSize: '0.875rem' }}>
+                    <Typography sx={{mt: 2, color: 'gray', fontSize: '0.875rem'}}>
                         To submit your review, either fill in all text fields or upload at least one review file.
                     </Typography>
 
