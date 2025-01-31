@@ -139,7 +139,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             requests: requests.map(requesteeId => {
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
                 return {
-                    status: "PENDING",
                     paper: { id: 0 },
                     requestee: {
                         id: requesteeId,
