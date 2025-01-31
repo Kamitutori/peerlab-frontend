@@ -19,6 +19,41 @@ export const lightTheme = createTheme({
             color: '#000000',
         },
     },
+    components: {
+        MuiTextField: {
+            defaultProps: {
+                size: "small",
+            },
+            styleOverrides: {
+                root: {
+                    "& .MuiOutlinedInput-root": {
+                        "& .MuiOutlinedInput-notchedOutline": {
+                            borderWidth: "2px",
+                        },
+                        "&.Mui-focused": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderWidth: "2px",
+                            },
+                        },
+                        "&.Mui-disabled": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#e8e8e8",
+                            },
+                            "& .MuiOutlinedInput-input": {
+                                color: "#e8e8e8",
+                            },
+                        },
+                    },
+                    "& .MuiInputLabel-outlined": {
+                        "&.Mui-focused": {
+                            color: "primary",
+                            fontWeight: "bold",
+                        },
+                    }
+                }
+            }
+        }
+    }
 });
 
 export const darkTheme = createTheme({
@@ -40,4 +75,39 @@ export const darkTheme = createTheme({
             color: '#ffffff',
         },
     },
+    components: {
+        MuiTextField: {
+            defaultProps: {
+                size: "small",
+            },
+            styleOverrides: {
+                root: {
+                    "& .MuiOutlinedInput-root": {
+                        "& .MuiOutlinedInput-notchedOutline": {
+                            borderWidth: "2px",
+                        },
+                        "&.Mui-focused": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderWidth: "2px",
+                            },
+                        },
+                        "&.Mui-disabled": {
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#353535",
+                            },
+                            "& .MuiOutlinedInput-input": {
+                                color: "#353535",
+                            },
+                        },
+                    },
+                    "& .MuiInputLabel-outlined": {
+                        "&.Mui-focused": {
+                            color: "primary",
+                            fontWeight: "bold",
+                        },
+                    }
+                }
+            }
+        }
+    }
 });
