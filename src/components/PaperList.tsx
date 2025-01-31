@@ -46,7 +46,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 margin: "auto",
                 mt: 4,
                 boxShadow: 3,
-                backgroundColor: "background.paper",
+                backgroundColor: "background.default",
                 minWidth: 300,
             }}
         >
@@ -89,7 +89,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                 >
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <ArticleIcon sx={{color: 'primary.main'}}/>
+                                            <ArticleIcon sx={{color: 'background.default'}}/>
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText

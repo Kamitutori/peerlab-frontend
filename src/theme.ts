@@ -25,14 +25,14 @@ export const darkTheme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: '#90caf9',
+            main: '#1976d2',
         },
         secondary: {
             main: '#f48fb1',
         },
         background: {
-            default: '#121212',
-            paper: '#1d1d1d',
+            default: '#252525',
+            paper: '#272626',
         },
     },
     typography: {

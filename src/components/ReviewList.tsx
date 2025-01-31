@@ -37,7 +37,7 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                 margin: "auto",
                 mt: 4,
                 boxShadow: 3,
-                backgroundColor: "background.paper",
+                backgroundColor: "background.default",
             }}
         >
             <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
@@ -74,7 +74,7 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                                 >
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <ArticleIcon sx={{color: 'primary.main'}}/>
+                                            <ArticleIcon sx={{color: 'background.default'}}/>
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
