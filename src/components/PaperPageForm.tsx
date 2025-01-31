@@ -159,10 +159,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 body: JSON.stringify(paperData)
             });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
             const result = await response.json();
             event.preventDefault();
 
@@ -209,10 +205,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                 }
             });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
 
             const text = await response.text();
             const result = text ? JSON.parse(text) : {};
