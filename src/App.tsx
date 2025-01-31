@@ -1,9 +1,9 @@
-import {useState} from 'react';
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {CssBaseline, ThemeProvider} from "@mui/material";
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import {darkTheme, lightTheme} from "./theme";
+import { darkTheme, lightTheme } from "./theme";
 
 import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
@@ -21,11 +21,25 @@ import AddPaperPage from "./pages/AddPaperPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
 
 function App() {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme ? JSON.parse(savedTheme) : false;
+    });
 
     const toggleTheme = () => {
-        setIsDarkMode(!isDarkMode);
+        setIsDarkMode((prevMode: boolean) => {
+            const newMode = !prevMode;
+            localStorage.setItem('theme', JSON.stringify(newMode));
+            return newMode;
+        });
     };
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setIsDarkMode(JSON.parse(savedTheme));
+        }
+    }, []);
 
     return (
         <div>
