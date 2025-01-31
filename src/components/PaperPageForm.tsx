@@ -284,7 +284,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
     return (
         <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
-            <Typography variant="h4" component="h1" sx={{ color: 'white' }} fontWeight={"bold"}>
+            <Typography variant="h4" component="h1" fontWeight={"bold"}>
                 {initialData.title ? 'Edit Paper' : 'Add Paper'}
             </Typography>
             <form onSubmit={handleSubmit}>
@@ -335,7 +335,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                             onChange={(e) => setAuthorsNote(e.target.value)}
                             multiline
                             rows={9.4}
-                            sx={{ width: '130%' }}
+                            sx={{ width: '100%' }}
                         />
                     </Grid2>
                 </Grid2>
