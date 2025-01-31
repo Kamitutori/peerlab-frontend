@@ -108,6 +108,9 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
+        } else if (files.length === 0) {
+            setWarning("Please upload a file.");
+            return;
         } else {
             setWarning('');
         }
@@ -164,10 +167,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             const result = await response.json();
             event.preventDefault();
 
-            if (files.length === 0) {
-                setWarning("Please upload a file.");
-                return;
-            }
 
             const file = files[0];
 
