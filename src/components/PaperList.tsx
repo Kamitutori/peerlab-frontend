@@ -55,7 +55,6 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     variant="h6"
                     component="div"
                     sx={{
-                        color: "white",
                         position: 'sticky',
                         top: 0,
                         backgroundColor: "background.paper",
@@ -72,7 +71,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     {title}
                 </Typography>
                 {isLoading ? (
-                    <Typography sx={{color: "white"}}>Loading papers...</Typography>
+                    <Typography>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
                 ) : (

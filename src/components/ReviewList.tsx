@@ -45,7 +45,6 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                     variant="h6"
                     component="div"
                     sx={{
-                        color: "white",
                         position: 'sticky',
                         top: 0,
                         backgroundColor: "background.paper",
@@ -69,7 +68,7 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                                     sx={{
                                         borderRadius: 2,
                                         "&:hover": {
-                                            backgroundColor: "#353535",
+                                            backgroundColor: "background.default",
                                         },
                                     }}
                                 >

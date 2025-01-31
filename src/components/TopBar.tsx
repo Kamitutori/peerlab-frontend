@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {styled, Theme, CSSObject, useTheme} from '@mui/material/styles';
-import MuiAppBar, {AppBarProps as MuiAppBarProps} from '@mui/material/AppBar';
+import { styled, Theme, CSSObject, useTheme } from '@mui/material/styles';
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
-import {Button} from '@mui/material';
+import { Button } from '@mui/material';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -21,10 +21,11 @@ import ListItemText from '@mui/material/ListItemText';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import PeerLabIcon from '../assets/peerlabLogo_squared.svg';
-import {useNavigate} from "react-router-dom";
-import {Link} from "react-router-dom";
-import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useUpdateAuth } from "./auth/AuthenticationContext.tsx";
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 
 const drawerWidth = 240;
 
@@ -55,7 +56,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
-})<AppBarProps>(({theme}) => ({
+})<AppBarProps>(({ theme }) => ({
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
         easing: theme.transitions.easing.sharp,
@@ -64,7 +65,7 @@ const AppBar = styled(MuiAppBar, {
     backgroundColor: '#1976d2',
     variants: [
         {
-            props: ({open}) => open,
+            props: ({ open }) => open,
             style: {
                 marginLeft: drawerWidth,
                 width: `calc(100% - ${drawerWidth}px)`,
@@ -77,22 +78,22 @@ const AppBar = styled(MuiAppBar, {
     ],
 }));
 
-const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})(
-    ({theme}) => ({
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
+    ({ theme }) => ({
         width: drawerWidth,
         flexShrink: 0,
         whiteSpace: 'nowrap',
         boxSizing: 'border-box',
         variants: [
             {
-                props: ({open}) => open,
+                props: ({ open }) => open,
                 style: {
                     ...openedMixin(theme),
                     '& .MuiDrawer-paper': openedMixin(theme),
                 },
             },
             {
-                props: ({open}) => !open,
+                props: ({ open }) => !open,
                 style: {
                     ...closedMixin(theme),
                     '& .MuiDrawer-paper': closedMixin(theme),
@@ -102,8 +103,7 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
     }),
 );
 
-
-const DrawerHeader = styled('div')(({theme}) => ({
+const DrawerHeader = styled('div')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -112,9 +112,13 @@ const DrawerHeader = styled('div')(({theme}) => ({
     ...theme.mixins.toolbar,
 }));
 
+interface TopMenuBarProps {
+    toggleTheme: () => void;
+    isDarkMode: boolean;
+}
 
-export default function MenuAppBar() {
-    const {logout} = useUpdateAuth();
+export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps) {
+    const { logout } = useUpdateAuth();
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
     const [username, setUsername] = React.useState<string | null>("Henlo");
@@ -161,7 +165,7 @@ export default function MenuAppBar() {
     }, []);
 
     return (
-        <Box sx={{flexGrow: 1, display: 'flex'}}>
+        <Box sx={{ flexGrow: 1, display: 'flex' }}>
             <AppBar position="fixed" open={open}>
                 <Toolbar>
                     <IconButton
@@ -173,17 +177,20 @@ export default function MenuAppBar() {
                             {
                                 marginRight: 5,
                             },
-                            open && {display: 'none'},
+                            open && { display: 'none' },
                         ]}
                     >
-                        <MenuIcon/>
+                        <MenuIcon />
                     </IconButton>
-                    <img src={PeerLabIcon} width="50" height="50" alt="logo"/>
-                    <Typography variant="h6" component="div" align={"left"} sx={{flexGrow: 1, marginLeft: 1}}>
+                    <img src={PeerLabIcon} width="50" height="50" alt="logo" />
+                    <Typography variant="h6" component="div" align={"left"} sx={{ flexGrow: 1, marginLeft: 1 }}>
                         {username}
                     </Typography>
+                    <Button color="inherit" onClick={toggleTheme}>
+                        {isDarkMode ? <LightModeIcon/> : <DarkModeIcon/>}
+                    </Button>
                     <div>
-                        <Button variant="outlined" sx={{color: 'white', size: 'small'}} onClick={logout}>
+                        <Button variant="outlined" sx={{ color: 'white', size: 'small' }} onClick={logout}>
                             Log out
                         </Button>
                         <IconButton
@@ -192,7 +199,7 @@ export default function MenuAppBar() {
                             onClick={redirect}
                             color="inherit"
                         >
-                            <AccountCircle/>
+                            <AccountCircle />
                         </IconButton>
                     </div>
                 </Toolbar>
@@ -201,14 +208,14 @@ export default function MenuAppBar() {
             <Drawer variant="permanent" open={open}>
                 <DrawerHeader>
                     <IconButton onClick={handleDrawerClose}>
-                        {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
+                        {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                     </IconButton>
                 </DrawerHeader>
-                <Divider/>
+                <Divider />
                 <Link to="/" className="site-title"></Link>
                 <List>
                     {['Dashboard'].map((text) => (
-                        <ListItem key={text} disablePadding sx={{display: 'block'}}>
+                        <ListItem key={text} disablePadding sx={{ display: 'block' }}>
                             <Link to="/dashboard">
                                 <ListItemButton
                                     onClick={handleDrawerClose}
@@ -242,7 +249,7 @@ export default function MenuAppBar() {
                                                 },
                                         ]}
                                     >
-                                        {<HomeIcon/>}
+                                        {<HomeIcon />}
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={text}
@@ -261,10 +268,10 @@ export default function MenuAppBar() {
                         </ListItem>
                     ))}
                 </List>
-                <Divider/>
+                <Divider />
                 <List>
                     {['Papers', 'Reviews'].map((text, index) => (
-                        <ListItem key={text} disablePadding sx={{display: 'block'}}>
+                        <ListItem key={text} disablePadding sx={{ display: 'block' }}>
                             <Link to={text === 'Papers' ? "/papers" : "/reviews"}>
                                 <ListItemButton
                                     onClick={handleDrawerClose}
@@ -298,7 +305,7 @@ export default function MenuAppBar() {
                                                 },
                                         ]}
                                     >
-                                        {index === 0 ? <MenuBookIcon/> : <LibraryBooksIcon/>}
+                                        {index === 0 ? <MenuBookIcon /> : <LibraryBooksIcon />}
 
                                     </ListItemIcon>
                                     <ListItemText
