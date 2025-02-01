@@ -16,7 +16,6 @@ import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
 import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
-import SinglePaperRequest from "./components/SinglePaperRequest";
 
 
 const theme = createTheme({
@@ -178,17 +177,6 @@ function App() {
                                                 <SinglePaper/>
                                             </>
                                         
-                                    }
-                                />
-                                <Route
-                                    path="/request/:id"
-                                    element={
-
-                                        <>
-                                            <TopMenuBar/>
-                                            <SinglePaperRequest/>
-                                        </>
-
                                     }
                                 />
                                 <Route

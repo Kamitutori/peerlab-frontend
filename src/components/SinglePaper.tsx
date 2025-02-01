@@ -12,6 +12,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import Divider from '@mui/material/Divider';
 import { styled } from '@mui/material/styles';
+import {Typography} from "@mui/material";
 
 interface PaperElement {
     id: number;
@@ -26,10 +27,42 @@ interface PaperElement {
     reviewLimit: number;
 }
 
+interface RequestElement {
+    id: number;
+    status: string;
+    paperId: number;
+    reviewId: number;
+}
 
-export default function SinglePaper() {
+interface Props {
+    request: RequestElement;
+}
+
+const BannerBox = styled(Box)(({ theme, bannerColor }: { bannerColor: string, theme: any }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: bannerColor,
+    padding: theme.spacing(1.5),
+    borderRadius: '4px',
+    marginBottom: theme.spacing(2),
+}));
+
+const Root = styled('div')(({ theme }) => ({
+    width: '95%',
+    ...theme.typography.body2,
+    color: theme.palette.text.secondary,
+    justifyContent: 'center',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: theme.spacing(2),
+}));
+
+
+export default function SinglePaper({ request }: Props) {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const isRequest = Boolean(request && request.id && request.status);
 
     const {
         isPending: isPaperPending,
@@ -45,6 +78,7 @@ export default function SinglePaper() {
         }
     });
 
+    {/* TO DO : download link for the paper!!*/}
     const fileUrl = 'https://example.com/path/to/your/file.pdf';
     const fileName = 'downloaded-file.pdf';
     const handleDownload = () => {
@@ -53,16 +87,6 @@ export default function SinglePaper() {
         link.download = fileName;
         link.click();
     };
-
-    const Root = styled('div')(({ theme }) => ({
-        width: '95%',
-        ...theme.typography.body2,
-        color: theme.palette.text.secondary,
-        justifyContent: 'center',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: theme.spacing(2),
-    }));
 
     if (isPaperPending) {
         return <span>Loading...</span>;
@@ -73,41 +97,97 @@ export default function SinglePaper() {
 
     const paperObject: PaperElement = paperData;
 
+    const openToReview = isRequest && ((request.status === "ACCEPTED" && !request.reviewId) ||
+        (request.status === "EXPIRED" && !request.reviewId && !paperObject.reviewLimit && paperObject.active));
+
+
+    // Logic for banner color and message
+    let bannerColor = '#FF6347';
+    let bannerMessage = "The request is expired."; // Default message
+
+    if (isRequest) {
+        const getBannerColor = (status: string): string => {
+            switch (status) {
+                case "ACCEPTED":
+                case "SUBMITTED":
+                    return "#90EE90"; // Green
+                default:
+                    return "#FF6347"; // Red
+            }
+        };
+
+        const getBannerMessage = (status: string): string => {
+            switch (status) {
+                case "PENDING":
+                    return "A review has been requested : ";
+                case "ACCEPTED":
+                    return "The request has been accepted.";
+                case "SUBMITTED":
+                    return "The review has been submitted.";
+                case "REJECTED":
+                    return "The request has been rejected.";
+                default:
+                    return "The request is expired.";
+            }
+        };
+
+        bannerColor = getBannerColor(request.status);
+        bannerMessage = getBannerMessage(request.status);
+    }
+    {/*TO DO : change the status of the request when the button is clicked */}
+    const handleAccept = () => {
+        console.log('Request Accepted');
+    };
+
+    const handleReject = () => {
+        console.log('Request Rejected');
+    };
+
+    {/* TO DO : Delete the review if the button is clicked*/}
+    const handleDelete = () => {
+        console.log('Review Deleted');
+    };
+
     return (
         <>
-            <Paper sx={{ width: '100%' }}>
-                <h2>.</h2>
-                <h2 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{paperObject.title}</h2>
-                <h3 style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Authors : ${paperObject.authors}`}</h3>
-
-                <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Stack spacing={1} sx={{ alignItems: 'center', paddingLeft: '10px', paddingRight: '10px' }}>
-                        <Chip label={paperObject.internal ? 'Internal' : 'External'} />
-                    </Stack>
+            <Paper sx={{ width: '100%', padding: '20px', borderRadius: '8px', boxShadow: 3, marginTop: 9}}>
+                <Typography variant="h4" sx={{ marginBottom: 2, textAlign: 'center' }}>{paperObject.title}</Typography>
+                {isRequest && (<BannerBox bannerColor={bannerColor} theme={undefined} >
+                    <Typography variant="h6" sx={{ flexGrow: 1, color: '#fff', paddingLeft: '10px' }}>
+                        {bannerMessage}
+                    </Typography>
+                    {request.status === "PENDING" && (
+                        <>
+                            <Button variant="contained" color="secondary" onClick={handleAccept}>Accept</Button>
+                            <Button variant="contained" color="secondary" sx={{ marginLeft: 2 }} onClick={handleReject}>Reject</Button>
+                        </>
+                    )}
+                </BannerBox>)}
+                <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ marginBottom: 2 }}>
+                    <Chip label={paperObject.internal ? 'Internal' : 'External'} color="primary" />
                     <Button
-                        component="label"
                         variant="contained"
-                        tabIndex={-1}
                         onClick={handleDownload}
                         startIcon={<FileDownloadIcon />}
-                        sx={{ marginRight: '20px' }}
                     >
-                        Download paper
+                        Download Paper
                     </Button>
                 </Stack>
+                <Typography variant="body1"><strong>Authors : </strong> {paperObject.authors}</Typography>
+                <Typography variant="body1"><strong>Preview : </strong> {paperObject.abstractText}</Typography>
+                <Root>
+                    <Divider />
+                </Root>
+                <Typography variant="body1"><strong>Reached reviews : </strong> *number of reached reviews* {paperObject.reviewLimit ? ` / ${paperObject.reviewLimit}` : ' '}</Typography>
+                <Typography variant="body1"><strong>Status :  </strong> {`${paperObject.active ? 'active' : 'inactive'}`}</Typography>
 
-                <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Status :  ${paperObject.active ? 'active' : 'inactive'}`}</div>
-                <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Review limit : X/${paperObject.reviewLimit}`}</div>
-                <Box sx={{ display: 'grid', gridTemplateRows: 'repeat(3, 1fr)', paddingLeft: '10px', paddingRight: '10px' }}>
-                    <div>{`Preview: ${paperObject.abstractText}`}</div>
-                </Box>
 
                 <Root>
                     <Divider>Author's Note</Divider>
-                    <p>{paperObject.authorsNote}</p>
+                    <Typography variant="body2" sx={{ fontStyle: 'italic' }}>{paperObject.authorsNote}</Typography>
                     <Divider />
                 </Root>
-
+                {!isRequest && (
                 <List
                     sx={{
                         width: '100%',
@@ -132,13 +212,38 @@ export default function SinglePaper() {
                             </ul>
                         </li>
                     ))}
-                </List>
-
-                <Stack spacing={2} direction="row" justifyContent="flex-end">
-                    <Button variant="outlined" onClick={() => navigate(`/edit-paper/${id}`)}>
-                        Edit
-                    </Button>
+                </List>)}
+                <Stack spacing={2} direction="row" justifyContent="flex-end" sx={{ marginTop: 2 }}>
+                    <Button variant="outlined" onClick={() => navigate(`/edit-paper/${id}`)}>Edit</Button>
+                    {isRequest && request.reviewId && (
+                        <Button variant="outlined" onClick={() => navigate(`/view-review/${request.reviewId}`)}>
+                            View Review
+                        </Button>
+                    )}
+                    {openToReview && (
+                        <Button variant="outlined" onClick={() => navigate(`/add-review/${id}`)}>
+                            Add Review
+                        </Button>
+                    )}
                 </Stack>
+                {isRequest && request.reviewId && (
+                    <Stack direction="row" justifyContent="flex-end" sx={{ marginTop: 2 }}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => navigate(`/edit-review/${request.reviewId}`)}
+                            color="primary"
+                            sx={{ marginRight: 2 }}
+                        >
+                            Edit the Review
+                        </Button>
+                    </Stack>
+            )}
+                {isRequest && request.reviewId && (
+                    <Stack spacing={2} direction="row" justifyContent="flex-end">
+                        <Button variant="outlined" onClick={handleDelete}>
+                            Delete review
+                        </Button>
+                    </Stack>)}
             </Paper>
 
             <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>{`Upload Date: ${paperObject.uploadDate}`}</div>
