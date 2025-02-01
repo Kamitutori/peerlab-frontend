@@ -20,7 +20,6 @@ export interface ListProps {
     title: string;
 }
 
-// TODO proper error treatment in terms of logout.
 // TODO proper navigation to paper page with context
 export default function RequestListOfPapers({endpoint, title}: ListProps) {
     const { showAlert } = useAlertDialog();
