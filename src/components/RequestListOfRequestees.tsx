@@ -15,23 +15,27 @@ import {useNavigate} from "react-router-dom";
 export interface SinglePaperRequestListEntry {
     id: number;
     status: string;
-    paperId: string;
+    paperId: number;
     paperTitle: string;
     paperOwnerName: string;
     requesteeId: number;
     requesteeName: string;
-    reviewId: number;
+    reviewId: number | null;
+    creationDate: string;
 }
 
-interface ListOfRequesteesProps {
+export interface ListOfRequesteesProps {
     requests: SinglePaperRequestListEntry[];
 }
 
 export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
     const navigate = useNavigate();
 
-    const statusOrder = ["SUBMITTED", "ACCEPTED", "PENDING", "REJECTED", "EXPIRED"];
-    requests.sort((a: SinglePaperRequestListEntry, b: SinglePaperRequestListEntry) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status));
+    requests.sort((a: SinglePaperRequestListEntry, b: SinglePaperRequestListEntry) => {
+        const statusOrder = ["SUBMITTED", "ACCEPTED", "PENDING", "REJECTED", "EXPIRED"];
+        const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+        return statusComparison !== 0 ? statusComparison : a.requesteeName.localeCompare(b.requesteeName);
+    });
 
     const handleClick = (reviewId: number) => {
         navigate(`/review/${reviewId}`);
@@ -39,15 +43,19 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
 
     const matchColor = (status: string) => {
         if (status === "PENDING") {
-            return "info";
+            return "#e6e600"; // Light mode
+            //return "#b3b300"; // Dark mode
         } else if (status === "ACCEPTED") {
-            return "white";
+            return "#00ccff"; // Light mode
+            //return "#008ae6"; // Dark mode
         } else if (status === "SUBMITTED") {
-            return "success";
+            return "#99ff99"; // Light mode
+            //return "#008000"; // Dark mode
         } else if (status === "REJECTED") {
-            return "error";
+            return "#ff0000"; // Light mode
         } else {
-            return "grey";
+            return "#f2f2f2"; // Light mode
+            //return "#595959"; // Dark mode
         }
     }
 
@@ -87,18 +95,18 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
                                    id: number;
                                    status: string;
                                    requesteeName: string;
-                                   reviewId: number
+                                   reviewId: number | null
                                },
                                index: number) => (
                         <div key={request.id}>
                             <ListItemButton
                                 disabled={request.status !== "SUBMITTED"}
-                                onClick={() => handleClick(request.reviewId)}
-                                color={matchColor(request.status)}
+                                onClick={() => handleClick(request.reviewId === null ? 0 : request.reviewId)}
                                 sx={{
                                     borderRadius: 2,
+                                    backgroundColor: matchColor(request.status),
                                     "&:hover": {
-                                        backgroundColor: "background.paper",
+                                        backgroundColor: "#888888", // Dark: b2b2b2; Light: 888888
                                     },
                                 }}
                             >
