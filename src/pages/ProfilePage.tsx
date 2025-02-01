@@ -211,7 +211,7 @@ function ProfilePage() {
 
     const handleAccountDeletion = async () => {
         const result = await showAlert(ACCOUNT_DELETION_ALERT_TITLE, ACCOUNT_DELETION_ALERT_MESSAGE, ACCOUNT_DELETION_CONFIRM_TEXT, ACCOUNT_DELETION_CANCEL_TEXT);
-        result ? submitAccountDeletion() : setIsAccountDeletion(false);
+        result ? await submitAccountDeletion() : setIsAccountDeletion(false);
     }
 
     const submitAccountDeletion = async () => {
