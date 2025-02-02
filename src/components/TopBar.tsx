@@ -78,6 +78,7 @@ const AppBar = styled(MuiAppBar, {
     ],
 }));
 
+/** This drawer serves as the nav bar. */
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme }) => ({
         width: drawerWidth,
