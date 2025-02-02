@@ -78,6 +78,10 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     <Typography>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
+                ) : data.length === 0 ? (
+                    <Typography color={"textSecondary"}>
+                        No papers to display.
+                    </Typography>
                 ) : (
                     <List sx={{maxHeight: 353, overflow: 'auto'}}>
                         {data.map((paper: { id: number; title: string; owner: { name: string } }, index: number) => (

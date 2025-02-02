@@ -106,6 +106,10 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                     <Typography sx={{color: "white"}}>Loading reviews...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load reviews.</Typography>
+                ) : data.length === 0 ? (
+                    <Typography color={"textSecondary"}>
+                        No reviews to display.
+                    </Typography>
                 ) : (
                     <List sx={{maxHeight: 353, overflow: 'auto'}}>
                         {data.map((review:

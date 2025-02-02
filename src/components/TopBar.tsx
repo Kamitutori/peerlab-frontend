@@ -223,7 +223,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                         {
                                             minHeight: 48,
                                             px: 2.5,
-                                            color: "white",
+                                            color: 'text.primary',
                                         },
                                         open ? {justifyContent: 'initial',} : {justifyContent: 'center',},
                                     ]}
@@ -261,7 +261,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                         {
                                             minHeight: 48,
                                             px: 2.5,
-                                            color: "white",
+                                            color: 'text.primary',
                                         },
                                         open ? {justifyContent: 'initial',} : {justifyContent: 'center',},
                                     ]}
@@ -278,6 +278,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
 
                                     </ListItemIcon>
                                     <ListItemText
+
                                         primary={text}
                                         sx={[
                                             open ? {opacity: 1,} : {opacity: 0,},

@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react';
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {CssBaseline, ThemeProvider} from "@mui/material";
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import {darkTheme, lightTheme} from "./theme";
+import { darkTheme, lightTheme } from "./theme";
 
 import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
@@ -47,7 +47,7 @@ function App() {
         <div>
             <BrowserRouter>
                 <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-                    <CssBaseline/>
+                    <CssBaseline />
                     <AuthProvider>
                         <AlertDialogProvider>
                             <div className="container">
@@ -190,8 +190,97 @@ function App() {
                                             </PrivateRoute>
                                         }
                                     />
+                                    <Route
+                                        path="/dashboard"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <Dashboard/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/profile"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <ProfilePage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/papers"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <MyPapersPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/reviews"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <MyReviewsPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <PaperList endpoint="/api/papers" title="Papers"/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+
+                                    />
+                                    <Route
+                                        path="/paper/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <SinglePaper/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/edit-paper/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <EditPaperPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/add-paper"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <AddPaperPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
                                     {/* Fallback Route */}
-                                    <Route path="*" element={<NoPage/>}/>
+                                    <Route path="*" element={<NoPage />} />
                                 </Routes>
                             </div>
                         </AlertDialogProvider>
