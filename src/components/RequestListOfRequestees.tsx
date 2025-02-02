@@ -51,15 +51,15 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
     /** Adapts the color scheme of the requests to their status and the current theme. */
     const matchColor = (status: string) => {
         if (status === "PENDING") {
-            return isLightMode ? "#e6e600": "#b3b300";
+            return isLightMode ? "#c1b80b": "#b3b300";
         } else if (status === "ACCEPTED") {
-            return isLightMode ? "#00ccff": "#008ae6";
+            return isLightMode ? "#449fd5": "#008ae6";
         } else if (status === "SUBMITTED") {
-            return isLightMode ? "#99ff99" : "#008000";
+            return isLightMode ? "#2f8c2f" : "#018a01";
         } else if (status === "REJECTED") {
             return "#ff0000";
         } else {
-            return isLightMode ? "#f2f2f2" : "#595959";
+            return isLightMode ? "#000000" : "#dadada";
         }
     }
 
@@ -111,9 +111,8 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
                                 onClick={() => handleClick(request.reviewId === null ? 0 : request.reviewId)}
                                 sx={{
                                     borderRadius: 2,
-                                    backgroundColor: "background.paper",
                                     "&:hover": {
-                                        backgroundColor: "#888888", // Dark: b2b2b2; Light: 888888
+                                        backgroundColor: "background.paper",
                                     },
                                 }}
                             >
