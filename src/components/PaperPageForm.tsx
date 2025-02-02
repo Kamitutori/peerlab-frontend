@@ -108,6 +108,9 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
+        } else if (files.length === 0) {
+            setWarning("Please upload a file.");
+            return;
         } else {
             setWarning('');
         }
@@ -136,7 +139,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             requests: requests.map(requesteeId => {
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
                 return {
-                    status: "PENDING",
                     paper: { id: 0 },
                     requestee: {
                         id: requesteeId,
@@ -157,17 +159,9 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 body: JSON.stringify(paperData)
             });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
             const result = await response.json();
             event.preventDefault();
 
-            if (files.length === 0) {
-                setWarning("Please upload a file.");
-                return;
-            }
 
             const file = files[0];
 
@@ -211,10 +205,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                 }
             });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
 
             const text = await response.text();
             const result = text ? JSON.parse(text) : {};
@@ -284,7 +274,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
     return (
         <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
-            <Typography variant="h4" component="h1" sx={{ color: 'white' }} fontWeight={"bold"}>
+            <Typography variant="h4" component="h1" fontWeight={"bold"}>
                 {initialData.title ? 'Edit Paper' : 'Add Paper'}
             </Typography>
             <form onSubmit={handleSubmit}>
@@ -335,7 +325,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                             onChange={(e) => setAuthorsNote(e.target.value)}
                             multiline
                             rows={9.4}
-                            sx={{ width: '130%' }}
+                            sx={{ width: '100%' }}
                         />
                     </Grid2>
                 </Grid2>

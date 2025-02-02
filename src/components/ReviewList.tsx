@@ -44,7 +44,7 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                 margin: "auto",
                 mt: 4,
                 boxShadow: 3,
-                backgroundColor: "background.paper",
+                backgroundColor: "background.default",
             }}
         >
             <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
@@ -52,7 +52,6 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                     variant="h6"
                     component="div"
                     sx={{
-                        color: "white",
                         position: 'sticky',
                         top: 0,
                         backgroundColor: "background.paper",
@@ -76,13 +75,13 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                                     sx={{
                                         borderRadius: 2,
                                         "&:hover": {
-                                            backgroundColor: "#353535",
+                                            backgroundColor: "background.paper",
                                         },
                                     }}
                                 >
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <ArticleIcon sx={{color: 'primary.main'}}/>
+                                            <ArticleIcon sx={{color: 'background.default'}}/>
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText

@@ -1,10 +1,13 @@
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {createTheme, ThemeProvider} from "@mui/material";
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
+import { darkTheme, lightTheme } from "./theme";
 
 import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/ProfilePage";
 import MyPapersPage from "./pages/MyPapersPage.tsx";
 import MyReviewsPage from "./pages/MyReviewsPage.tsx";
 import NoPage from "./pages/NoPage";
@@ -81,13 +84,35 @@ const theme = createTheme({
 });
 
 function App() {
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme ? JSON.parse(savedTheme) : false;
+    });
+
+    const toggleTheme = () => {
+        setIsDarkMode((prevMode: boolean) => {
+            const newMode = !prevMode;
+            localStorage.setItem('theme', JSON.stringify(newMode));
+            return newMode;
+        });
+    };
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setIsDarkMode(JSON.parse(savedTheme));
+        }
+    }, []);
+
     return (
         <div>
             <BrowserRouter>
-                <ThemeProvider theme={theme}>
+                <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+                    <CssBaseline />
                     <AuthProvider>
                         <AlertDialogProvider>
                             <div className="container">
+                                <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
                                 <Routes>
                                     {/* Public Routes */}
                                     <Route

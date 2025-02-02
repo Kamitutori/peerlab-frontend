@@ -76,7 +76,7 @@ export default function LoginPage() {
     return (
         <Box>
             <Paper sx={{
-                bgcolor: "#333",
+                bgColor: "primary.main",
                 width: "350px",
                 maxWidth: "350px"
             }}
@@ -98,7 +98,7 @@ export default function LoginPage() {
                              alt="PeerLab logo"
                              style={{height: 100, width: 100}}
                         />
-                        <h1 style={{color: "#fff"}}>
+                        <h1>
                             Login
                         </h1>
                         {showMessage && (
