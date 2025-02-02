@@ -111,7 +111,7 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
                                 onClick={() => handleClick(request.reviewId === null ? 0 : request.reviewId)}
                                 sx={{
                                     borderRadius: 2,
-                                    backgroundColor: matchColor(request.status),
+                                    backgroundColor: "background.paper",
                                     "&:hover": {
                                         backgroundColor: "#888888", // Dark: b2b2b2; Light: 888888
                                     },
@@ -138,7 +138,7 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
                                         secondary: {
                                             sx: {
                                                 fontSize: "0.75rem",
-                                                color: "primary",
+                                                color: matchColor(request.status),
                                             },
                                         }
                                     }}
