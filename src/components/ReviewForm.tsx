@@ -1,7 +1,3 @@
-// TODO number of review files may be limited to 5
-// TODO whether score is disabled has to be set accordingly to the internal/external value (which is not typical for a review to know)
-// TODO what if the user deletes his token right before submission?
-
 import React, {useEffect, useRef, useState} from 'react';
 import {
     Box,
@@ -18,6 +14,8 @@ import {useDropzone} from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
+import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useNavigate} from "react-router-dom";
 
 interface ReviewFormProps {
     initialData?: any;
@@ -25,7 +23,14 @@ interface ReviewFormProps {
 }
 
 const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
+    const CANCEL_REVIEW_ALERT_TITLE = "Cancel Review";
+    const CANCEL_REVIEW_ALERT_MESSAGE = "Are you sure you want to cancel writing this review? All inputs will be discarded.";
+    const CANCEL_REVIEW_ALERT_OK_TEXT = "Confirm";
+    const CANCEL_REVIEW_ALERT_CANCEL_TEXT = "Cancel";
+
     const {logout} = useUpdateAuth();
+    const {showAlert} = useAlertDialog();
+    const navigate = useNavigate();
     const [warning, setWarning] = useState('');
 
     /** Input fields of a review */
@@ -36,15 +41,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
     const [questions, setQuestions] = useState(initialData.questions || '');
     const [score, setScore] = useState(initialData.score || '');
     const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
-    //const [fileIds, setFileIds] = useState(initialData.fileIds || Array<string>(5).fill(''));
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     /** Properties of the corresponding request needed for a correct submission of a review */
-    const [request] = useState(initialData.request || '');
-    const [isExternal] = useState(!initialData.isInternal || true);
-    const [minScore] = useState(initialData.minScore || '');
-    const [maxScore] = useState(initialData.maxScore || '');
+    const [request] = useState(initialData.request);
+    const [isExternal] = useState(!initialData.isInternal);
+    const [minScore] = useState(initialData.minScore);
+    const [maxScore] = useState(initialData.maxScore);
 
     /** Checks whether the text fields have to be filled out or a file is uploaded */
     const [isTextRequired, setIsTextRequired] = useState(true);
@@ -72,6 +76,34 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
 
         setWarning('');
 
+        const fileIds: string[] = [];
+        for (const file of files) {
+            try {
+                const uploadResponse = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                    }
+                });
+
+                const { uploadUrl, fileId } = await uploadResponse.json();
+
+                await fetch(uploadUrl, {
+                    method: "PUT",
+                    body: file,
+                    headers: {
+                        "Content-Type": file.type
+                    }
+                });
+
+                fileIds.push(fileId);
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                setWarning('Error uploading file(s).');
+                return;
+            }
+        }
+
         const reviewData = {
             summary: summary,
             strengths: strengths,
@@ -79,7 +111,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
             comments: comments,
             confidenceLevel: confidenceLevel,
             score: score,
-            fileIds: ["1", "2"], //fileIds
+            fileIds: fileIds,
             submissionDate: new Date().toISOString(),
             request: request
         };
@@ -118,10 +150,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
 
     /** These functions handle the file upload */
     const onDrop = (acceptedFiles: File[]) => {
-        setFiles(acceptedFiles);
+        setFiles(prevFiles => [...prevFiles, ...acceptedFiles]);
     };
 
-    const {getRootProps, getInputProps} = useDropzone({onDrop});
+    const {getRootProps, getInputProps} = useDropzone({onDrop, multiple: true});
 
     const handleUploadClick = () => {
         if (fileInputRef.current) {
@@ -129,14 +161,18 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
         }
     };
 
-    const handleRemoveFile = () => {
-        setFiles([]);
+    const handleRemoveFile = (fileName: string) => {
+        setFiles(files.filter(file => file.name !== fileName));
     };
 
     /** Handles the cancellation of the review */
-    const handleCancel = () => {
-        // TODO show confirmation pop up and then redirect to the previous page
+    const handleCancel = async () => {
+        const hasCanceled = await showAlert(CANCEL_REVIEW_ALERT_TITLE, CANCEL_REVIEW_ALERT_MESSAGE, CANCEL_REVIEW_ALERT_OK_TEXT, CANCEL_REVIEW_ALERT_CANCEL_TEXT);
+        if (hasCanceled) {
+            navigate(`http://localhost:8080/paper/${request.paperId}`, { state: { source: "paper_list" } });
+        }
     };
+    console.log(files)
 
     return (
         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%"}}>
@@ -229,32 +265,36 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                     </Grid2>
 
                     {/* File Upload */}
-                    {files.length === 0 ? (
-                        <Box {...getRootProps()}
-                             sx={{
-                                 border: '2px dashed grey',
-                                 padding: 4,
-                                 textAlign: 'center',
-                                 marginTop: 2
-                             }}>
-                            <input {...getInputProps()} />
-                            <Typography sx={{color: 'primary'}}>
-                                Drag & drop some files here, or click to select files
-                            </Typography>
-                            <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
-                                Upload File
-                            </Button>
-                        </Box>
-                    ) : (
-                        <Box sx={{display: 'flex', alignItems: 'center', marginTop: 2}}>
-                            <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
-                                Uploaded file: {files[0].name}
-                            </Typography>
-                            <IconButton onClick={handleRemoveFile} sx={{ml: 1}}>
-                                <CloseIcon/>
-                            </IconButton>
+                    <Box {...getRootProps()}
+                         sx={{
+                             border: '2px dashed grey',
+                             padding: 4,
+                             textAlign: 'center',
+                             marginTop: 2
+                         }}>
+                        <input {...getInputProps()} />
+                        <Typography sx={{color: 'primary'}}>
+                            Drag & drop some files here, or click to select files
+                        </Typography>
+                        <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
+                            Upload File
+                        </Button>
+                    </Box>
+                    {files.length > 0 && (
+                        <Box sx={{marginTop: 2}}>
+                            {files.map(file => (
+                                <Box key={file.name} sx={{display: 'flex', alignItems: 'center', marginTop: 1}}>
+                                    <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
+                                        {file.name}
+                                    </Typography>
+                                    <IconButton onClick={() => handleRemoveFile(file.name)} sx={{ml: 1}}>
+                                        <CloseIcon/>
+                                    </IconButton>
+                                </Box>
+                            ))}
                         </Box>
                     )}
+
                     <input
                         type="file"
                         accept={'.pdf'}
@@ -265,6 +305,20 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                                 setFiles(Array.from(e.target.files));
                             }
                         }}
+                        multiple
+                    />
+
+                    <input
+                        type="file"
+                        accept={'.pdf'}
+                        ref={fileInputRef}
+                        style={{display: 'none'}}
+                        onChange={(e) => {
+                            if (e.target.files) {
+                                setFiles(prevFiles => [...prevFiles, ...Array.from(e.target.files)]);
+                            }
+                        }}
+                        multiple
                     />
                     {warning && (
                         <Typography color="error" sx={{mt: 2}}>
@@ -282,7 +336,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                         <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
                             Submit
                         </Button>
-                        <Button variant="outlined" color="secondary" onClick={handleCancel} sx={{mt: 2}}>
+                        <Button variant="outlined" color="error" onClick={handleCancel} sx={{mt: 2}}>
                             Cancel
                         </Button>
                     </Box>
