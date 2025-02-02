@@ -56,6 +56,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [authorsNote, setAuthorsNote] = useState(initialData.authorsNote || '');
     const [abstractText, setAbstractText] = useState(initialData.abstractText || '');
     const [files, setFiles] = useState<File[]>([]);
+    const [fileId] = useState(initialData.id || '');
     const [warning, setWarning] = useState('');
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [requests, setRequests] = useState<string[]>(initialData.requests || []);
@@ -133,7 +134,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             reviewLimit,
             minScore: minScoreNumber,
             maxScore: maxScoreNumber,
-            fileId: "1",
+            fileId, // This will be updated after file upload
             active: true,
             internal: internal === 'internal',
             requests: requests.map(requesteeId => {
@@ -160,20 +161,20 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             });
 
             const result = await response.json();
-            event.preventDefault();
-
 
             const file = files[0];
 
             try {
-                const response = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
+                const uploadResponse = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem("jwt")}`
                     }
                 });
 
-                const uploadUrl = await response.text();
+                const { uploadUrl, fileId } = await uploadResponse.json();
+                console.log(fileId);
+                console.log(uploadUrl);
 
                 await fetch(uploadUrl, {
                     method: "PUT",
@@ -185,14 +186,42 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
                 console.log("File uploaded successfully");
 
+                // Update paperData with the correct fileId
+                paperData.fileId = fileId;
+
+                // Update the paper with the correct fileId
+                await fetch(`http://localhost:8080/api/papers/${result.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                    },
+                    body: JSON.stringify(paperData)
+                });
+
             } catch (error) {
                 console.error("Error uploading file:", error);
             }
-            console.log('Success:', result);
-
             navigate(`/paper/${result.id}`);
         } catch (error) {
             console.error('Error:', error);
+        }
+    };
+
+    const handleDownloadClick = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${initialData.fileId}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                }
+            });
+
+            const downloadUrl = await response.text();
+
+            window.open(downloadUrl, '_blank');
+        } catch (error) {
+            console.error("Error downloading file:", error);
         }
     };
 
@@ -246,29 +275,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             setRequests(reviewers.map(reviewer => reviewer.id));
         } else {
             setRequests([]);
-        }
-    };
-
-    const handleDownloadClick = async () => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${initialData.fileId}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-                }
-            });
-
-            const downloadUrl = await response.text();
-
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = initialData.title;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-        } catch (error) {
-            console.error("Error downloading file:", error);
         }
     };
 
@@ -359,11 +365,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 />
                 {initialData.id ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
-                        <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
-                            Uploaded file: {initialData.title}
-                        </Typography>
                         <Button variant="contained" color="secondary" onClick={handleDownloadClick} sx={{ ml: 2 }}>
-                            Download File
+                            Download uploaded file
                         </Button>
                     </Box>
                 ) : (
