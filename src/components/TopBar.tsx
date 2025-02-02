@@ -223,7 +223,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                         {
                                             minHeight: 48,
                                             px: 2.5,
-                                            color: "black",
+                                            color: 'text.primary',
                                         },
                                         open
                                             ? {
@@ -279,7 +279,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                         {
                                             minHeight: 48,
                                             px: 2.5,
-                                            color: "black",
+                                            color: 'text.primary',
                                         },
                                         open
                                             ? {
