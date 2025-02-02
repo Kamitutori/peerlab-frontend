@@ -56,7 +56,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [authorsNote, setAuthorsNote] = useState(initialData.authorsNote || '');
     const [abstractText, setAbstractText] = useState(initialData.abstractText || '');
     const [files, setFiles] = useState<File[]>([]);
-    const [fileId] = useState(initialData.id || '');
     const [warning, setWarning] = useState('');
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [requests, setRequests] = useState<string[]>(initialData.requests || []);
@@ -109,7 +108,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
-        } else if (files.length === 0) {
+        } else if (files.length === 0 && !initialData.id) {
             setWarning("Please upload a file.");
             return;
         } else {
@@ -124,6 +123,36 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
         const uploadDate = new Date().toISOString();
 
+        let fileId = initialData.fileId;
+
+        if (files.length > 0) {
+            const file = files[0];
+
+            try {
+                const uploadResponse = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                    }
+                });
+
+                const { uploadUrl, fileId: newFileId } = await uploadResponse.json();
+
+                await fetch(uploadUrl, {
+                    method: "PUT",
+                    body: file,
+                    headers: {
+                        "Content-Type": file.type
+                    }
+                });
+
+                fileId = newFileId;
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                return;
+            }
+        }
+
         const paperData = {
             title,
             owner,
@@ -134,7 +163,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             reviewLimit,
             minScore: minScoreNumber,
             maxScore: maxScoreNumber,
-            fileId, // This will be updated after file upload
+            fileId,
             active: true,
             internal: internal === 'internal',
             requests: requests.map(requesteeId => {
@@ -161,47 +190,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             });
 
             const result = await response.json();
-
-            const file = files[0];
-
-            try {
-                const uploadResponse = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-                    }
-                });
-
-                const { uploadUrl, fileId } = await uploadResponse.json();
-                console.log(fileId);
-                console.log(uploadUrl);
-
-                await fetch(uploadUrl, {
-                    method: "PUT",
-                    body: file,
-                    headers: {
-                        "Content-Type": file.type
-                    }
-                });
-
-                console.log("File uploaded successfully");
-
-                // Update paperData with the correct fileId
-                paperData.fileId = fileId;
-
-                // Update the paper with the correct fileId
-                await fetch(`http://localhost:8080/api/papers/${result.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-                    },
-                    body: JSON.stringify(paperData)
-                });
-
-            } catch (error) {
-                console.error("Error uploading file:", error);
-            }
             navigate(`/paper/${result.id}`);
         } catch (error) {
             console.error('Error:', error);
