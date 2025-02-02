@@ -14,15 +14,17 @@ import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
-import {SinglePaperRequestListEntry} from "./RequestListOfRequestees.tsx";
+import {RequestObject} from "./RequestListOfRequestees.tsx";
 
+/** The props for the list of papers; the title of the list and the endpoint to fetch its data from. */
 export interface ListProps {
     endpoint: string;
     title: string;
 }
 
-// TODO proper navigation to paper page with context
-// TODO ALERT: This implementation expects a request dto with a date. You may encounter issues with the current backend.
+// TODO | ALERT: Implementation not compatible with current single paper page implementation with props. Need tot alk about navigational context on monday.
+// TODO | ALERT: This implementation expects a request dto with a date. You may encounter issues with the current backend.
+/** This function processes and returns a list of all papers the user was requested to review. */
 export default function RequestListOfPapers({endpoint, title}: ListProps) {
     const { showAlert } = useAlertDialog();
     const {logout} = useUpdateAuth();
@@ -43,20 +45,28 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
             if (res.status === 401) {
                 await showAlert(LOGOUT_ALERT_TITLE, LOGOUT_ALERT_MESSAGE, "", "");
                 setTimeout(() => {logout();}, 5000);}
-            if (!res.ok) throw new Error("Failed to fetch requests.");
+            if (!res.ok) {
+                throw new Error("Failed to fetch requests.");
+            }
             return res.json();
         },
     });
 
+    /** Sorts the received requests by their creation date. Order is from most to least recent. */
     if (!isLoading && !error) {
-        data.sort((request1: SinglePaperRequestListEntry, request2: SinglePaperRequestListEntry) => {
+        data.sort((request1: RequestObject, request2: RequestObject) => {
             return new Date(request2.creationDate).getTime() - new Date(request1.creationDate).getTime();
         });
     }
+
+    /** Redirects to the paper with the given id.
+     * WARNING: This is where the implementation with the single paper page is not compatible.
+     * */
     const handleClick = (paperId: number) => {
         navigate(`/paper/${paperId}`);
     };
 
+    /** The request list component. */
     return (
         <Card
             sx={{
@@ -67,6 +77,7 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
                 minWidth: 300,
             }}
         >
+            {/* Content of the List */}
             <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
                 <Typography
                     variant="h6"
@@ -102,6 +113,7 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
                                    },
                                    index: number) => (
                             <div key={request.id}>
+                                {/* Requested Papers mapped as List Element */}
                                 <ListItemButton
                                     onClick={() => handleClick(request.paperId)}
                                     sx={{

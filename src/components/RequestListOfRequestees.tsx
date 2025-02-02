@@ -13,8 +13,8 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
 
-// TODO theme adjustment depending on light/dark mode
-export interface SinglePaperRequestListEntry {
+/** The request object as returned by the server endpoint. */
+export interface RequestObject {
     id: number;
     status: string;
     paperId: number;
@@ -26,44 +26,44 @@ export interface SinglePaperRequestListEntry {
     creationDate: string;
 }
 
-export interface ListOfRequesteesProps {
-    requests: SinglePaperRequestListEntry[];
+export interface ListOfRequests {
+    requests: RequestObject[];
 }
 
-/** */
-export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
+/** This function processes and returns a list of all the requested users of a paper. */
+export default function RequestListOfRequestees({requests}: ListOfRequests) {
     const navigate = useNavigate();
     const theme = useTheme();
-    const isLighMode = theme.palette.mode === "light";
+    const isLightMode = theme.palette.mode === "light";
 
-    requests.sort((a: SinglePaperRequestListEntry, b: SinglePaperRequestListEntry) => {
+    /** Sorts the received requests first by their status in below order and secondary in alphabetical order. */
+    requests.sort((a: RequestObject, b: RequestObject) => {
         const statusOrder = ["SUBMITTED", "ACCEPTED", "PENDING", "REJECTED", "EXPIRED"];
         const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
         return statusComparison !== 0 ? statusComparison : a.requesteeName.localeCompare(b.requesteeName);
     });
 
+    /** Redirects to the review with the given id. */
     const handleClick = (reviewId: number) => {
         navigate(`/review/${reviewId}`);
     };
 
+    /** Adapts the color scheme of the requests to their status and the current theme. */
     const matchColor = (status: string) => {
         if (status === "PENDING") {
-            return isLighMode ? "#e6e600" : "#b3b300"; // Light mode
-            //return "#b3b300"; // Dark mode
+            return isLightMode ? "#e6e600": "#b3b300";
         } else if (status === "ACCEPTED") {
-            return "#00ccff"; // Light mode
-            //return "#008ae6"; // Dark mode
+            return isLightMode ? "#00ccff": "#008ae6";
         } else if (status === "SUBMITTED") {
-            return "#99ff99"; // Light mode
-            //return "#008000"; // Dark mode
+            return isLightMode ? "#99ff99" : "#008000";
         } else if (status === "REJECTED") {
-            return "#ff0000"; // Light mode
+            return "#ff0000";
         } else {
-            return "#f2f2f2"; // Light mode
-            //return "#595959"; // Dark mode
+            return isLightMode ? "#f2f2f2" : "#595959";
         }
     }
 
+    /** The request list component. */
     return (
         <Card
             sx={{
@@ -74,6 +74,7 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
                 minWidth: 300,
             }}
         >
+            {/* Content of the List */}
             <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
                 <Typography
                     variant="h6"
@@ -104,6 +105,7 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
                                },
                                index: number) => (
                         <div key={request.id}>
+                            {/* Requests mapped as List Element */}
                             <ListItemButton
                                 disabled={request.status !== "SUBMITTED"}
                                 onClick={() => handleClick(request.reviewId === null ? 0 : request.reviewId)}
