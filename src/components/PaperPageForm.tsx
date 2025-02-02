@@ -365,8 +365,11 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 />
                 {initialData.id ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                        <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
+                            Uploaded file:
+                        </Typography>
                         <Button variant="contained" color="secondary" onClick={handleDownloadClick} sx={{ ml: 2 }}>
-                            Download uploaded file
+                            Download
                         </Button>
                     </Box>
                 ) : (
