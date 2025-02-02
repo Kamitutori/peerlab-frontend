@@ -8,10 +8,12 @@ import {
     ListItemText,
     Typography,
     Divider,
+    useTheme,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
 
+// TODO theme adjustment depending on light/dark mode
 export interface SinglePaperRequestListEntry {
     id: number;
     status: string;
@@ -28,8 +30,11 @@ export interface ListOfRequesteesProps {
     requests: SinglePaperRequestListEntry[];
 }
 
+/** */
 export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isLighMode = theme.palette.mode === "light";
 
     requests.sort((a: SinglePaperRequestListEntry, b: SinglePaperRequestListEntry) => {
         const statusOrder = ["SUBMITTED", "ACCEPTED", "PENDING", "REJECTED", "EXPIRED"];
@@ -43,7 +48,7 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
 
     const matchColor = (status: string) => {
         if (status === "PENDING") {
-            return "#e6e600"; // Light mode
+            return isLighMode ? "#e6e600" : "#b3b300"; // Light mode
             //return "#b3b300"; // Dark mode
         } else if (status === "ACCEPTED") {
             return "#00ccff"; // Light mode

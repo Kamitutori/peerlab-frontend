@@ -14,7 +14,7 @@ import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
-import {ListOfRequesteesProps, SinglePaperRequestListEntry} from "./RequestListOfRequestees.tsx";
+import {SinglePaperRequestListEntry} from "./RequestListOfRequestees.tsx";
 
 export interface ListProps {
     endpoint: string;
@@ -22,14 +22,14 @@ export interface ListProps {
 }
 
 // TODO proper navigation to paper page with context
-//export default function RequestListOfPapers({endpoint, title}: ListProps) {
-export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
+// TODO ALERT: This implementation expects a request dto with a date. You may encounter issues with the current backend.
+export default function RequestListOfPapers({endpoint, title}: ListProps) {
     const { showAlert } = useAlertDialog();
     const {logout} = useUpdateAuth();
     const LOGOUT_ALERT_TITLE = "Forced Logout";
     const LOGOUT_ALERT_MESSAGE = "You will be logged out shortly as your token is invalid.";
     const navigate = useNavigate();
-    /*
+
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
@@ -47,12 +47,12 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
             return res.json();
         },
     });
-*/
 
-     requests.sort((request1: SinglePaperRequestListEntry, request2: SinglePaperRequestListEntry) => {
-        return new Date(request2.creationDate).getTime() - new Date(request1.creationDate).getTime();
-    });
-
+    if (!isLoading && !error) {
+        data.sort((request1: SinglePaperRequestListEntry, request2: SinglePaperRequestListEntry) => {
+            return new Date(request2.creationDate).getTime() - new Date(request1.creationDate).getTime();
+        });
+    }
     const handleClick = (paperId: number) => {
         navigate(`/paper/${paperId}`);
     };
@@ -85,18 +85,15 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
                         minHeight: '50px', // Ensures enough height for vertical centering
                     }}
                 >
-
-                    Requests
+                    {title}
                 </Typography>
-                {/*
                 {isLoading ? (
                     <Typography>Loading requests...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load requests.</Typography>
                 ) : (
-                */}
                     <List sx={{maxHeight: 353, overflow: 'auto'}}>
-                        {requests.map((request:
+                        {data.map((request:
                                    {
                                        id: number;
                                        paperTitle: string;
@@ -141,11 +138,11 @@ export default function RequestListOfPapers({requests}: ListOfRequesteesProps) {
                                         }}
                                     />
                                 </ListItemButton>
-                                {index < requests.length - 1 && <Divider sx={{backgroundColor: "grey"}}/>}
+                                {index < data.length - 1 && <Divider sx={{backgroundColor: "grey"}}/>}
                             </div>
                         ))}
                     </List>
-                {/* )} */}
+                )}
             </CardContent>
         </Card>
     );
