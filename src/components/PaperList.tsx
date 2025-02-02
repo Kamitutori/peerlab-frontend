@@ -87,7 +87,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                     sx={{
                                         borderRadius: 2,
                                         "&:hover": {
-                                            backgroundColor: "#353535",
+                                            backgroundColor: "background.paper",
                                         },
                                     }}
                                 >
