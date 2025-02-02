@@ -13,31 +13,70 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useNavigate} from "react-router-dom";
+import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {RequestObject} from "./RequestListOfRequestees.tsx";
 
+/** The review object as returned by the server endpoint. */
+export interface ReviewObject {
+    id: number;
+    request: RequestObject
+    fileIds: string[];
+    summary: string;
+    strengths: string;
+    weaknesses: string;
+    comments: string;
+    questions: string;
+    score: number,
+    confidenceLevel: number;
+    creationDate: string;
+}
+
+/** The props for the list of papers; the title of the list and the endpoint to fetch its data from. */
 interface ReviewListProps {
     endpoint: string;
     title: string;
 }
 
+// TODO | ALERT: Implementation not compatible with current single paper page implementation with props. Need tot alk about navigational context on monday.
+/** This function processes and returns a list of all papers the user was requested to review. */
 export default function ReviewList({endpoint, title}: ReviewListProps) {
     const {logout} = useUpdateAuth();
     const navigate = useNavigate();
+    const {showAlert} = useAlertDialog();
+    const LOGOUT_ALERT_TITLE = "Forced Logout";
+    const LOGOUT_ALERT_MESSAGE = "You will be logged out shortly as your token is invalid.";
+
+    /** Fetches the reviews from the server. */
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
             const res = await fetch(endpoint);
+            await showAlert(LOGOUT_ALERT_TITLE, LOGOUT_ALERT_MESSAGE, "", "");
             if (res.status === 401) {
                 logout();
             }
-            if (!res.ok) throw new Error("Failed to fetch reviews");
+            if (!res.ok) {
+                throw new Error("Failed to fetch reviews");
+            }
             return res.json();
         },
     });
 
+    /** Sorts the received reviews by their submission date. Order is from most to least recent. */
+    if (!isLoading && !error) {
+        data.sort((review1: ReviewObject, review2: ReviewObject) => {
+            return new Date(review2.creationDate).getTime() - new Date(review1.creationDate).getTime();
+        });
+    }
+
+    /** Redirects to the review with the given id.
+     * WARNING: This is where the implementation with the single paper page is not compatible.
+     * */
     const handleClick = (reviewId: number) => {
         navigate(`/review/${reviewId}`);
     };
 
+    /** The review list component. */
     return (
         <Card
             sx={{
@@ -47,7 +86,8 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                 backgroundColor: "background.default",
             }}
         >
-            <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
+            {/* Content of the List */}
+            <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -63,13 +103,18 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                     {title}
                 </Typography>
                 {isLoading ? (
-                    <Typography sx={{ color: "white" }}>Loading reviews...</Typography>
+                    <Typography sx={{color: "white"}}>Loading reviews...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load reviews.</Typography>
                 ) : (
-                    <List sx={{ maxHeight: 353, overflow: 'auto' }}>
-                        {data.map((review: { id: number; paperName: string; authorName: string }, index: number) => (
-                            <div key={review.id}>
+                    <List sx={{maxHeight: 353, overflow: 'auto'}}>
+                        {data.map((review:
+                                   {
+                                       id: number;
+                                       request: RequestObject;
+                                   }, index: number) => (
+                            <div key={review.request.paperId}>
+                                {/* Reviews mapped as List Element */}
                                 <ListItemButton
                                     onClick={() => handleClick(review.id)}
                                     sx={{
@@ -85,8 +130,8 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
-                                        primary={review.paperName}
-                                        secondary={`Author: ${review.authorName}`}
+                                        primary={review.request.paperTitle}
+                                        secondary={`Author: ${review.request.paperOwnerName}`}
                                         slotProps={{
                                             primary: {
                                                 noWrap: true,

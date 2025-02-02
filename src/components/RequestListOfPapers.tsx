@@ -32,6 +32,7 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
     const LOGOUT_ALERT_MESSAGE = "You will be logged out shortly as your token is invalid.";
     const navigate = useNavigate();
 
+    /** Fetches the requests from the server. */
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
