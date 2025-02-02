@@ -108,7 +108,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
-        } else if (files.length === 0) {
+        } else if (files.length === 0 && !initialData.id) {
             setWarning("Please upload a file.");
             return;
         } else {
@@ -123,6 +123,36 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
         const uploadDate = new Date().toISOString();
 
+        let fileId = initialData.fileId;
+
+        if (files.length > 0) {
+            const file = files[0];
+
+            try {
+                const uploadResponse = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                    }
+                });
+
+                const { uploadUrl, fileId: newFileId } = await uploadResponse.json();
+
+                await fetch(uploadUrl, {
+                    method: "PUT",
+                    body: file,
+                    headers: {
+                        "Content-Type": file.type
+                    }
+                });
+
+                fileId = newFileId;
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                return;
+            }
+        }
+
         const paperData = {
             title,
             owner,
@@ -133,7 +163,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             reviewLimit,
             minScore: minScoreNumber,
             maxScore: maxScoreNumber,
-            fileId: "1",
+            fileId,
             active: true,
             internal: internal === 'internal',
             requests: requests.map(requesteeId => {
@@ -160,39 +190,26 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             });
 
             const result = await response.json();
-            event.preventDefault();
-
-
-            const file = files[0];
-
-            try {
-                const response = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-                    }
-                });
-
-                const uploadUrl = await response.text();
-
-                await fetch(uploadUrl, {
-                    method: "PUT",
-                    body: file,
-                    headers: {
-                        "Content-Type": file.type
-                    }
-                });
-
-                console.log("File uploaded successfully");
-
-            } catch (error) {
-                console.error("Error uploading file:", error);
-            }
-            console.log('Success:', result);
-
             navigate(`/paper/${result.id}`);
         } catch (error) {
             console.error('Error:', error);
+        }
+    };
+
+    const handleDownloadClick = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${initialData.fileId}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                }
+            });
+
+            const downloadUrl = await response.text();
+
+            window.open(downloadUrl, '_blank');
+        } catch (error) {
+            console.error("Error downloading file:", error);
         }
     };
 
@@ -246,29 +263,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             setRequests(reviewers.map(reviewer => reviewer.id));
         } else {
             setRequests([]);
-        }
-    };
-
-    const handleDownloadClick = async () => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${initialData.fileId}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-                }
-            });
-
-            const downloadUrl = await response.text();
-
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = initialData.title;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-        } catch (error) {
-            console.error("Error downloading file:", error);
         }
     };
 
@@ -360,10 +354,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 {initialData.id ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
                         <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
-                            Uploaded file: {initialData.title}
+                            Uploaded file:
                         </Typography>
                         <Button variant="contained" color="secondary" onClick={handleDownloadClick} sx={{ ml: 2 }}>
-                            Download File
+                            Download
                         </Button>
                     </Box>
                 ) : (
