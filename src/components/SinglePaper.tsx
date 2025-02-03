@@ -134,18 +134,76 @@ export default function SinglePaper({ request }: Props) {
         bannerColor = getBannerColor(request.status);
         bannerMessage = getBannerMessage(request.status);
     }
+
+
     {/*TO DO : change the status of the request when the button is clicked */}
-    const handleAccept = () => {
+    const handleAccept = async () => {
         console.log('Request Accepted');
+        try {
+            const response = await fetch(`/requests/${id}`, {
+                method: 'PUT',  // We specify the HTTP method as PUT
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'ACCEPTED',
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update request');
+            }
+
+            const updatedRequest = await response.json();
+            console.log('Request updated:', updatedRequest);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
-    const handleReject = () => {
+    const handleReject = async () => {
         console.log('Request Rejected');
+        try {
+            const response = await fetch(`/requests/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'REJECTED',
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update request');
+            }
+
+            const updatedRequest = await response.json();
+            console.log('Request updated:', updatedRequest);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     {/* TO DO : Delete the review if the button is clicked*/}
-    const handleDelete = () => {
+    const handleDelete = async () => {
         console.log('Review Deleted');
+        try {
+            const response = await fetch(`/requests/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete request');
+            }
+
+            console.log('Request deleted successfully');
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     return (
