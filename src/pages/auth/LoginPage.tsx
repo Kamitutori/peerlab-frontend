@@ -1,17 +1,13 @@
-// TODO proper response messages (not the alert bs from authcontext)
-// TODO maybe better redirection implementation necessary. but if you fiddle with jwts, f. you
-
-import {Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
+import {Alert, Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
 import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
 import {useUpdateAuth} from "../../components/auth/AuthenticationContext.tsx";
 import {useNavigate} from "react-router-dom";
 
-
-
 export default function LoginPage() {
-    const emailRegex = /^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)])$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //const strongPasswordRegex: RegExp = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
     const [showPassword, setShowPassword] = useState(false);
     const {login} = useUpdateAuth();
     const navigate = useNavigate();
@@ -34,6 +30,21 @@ export default function LoginPage() {
         }));
     };
 
+    /** The props of a message the user receives as feedback on trying to login. */
+    const [message, setMessage] = useState<string | null>(null);
+    const [messageType, setMessageType] = useState<'error' | 'success' | 'warning' | ''>('');
+    const [showMessage, setShowMessage] = useState(false);
+
+    function setMessageProps(message: string | undefined, messageType: 'error' | 'success' | 'warning' | '') {
+        if (message === undefined) {
+            setMessage("Unexpected Behavior: Message is null.");
+        } else {
+            setMessage(message);
+        }
+        setMessageType(messageType);
+        setShowMessage(true);
+    }
+
     /**
      * Redirection in case of present jwt (assuming, the user is logged in).
      */
@@ -46,15 +57,23 @@ export default function LoginPage() {
         e.preventDefault();
         const {email, password} = input;
         if (email === "" || password === "") {
-            alert("Please fill in all fields.");
+            setMessageProps("Please fill in all fields.", "warning");
             return;
         }
-         /* if (emailRegex.test(email)) {
-            alert("Your email has no valid format.")
-             return;
-        } */
-        await login({email, password});
-        // TODO Statements here are not reached if successful. Remove alerts and insert error message here. Problem: how to transfer the response code?
+        if (!emailRegex.test(input.email)) {
+            setMessageProps("Please enter a valid email address.", "warning");
+            return;
+        }
+        /*if (!strongPasswordRegex.test(input.password)) {
+            setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
+            return;
+        }*/
+        const response = await login({email, password});
+        if (response.success) {
+            navigate("/dashboard");
+        } else {
+            setMessageProps(response.message, "error");
+        }
     };
 
     /** The login page components. */
@@ -86,6 +105,19 @@ export default function LoginPage() {
                         <h1>
                             Login
                         </h1>
+                        {showMessage && (
+                            <Alert
+                                severity={messageType as 'error' | 'success'}
+                                sx={{
+                                    whiteSpace: 'pre-line',
+                                    width: "100%" ,
+                                    textAlign: "center",
+                                    alignItems: "center"
+                            }}
+                            >
+                                {message}
+                            </Alert>
+                        )}
                         <div></div>
                         <TextField
                             id="email-input"

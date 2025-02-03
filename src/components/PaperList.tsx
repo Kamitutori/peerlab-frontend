@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
+import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 
 interface PaperListProps {
     endpoint: string;
@@ -19,6 +20,8 @@ interface PaperListProps {
 }
 
 export default function PaperList({endpoint, title}: PaperListProps) {
+    const {logout} = useUpdateAuth();
+    const navigate = useNavigate();
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
@@ -29,12 +32,13 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
                 },
             });
+            if (res.status === 401) {
+                logout();
+            }
             if (!res.ok) throw new Error("Failed to fetch papers");
             return res.json();
         },
     });
-
-    const navigate = useNavigate();
 
     const handleClick = (paperId: number) => {
         navigate(`/paper/${paperId}`);
