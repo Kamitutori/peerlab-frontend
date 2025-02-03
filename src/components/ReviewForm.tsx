@@ -78,8 +78,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
 
         const fileIds: string[] = [];
         for (const file of files) {
+            console.log(file.name);
             try {
-                const uploadResponse = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
+                const uploadResponse = await fetch(`http://localhost:8080/api/minio/review-upload-url`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem("jwt")}`
@@ -97,6 +98,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                 });
 
                 fileIds.push(fileId);
+                console.log(`File uploaded: ${file.name}`);
             } catch (error) {
                 console.error("Error uploading file:", error);
                 setWarning('Error uploading file(s).');
@@ -150,7 +152,16 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
 
     /** These functions handle the file upload */
     const onDrop = (acceptedFiles: File[]) => {
-        setFiles(prevFiles => [...prevFiles, ...acceptedFiles]);
+        const newFiles = acceptedFiles.filter(file => {
+            const existingFileIndex = files.findIndex(existingFile => existingFile.name === file.name);
+            if (existingFileIndex !== -1) {
+                // Replace the existing file
+                files[existingFileIndex] = file;
+                return false; // Do not add to newFiles
+            }
+            return true; // Add to newFiles
+        });
+        setFiles(prevFiles => [...prevFiles, ...newFiles]);
     };
 
     const {getRootProps, getInputProps} = useDropzone({onDrop, multiple: true});
@@ -299,27 +310,24 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
                         type="file"
                         accept={'.pdf'}
                         ref={fileInputRef}
-                        style={{display: 'none'}}
+                        style={{ display: 'none' }}
                         onChange={(e) => {
                             if (e.target.files) {
-                                setFiles(Array.from(e.target.files));
+                                const newFiles = Array.from(e.target.files).filter(file => {
+                                    const existingFileIndex = files.findIndex(existingFile => existingFile.name === file.name);
+                                    if (existingFileIndex !== -1) {
+                                        // Replace the existing file
+                                        files[existingFileIndex] = file;
+                                        return false; // Do not add to newFiles
+                                    }
+                                    return true; // Add to newFiles
+                                });
+                                setFiles(prevFiles => [...prevFiles, ...newFiles]);
                             }
                         }}
                         multiple
                     />
 
-                    <input
-                        type="file"
-                        accept={'.pdf'}
-                        ref={fileInputRef}
-                        style={{display: 'none'}}
-                        onChange={(e) => {
-                            if (e.target.files) {
-                                setFiles(prevFiles => [...prevFiles, ...Array.from(e.target.files)]);
-                            }
-                        }}
-                        multiple
-                    />
                     {warning && (
                         <Typography color="error" sx={{mt: 2}}>
                             {warning}
