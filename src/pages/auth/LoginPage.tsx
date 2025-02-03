@@ -1,7 +1,7 @@
 // TODO proper response messages (not the alert bs from authcontext)
 // TODO maybe better redirection implementation necessary. but if you fiddle with jwts, f. you
 
-import {Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
+import {Alert, Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
 import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
@@ -27,12 +27,28 @@ export default function LoginPage() {
     });
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+
         const {name, value} = e.target;
         setInput((prev) => ({
             ...prev,
             [name]: value,
         }));
     };
+
+    /** The props of a message the user receives as feedback on trying to login. */
+    const [message, setMessage] = useState<string | null>(null);
+    const [messageType, setMessageType] = useState<'error' | 'success' | 'warning' | ''>('');
+    const [showMessage, setShowMessage] = useState(false);
+
+    function setMessageProps(message: string | undefined, messageType: 'error' | 'success' | 'warning' | '') {
+        if (message === undefined) {
+            setMessage("Unexpected Behavior: Message is null.");
+        } else {
+            setMessage(message);
+        }
+        setMessageType(messageType);
+        setShowMessage(true);
+    }
 
     /**
      * Redirection in case of present jwt (assuming, the user is logged in).
@@ -49,12 +65,13 @@ export default function LoginPage() {
             alert("Please fill in all fields.");
             return;
         }
-         /* if (emailRegex.test(email)) {
-            alert("Your email has no valid format.")
-             return;
-        } */
-        await login({email, password});
-        // TODO Statements here are not reached if successful. Remove alerts and insert error message here. Problem: how to transfer the response code?
+        const response = await login({email, password});
+        console.log(response);
+        if (response.success) {
+            navigate("http://localhost:5173/dashboard");
+        } else {
+            setMessageProps(response.message, "error");
+        }
     };
 
     /** The login page components. */
@@ -86,6 +103,19 @@ export default function LoginPage() {
                         <h1>
                             Login
                         </h1>
+                        {showMessage && (
+                            <Alert
+                                severity={messageType as 'error' | 'success'}
+                                sx={{
+                                    whiteSpace: 'pre-line',
+                                    width: "100%" ,
+                                    textAlign: "center",
+                                    alignItems: "center"
+                            }}
+                            >
+                                {message}
+                            </Alert>
+                        )}
                         <div></div>
                         <TextField
                             id="email-input"

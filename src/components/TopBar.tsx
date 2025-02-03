@@ -78,6 +78,7 @@ const AppBar = styled(MuiAppBar, {
     ],
 }));
 
+/** This drawer serves as the nav bar. */
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme }) => ({
         width: drawerWidth,
@@ -225,13 +226,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                             px: 2.5,
                                             color: 'text.primary',
                                         },
-                                        open
-                                            ? {
-                                                justifyContent: 'initial',
-                                            }
-                                            : {
-                                                justifyContent: 'center',
-                                            },
+                                        open ? {justifyContent: 'initial',} : {justifyContent: 'center',},
                                     ]}
                                 >
                                     <ListItemIcon
@@ -240,13 +235,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                                 minWidth: 0,
                                                 justifyContent: 'center',
                                             },
-                                            open
-                                                ? {
-                                                    mr: 3,
-                                                }
-                                                : {
-                                                    mr: 'auto',
-                                                },
+                                            open ? {mr: 3,} : {mr: 'auto',},
                                         ]}
                                     >
                                         {<HomeIcon />}
@@ -254,13 +243,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                     <ListItemText
                                         primary={text}
                                         sx={[
-                                            open
-                                                ? {
-                                                    opacity: 1,
-                                                }
-                                                : {
-                                                    opacity: 0,
-                                                },
+                                            open ? {opacity: 1,} : {opacity: 0,},
                                         ]}
                                     />
                                 </ListItemButton>
@@ -281,28 +264,15 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                                             px: 2.5,
                                             color: 'text.primary',
                                         },
-                                        open
-                                            ? {
-                                                justifyContent: 'initial',
-                                            }
-                                            : {
-                                                justifyContent: 'center',
-                                            },
+                                        open ? {justifyContent: 'initial',} : {justifyContent: 'center',},
                                     ]}
                                 >
                                     <ListItemIcon
-                                        sx={[
-                                            {
-                                                minWidth: 0,
-                                                justifyContent: 'center',
-                                            },
-                                            open
-                                                ? {
-                                                    mr: 3,
-                                                }
-                                                : {
-                                                    mr: 'auto',
-                                                },
+                                        sx={[{
+                                            minWidth: 0,
+                                            justifyContent: 'center',
+                                        },
+                                            open ? {mr: 3,} : {mr: 'auto',},
                                         ]}
                                     >
                                         {index === 0 ? <MenuBookIcon /> : <LibraryBooksIcon />}
@@ -312,13 +282,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
 
                                         primary={text}
                                         sx={[
-                                            open
-                                                ? {
-                                                    opacity: 1,
-                                                }
-                                                : {
-                                                    opacity: 0,
-                                                },
+                                            open ? {opacity: 1,} : {opacity: 0,},
                                         ]}
                                     />
                                 </ListItemButton>

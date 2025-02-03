@@ -2,7 +2,19 @@
 // TODO styling of page
 
 import React, {useState} from "react";
-import {Alert, Box, Button, Divider, Grid2, Menu, MenuItem, Stack, TextField, Typography,} from "@mui/material";
+import {
+    Alert,
+    Box,
+    Button,
+    Checkbox,
+    Divider, FormControlLabel,
+    Grid2,
+    Menu,
+    MenuItem,
+    Stack,
+    TextField,
+    Typography,
+} from "@mui/material";
 import PaperList from "../components/PaperList.tsx";
 import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "../components/AlertDialogProvider.tsx";
@@ -13,7 +25,7 @@ function ProfilePage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const INVALID_TOKEN_MSG = "Your token is invalid. You will be logged out soon.";
     const ACCOUNT_DELETION_ALERT_TITLE = "Account Deletion";
-    const ACCOUNT_DELETION_ALERT_MESSAGE = "Are you sure you want to delete your account? All data will be deleted.";
+    const ACCOUNT_DELETION_ALERT_MESSAGE = "Are you sure you want to delete your account? All data will be lost.";
     const ACCOUNT_DELETION_CONFIRM_TEXT = "Delete";
     const ACCOUNT_DELETION_CANCEL_TEXT = "Cancel";
     const LOCAL_STORAGE_UPDATE_EVENT = "localStorageUpdate";
@@ -121,6 +133,8 @@ function ProfilePage() {
         });
     };
 
+    const [showPassword, setShowPassword] = useState(false);
+
     /** These functions implement the account settings functionality. */
     const handleSubmit = () => {
         if (isEditProfile) {
@@ -222,7 +236,7 @@ function ProfilePage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem("jwt")}`
                 }
-            })
+            });
             if (res.status == 200) {
                 setMessageProps("Successfully deleted account. You will be logged out.", "success");
                 setTimeout(() => {
@@ -253,7 +267,7 @@ function ProfilePage() {
             minWidth: "1215px",
             display: "flex",
             height: "flex",
-            backgroundColor: "#777",
+            backgroundColor: "#555",
             marginTop: 10,
         }}
         >
@@ -344,7 +358,7 @@ function ProfilePage() {
                         <Stack spacing={2}>
                             <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                 <TextField
-                                    type={isEditProfile ? "text" : "password"}
+                                    type={(showPassword) ? "text" : "password"}
                                     name={isEditProfile ? "name" : "password"}
                                     label={isEditProfile ? "New Name" : "New Password"}
                                     variant="outlined"
@@ -354,7 +368,7 @@ function ProfilePage() {
                             </Box>
                             <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                 <TextField
-                                    type={isEditProfile ? "text" : "password"}
+                                    type={(showPassword) ? "text" : "password"}
                                     name={isEditProfile ? "email" : "confirmPassword"}
                                     label={isEditProfile ? "New Email" : "Confirm Password"}
                                     variant="outlined"
@@ -363,6 +377,19 @@ function ProfilePage() {
                                     onChange={handleInput}
                                 />
                             </Box>
+                            {isChangePassword && (
+                                <Box sx={{display: "flex", justifyContent: "center", gap: 1}}>
+                                    <FormControlLabel
+                                        style={{color: "#b5b5b5"}}
+                                        label="Show Password"
+                                        control={
+                                            <Checkbox style={{color: "#cdcdcd"}}
+                                                      onChange={() => setShowPassword(!showPassword)}
+                                            />
+                                        }
+                                    />
+                                </Box>
+                            )}
                         </Stack>
                     </Box>
                 )}
