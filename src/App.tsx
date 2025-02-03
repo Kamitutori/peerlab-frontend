@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import {useEffect, useState} from 'react';
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {CssBaseline, ThemeProvider} from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import { darkTheme, lightTheme } from "./theme";
+import {darkTheme, lightTheme} from "./theme";
 
 import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
@@ -20,6 +20,7 @@ import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import EditReviewPage from "./pages/EditReviewPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
+import SinglePaper from "./components/SinglePaper.tsx";
 
 function App() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -46,7 +47,7 @@ function App() {
         <div>
             <BrowserRouter>
                 <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-                    <CssBaseline />
+                    <CssBaseline/>
                     <AuthProvider>
                         <AlertDialogProvider>
                             <div className="container">
@@ -135,6 +136,17 @@ function App() {
 
                                     />
                                     <Route
+                                        path="/paper/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <SinglePaper/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
                                         path="/edit-paper/:id"
                                         element={
                                             <PrivateRoute>
@@ -179,7 +191,7 @@ function App() {
                                         }
                                     />
                                     {/* Fallback Route */}
-                                    <Route path="*" element={<NoPage />} />
+                                    <Route path="*" element={<NoPage/>}/>
                                 </Routes>
                             </div>
                         </AlertDialogProvider>
