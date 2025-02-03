@@ -14,14 +14,14 @@ interface ReviewElement {
     comments: string;
     questions: string;
     score: number;
-    confidenceLevel: number;
+    confidenceLevel: string;
     submissionDate: string;
 }
 
 export default function ViewReview() {
     const { id } = useParams<{ id: string }>();
 
-    {/*const {
+    const {
         isPending: isReviewPending,
         isError: isReviewError,
         error: reviewError,
@@ -48,7 +48,7 @@ export default function ViewReview() {
         return <span>{`Error!: ${reviewError.message}`}</span>;
     }
 
-    const reviewObject: ReviewElement = reviewData;*/}
+    const reviewObject: ReviewElement = reviewData;
 
     {/*TO DO : on click go back to the previous page*/}
     const handleBackToPaper = () => {
@@ -60,13 +60,13 @@ export default function ViewReview() {
                 width: '100%',
                 height: '150px',
                 overflowY: 'auto',
-                boxShadow: 4, // Ombre légère autour de la box
+                boxShadow: 4,
                 padding: 2,
             }}>
                 <Typography variant="h6" gutterBottom>
                     Summmary
                 </Typography>
-                Affichage 1: Texte d'exemple 1hhh jhvkjghvkjgckjghc ujgvkcgtkugckhygtckyhgc ougftkujtiyhfgckjiygcjyc ouyfoufgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                {reviewObject.summary}
             </Box>
             <Box
                 display="flex"
@@ -74,7 +74,6 @@ export default function ViewReview() {
                 justifyContent="space-between"
                 sx={{paddingTop: 2, width: '100%', overflowY: 'auto', padding: 1}}
             >
-                {/* Box à gauche */}
                 <Box
                     sx={{
                         width: '50%',
@@ -88,7 +87,7 @@ export default function ViewReview() {
                     <Typography variant="h6" gutterBottom>
                         Strengths
                     </Typography>
-                    Affichage 1: Textkhgfkchjgckjgckh;gfckhfckhfcxkyfxke d'
+                    {reviewObject.strengths}
                 </Box>
 
                 <Box
@@ -104,7 +103,7 @@ export default function ViewReview() {
                     <Typography variant="h6" gutterBottom>
                         Questions
                     </Typography>
-                    Affichage 1: Texte d'
+                    {reviewObject.questions}
                 </Box>
             </Box>
             <Box
@@ -126,10 +125,9 @@ export default function ViewReview() {
                     <Typography variant="h6" gutterBottom>
                         Weaknesses
                     </Typography>
-                    Affichage 1: Textkhgfkchjgckjgckh;gfckhfckhfcxkyfxke d'
+                    {reviewObject.weaknesses}
                 </Box>
 
-                {/* Box à droite */}
                 <Box
                     sx={{
                         width: '50%',
@@ -143,7 +141,7 @@ export default function ViewReview() {
                     <Typography variant="h6" gutterBottom>
                         Comments
                     </Typography>
-                    Affichage 1: Texte d'
+                    {reviewObject.comments}
                 </Box>
             </Box>
             <Box
@@ -159,11 +157,11 @@ export default function ViewReview() {
                         width: '75%',
                     }}
                 >
-                    <Typography variant="h6"><strong>Confidence level : </strong> medium</Typography>
-                    <Typography variant="h6"><strong>Score : </strong> SCORE</Typography>
+                    <Typography variant="h6"><strong>Confidence level : </strong> {reviewObject.confidenceLevel}</Typography>
+                    <Typography variant="h6"><strong>Score : </strong> {reviewObject.score}</Typography>
                 </Box>
                 <Box>
-                    Submission Date : ikgkihyv
+                    Submission Date : {reviewObject.submissionDate}
                     <Box
                     sx={{display: 'flex',
                         justifyContent: 'flex-end',
