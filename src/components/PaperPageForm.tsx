@@ -78,6 +78,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             .then(text => {
                 const data = text ? JSON.parse(text) : [];
                 setReviewers(data);
+                console.log('Reviewers:', data);
             })
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
@@ -147,6 +148,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 });
 
                 fileId = newFileId;
+                console.log("File uploaded successfully.");
             } catch (error) {
                 console.error("Error uploading file:", error);
                 return;
@@ -170,6 +172,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
                 return {
                     paper: { id: 0 },
+                    status: "PENDING",
                     requestee: {
                         id: requesteeId,
                         name: reviewer?.name || "",
@@ -178,7 +181,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 };
             })
         };
-
+        console.log('Paper data:', paperData);
         try {
             const response = await fetch(`http://localhost:8080/api/papers${initialData.id ? `/${initialData.id}` : ''}`, {
                 method: initialData.id ? 'PUT' : 'POST',
@@ -190,6 +193,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             });
 
             const result = await response.json();
+            console.log('Success:', result);
             navigate(`/paper/${result.id}`);
         } catch (error) {
             console.error('Error:', error);
