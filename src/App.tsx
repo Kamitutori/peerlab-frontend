@@ -19,6 +19,7 @@ import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
 import ProfilePage from "./pages/ProfilePage";
+import ViewReview from "./components/ViewReview.tsx";
 
 function App() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -162,6 +163,17 @@ function App() {
                                                 <>
                                                     <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
                                                     <AddPaperPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/review/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <ViewReview/>
                                                 </>
                                             </PrivateRoute>
                                         }
