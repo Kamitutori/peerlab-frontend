@@ -80,7 +80,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
         for (const file of files) {
             console.log(file.name);
             try {
-                const uploadResponse = await fetch(`http://localhost:8080/api/minio/review-upload-url`, {
+                const uploadResponse = await fetch(`http://localhost:8080/api/minio/review-upload-url?fileName=${file.name}`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem("jwt")}`
@@ -188,7 +188,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
     return (
         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%"}}>
             <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10,}}>
-                <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
+                <Typography variant="h4" component="h1" fontWeight={"bold"}>
                     {initialData.title ? 'Edit Review' : 'Add Review'}
                 </Typography>
 
