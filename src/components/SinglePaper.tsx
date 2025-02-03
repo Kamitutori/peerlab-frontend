@@ -150,7 +150,7 @@ export default function SinglePaper({ request }: Props) {
 
     return (
         <>
-            <Paper sx={{ width: '100%', padding: '20px', borderRadius: '8px', boxShadow: 3, marginTop: 9}}>
+            <Paper sx={{ width: '100%', maxWidth: '1000px', padding: '20px', borderRadius: '8px', boxShadow: 3, marginTop: 9}}>
                 <Typography variant="h4" sx={{ marginBottom: 2, textAlign: 'center' }}>{paperObject.title}</Typography>
                 {isRequest && (<BannerBox bannerColor={bannerColor} theme={undefined} >
                     <Typography variant="h6" sx={{ flexGrow: 1, color: '#fff', paddingLeft: '10px' }}>
@@ -178,7 +178,7 @@ export default function SinglePaper({ request }: Props) {
                 <Root>
                     <Divider />
                 </Root>
-                <Typography variant="body1"><strong>Reached reviews : </strong> *number of reached reviews* {paperObject.reviewLimit ? ` / ${paperObject.reviewLimit}` : ' '}</Typography>
+                <Typography variant="body1"><strong>Accepted requests : </strong> *number of reached reviews* {paperObject.reviewLimit ? ` / ${paperObject.reviewLimit}` : ' '}</Typography>
                 <Typography variant="body1"><strong>Status :  </strong> {`${paperObject.active ? 'active' : 'inactive'}`}</Typography>
 
 
@@ -187,6 +187,7 @@ export default function SinglePaper({ request }: Props) {
                     <Typography variant="body2" sx={{ fontStyle: 'italic' }}>{paperObject.authorsNote}</Typography>
                     <Divider />
                 </Root>
+                {/*TO DO : real request/review list*/}
                 {!isRequest && (
                 <List
                     sx={{
