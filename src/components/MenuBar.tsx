@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import { useUpdateAuth } from "./auth/AuthenticationContext.tsx";
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import {useAlertDialog} from "./AlertDialogProvider.tsx";
 
 const drawerWidth = 240;
 
@@ -120,10 +121,13 @@ interface TopMenuBarProps {
 
 export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps) {
     const { logout } = useUpdateAuth();
+    const { showAlert } = useAlertDialog();
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
-    const [username, setUsername] = React.useState<string | null>("Henlo");
+    const [username, setUsername] = React.useState<string | null>("");
     const LOCAL_STORAGE_UPDATE_EVENT = "localStorageUpdate";
+
+
     const handleDrawerOpen = () => {
         setOpen(true);
     };
@@ -144,12 +148,12 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                 try {
                     setUsername(JSON.parse(userJson).name);
                 } catch (error) {
-                    setUsername(null);
-                    alert("Unexpected behavior: User object in localStorage is not a valid JSON object.");
+                    showAlert("User Object Error", "Unexpected behavior: User object in local storage is not a valid JSON object. You will be logged out as a result.", "", "OK")
+                        .then(() => { logout(); });
                 }
             } else {
-                setUsername(null);
-                alert("Unexpected behavior: User is logged in with no user object in localStorage.");
+                showAlert("Invalid Storage State", "There is no user object in your local storage. You will be logged out.", "", "OK")
+                    .then(() => {logout();});
             }
         };
         // Set username on component mount

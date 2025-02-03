@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import MyPapersPage from "./pages/MyPapersPage.tsx";
 import MyReviewsPage from "./pages/MyReviewsPage.tsx";
 import NoPage from "./pages/NoPage";
-import TopMenuBar from "./components/TopBar";
+import TopMenuBar from "./components/MenuBar.tsx";
 import RegisterPage from "./pages/auth/RegisterPage.tsx";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
@@ -20,7 +20,7 @@ import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import EditReviewPage from "./pages/EditReviewPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
-import SinglePaper from "./components/SinglePaper.tsx";
+//import SinglePaper from "./components/SinglePaper.tsx";
 
 function App() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -135,6 +135,7 @@ function App() {
                                         }
 
                                     />
+                                    {/*
                                     <Route
                                         path="/paper/:id"
                                         element={
@@ -146,6 +147,7 @@ function App() {
                                             </PrivateRoute>
                                         }
                                     />
+                                    */}
                                     <Route
                                         path="/edit-paper/:id"
                                         element={

@@ -1,5 +1,3 @@
-// TODO Add more precise response messages on failure, e.g. account already in use, also see AuthenticationContext
-
 import {
     Alert,
     Button,
@@ -12,12 +10,18 @@ import {
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
 import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
-import {useQuery} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
 
-
-
 export default function RegisterPage() {
+    const strongPasswordRegex: RegExp = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
+    const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    function backToLogin() {
+        navigate("/login");
+    }
+
     /** The registration input and it's handling function. */
     const [input, setInput] = useState({
         name: "",
@@ -25,10 +29,6 @@ export default function RegisterPage() {
         password: "",
         rep_password: ""
     });
-    const navigate = useNavigate();
-    function backToLogin() {
-        navigate("/login");
-    }
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -36,10 +36,7 @@ export default function RegisterPage() {
             ...prev,
             [name]: value,
         }));
-        console.log(input);
     };
-
-    const [showPassword, setShowPassword] = useState(false);
 
     /** The props of a message the user receives as feedback on trying to register. */
     const [message, setMessage] = useState<string | null>(null);
@@ -52,39 +49,9 @@ export default function RegisterPage() {
         setShowMessage(true);
     }
 
-    /** The register query function. */
-    const {refetch} =
-        useQuery({
-            queryKey: ['register'],
-            queryFn: async () => {
-                const res = await fetch("http://localhost:8080/api/auth/register", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: input.name,
-                        email: input.email,
-                        password: input.password,
-                    })
-                })
-                return (res.status);
-            },
-            enabled: false,
-            refetchOnReconnect: false,
-            refetchOnMount: false,
-            refetchOnWindowFocus: false,
-            retryOnMount: false,
-            retry: 0,
-
-        });
-
     /** The register service routine. */
-    const registerUser = (e: React.FormEvent<HTMLFormElement>) => {
+    const registerUser = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        let strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
-
         if (input.name === "" || input.email === "" || input.password === "" || input.rep_password === "") {
             setMessageProps("Please fill in all fields.", "warning");
             return;
@@ -97,28 +64,35 @@ export default function RegisterPage() {
             setMessageProps("Please enter a valid email address.", "warning");
             return;
         }
-
         if (!strongPasswordRegex.test(input.password)) {
             setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
             return;
         }
 
-        refetch().then(({data}) => {
-            if (data == 200) {
+        try {
+            const response = await fetch("http://localhost:8080/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: input.name,
+                    email: input.email,
+                    password: input.password,
+                })
+            });
+
+            if (response.ok) {
                 setMessageProps(`Registration successful. Verify your email to authenticate and login afterward. Redirecting to login...`, "success");
                 setTimeout(() => {
                     navigate("/login");
                 }, 10000);
-            }else if (data == 403) {
-                setMessageProps(`Registration failed: ${data}. Please check your inputs. Maybe the email is already in use.`, "error");
             } else {
-                setMessageProps(`Registration failed:  ${data || 'Unknown error'}`, "error");
+                setMessageProps(`Registration failed: ${await response.text()}`, "error");
             }
-        })
-            .catch((err) => {
-                console.error('Error during registration:', err);
-                alert(`There was an error during registration. Err: ${err}`);
-            })
+        } catch (error) {
+            setMessageProps(`There was an error during registration: ${error}`, "error");
+        }
     }
 
     /** The register page components. */

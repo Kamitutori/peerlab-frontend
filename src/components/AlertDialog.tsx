@@ -27,10 +27,27 @@ export default function AlertDialog({ title, message, open, okText, cancelText, 
                     {message}
                 </DialogContentText>
             </DialogContent>
-            {(cancelText !== "" && okText != "") && (
+            {(cancelText !== "" || okText != "") && (
                 <DialogActions>
-                    <Button variant="contained" color="error" onClick={() => onClose(true)}>{okText}</Button>
-                    <Button variant="outlined" onClick={() => onClose(false)}>{cancelText}</Button>
+                    {(okText !== "") && (
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => onClose(true)}
+                        >
+                            {okText}
+                        </Button>
+                    )}
+                    {(cancelText !== "") && (
+                        <Button
+                            variant="outlined"
+                            onClick={() => onClose(false)}
+                        >
+                            {cancelText}
+                        </Button>
+                    )}
+
+
                 </DialogActions>
             )}
         </Dialog>

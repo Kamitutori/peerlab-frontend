@@ -43,16 +43,14 @@ export default function ReviewList({endpoint, title}: ReviewListProps) {
     const {logout} = useUpdateAuth();
     const navigate = useNavigate();
     const {showAlert} = useAlertDialog();
-    const LOGOUT_ALERT_TITLE = "Forced Logout";
-    const LOGOUT_ALERT_MESSAGE = "You will be logged out shortly as your token is invalid.";
 
     /** Fetches the reviews from the server. */
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
             const res = await fetch(endpoint);
-            await showAlert(LOGOUT_ALERT_TITLE, LOGOUT_ALERT_MESSAGE, "", "");
             if (res.status === 401) {
+                await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
                 logout();
             }
             if (!res.ok) {

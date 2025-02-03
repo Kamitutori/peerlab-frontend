@@ -22,19 +22,13 @@ import {useAlertDialog} from "../components/AlertDialogProvider.tsx";
 /** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */
 function ProfilePage() {
     const strongPasswordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const INVALID_TOKEN_MSG = "Your token is invalid. You will be logged out soon.";
-    const ACCOUNT_DELETION_ALERT_TITLE = "Account Deletion";
-    const ACCOUNT_DELETION_ALERT_MESSAGE = "Are you sure you want to delete your account? All data will be lost.";
-    const ACCOUNT_DELETION_CONFIRM_TEXT = "Delete";
-    const ACCOUNT_DELETION_CANCEL_TEXT = "Cancel";
     const LOCAL_STORAGE_UPDATE_EVENT = "localStorageUpdate";
 
     /** This effect updates the account information on the page if the user changed it. */
     const [userName, setUserName] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
 
-    const { showAlert } = useAlertDialog();
+    const {showAlert} = useAlertDialog();
     const {logout} = useUpdateAuth();
 
     React.useEffect(() => {
@@ -43,21 +37,24 @@ function ProfilePage() {
             if (userJson) {
                 try {
                     if (JSON.parse(userJson).name === undefined || JSON.parse(userJson).email === undefined) {
-                        alert("Unexpected behavior: User object in localStorage is missing name or email. You will be logged out.");
-                        setTimeout(() => {
-                                logout()
-                            },
-                            3000)
+                        showAlert("User Object Error", "Unexpected behavior: User object in local storage is undefined. You will be logged out as a result.", "", "OK")
+                            .then(() => {
+                                logout();
+                            });
                     }
                     setUserName(JSON.parse(userJson).name);
                     setUserEmail(JSON.parse(userJson).email)
                 } catch (error) {
-                    alert("Unexpected behavior: User object in localStorage is not a valid JSON object. You will be logged out.");
-                    logout();
+                    showAlert("User Object Error", "Unexpected behavior: User object in local storage is not a valid JSON object. You are logged out as a result.", "", "OK")
+                        .then(() => {
+                            logout();
+                        });
                 }
             } else {
-                alert("Unexpected behavior: User is on profile page with no user object in localStorage. You will be logged out.");
-                logout();
+                showAlert("Invalid Storage State", "There is no user object in your local storage. You will be logged out.", "", "OK")
+                    .then(() => {
+                        logout();
+                    });
             }
         }
         updateProfile();
@@ -110,7 +107,6 @@ function ProfilePage() {
     /** These functions handle the input of account changes. */
     const [input, setInput] = useState({
         name: "",
-        email: "",
         password: "",
         confirmPassword: ""
     });
@@ -121,13 +117,11 @@ function ProfilePage() {
             ...prev,
             [name]: value,
         }));
-        console.log(input);
     };
 
     const setInputToDefault = () => {
         setInput({
-            name: "", //localStorage.getItem("user").name,
-            email: "", //localStorage.getItem("user").email,
+            name: "",
             password: "",
             confirmPassword: ""
         });
@@ -145,42 +139,38 @@ function ProfilePage() {
     }
 
     const submitEditProfile = async () => {
-        if (emailRegex.test(input.email)) {
-            try {
-                const res = await fetch("http://localhost:8080/api/users", {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem("jwt")}`
-                    },
-                    body: JSON.stringify({
-                        // TODO how to handle empty fields? just fill them up? or fill fields by default?
-                        name: input.name,
-                        email: input.email
-                    })
-                });
-                if (res.status == 200) {
-                    setMessageProps("Successfully edited profile.", "success");
-                    const responseData = await res.json();
-                    localStorage.setItem("user", JSON.stringify(responseData));
-                    window.dispatchEvent(new Event(LOCAL_STORAGE_UPDATE_EVENT));
-                    setTimeout(() => {
-                        handleMenuClose();
-                        setIsEditProfile(false);
-                    }, 3000);
-                } else if (res.status == 400) {
-                    setMessageProps("Your inputs are invalid.", "error");
-                } else if (res.status == 401) {
-                    handleUnauthenticatedLogout()
-                } else {
-                    setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
-                }
-            } catch (error) {
-                alert(`An error has occurred: ${error}.`)
+        try {
+            const res = await fetch("http://localhost:8080/api/users", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem("jwt")}`
+                },
+                body: JSON.stringify({
+                    name: input.name,
+                })
+            });
+            if (res.status == 200) {
+                setMessageProps("Successfully edited profile.", "success");
+                const responseData = await res.json();
+                localStorage.setItem("user", JSON.stringify(responseData));
+                window.dispatchEvent(new Event(LOCAL_STORAGE_UPDATE_EVENT));
+                setTimeout(() => {
+                    handleMenuClose();
+                    setIsEditProfile(false);
+                }, 3000);
+            } else if (res.status == 400) {
+                setMessageProps("Your inputs are invalid.", "error");
+            } else if (res.status == 401) {
+                await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
+                logout();
+            } else {
+                setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
             }
-        } else {
-            setMessageProps("Invalid email address.", "warning");
+        } catch (error) {
+            await showAlert("Error", `There was an error during the process: ${error}.`, "", "OK");
         }
+
     }
 
     const submitChangePassword = async () => {
@@ -213,18 +203,19 @@ function ProfilePage() {
                 } else if (res.status == 400) {
                     setMessageProps("The password was invalid.", "error");
                 } else if (res.status == 401) {
-                    handleUnauthenticatedLogout()
+                    await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
+                    logout();
                 } else {
                     setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
                 }
             } catch (error) {
-                alert(`An error has occurred: ${error}.`)
+                await showAlert("Error", `There was an error during the process: ${error}.`, "", "OK");
             }
         }
     };
 
     const handleAccountDeletion = async () => {
-        const result = await showAlert(ACCOUNT_DELETION_ALERT_TITLE, ACCOUNT_DELETION_ALERT_MESSAGE, ACCOUNT_DELETION_CONFIRM_TEXT, ACCOUNT_DELETION_CANCEL_TEXT);
+        const result = await showAlert("Account Deletion", "Are you sure you want to delete your account? All data will be lost.", "Delete", "Cancel");
         result ? await submitAccountDeletion() : setIsAccountDeletion(false);
     }
 
@@ -238,26 +229,17 @@ function ProfilePage() {
                 }
             });
             if (res.status == 200) {
-                setMessageProps("Successfully deleted account. You will be logged out.", "success");
-                setTimeout(() => {
-                    logout();
-                }, 3000);
+                await showAlert("Account Deletion", "Your account was successfully deleted.", "", "Acknowledge");
+                logout();
             } else if (res.status == 401) {
-                handleUnauthenticatedLogout();
+                await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
+                logout();
             } else {
                 setMessageProps(`An error has occurred: ${res.status}: ${res.statusText}`, "error");
             }
         } catch (error) {
-            alert(`An error has occurred. ${error}.`)
+            await showAlert("Error", `An error has occurred. ${error}.`, "", "OK");
         }
-    }
-
-    /* This function is called to log out users that sent requests with invalid tokens. */
-    const handleUnauthenticatedLogout = () => {
-        setMessageProps(INVALID_TOKEN_MSG, "error");
-        setTimeout(() => {
-            logout();
-        }, 3000)
     }
 
     /** The profile page components. */
@@ -317,7 +299,7 @@ function ProfilePage() {
                                 setIsChangePassword(false);
                             }}
                         >
-                            Edit Profile
+                            Change username
                         </MenuItem>
                         <MenuItem
                             onClick={() => {
@@ -366,17 +348,19 @@ function ProfilePage() {
                                     onChange={handleInput}
                                 />
                             </Box>
-                            <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
-                                <TextField
-                                    type={(showPassword) ? "text" : "password"}
-                                    name={isEditProfile ? "email" : "confirmPassword"}
-                                    label={isEditProfile ? "New Email" : "Confirm Password"}
-                                    variant="outlined"
+                            {(isChangePassword) && (
+                                <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
+                                    <TextField
+                                        type={(showPassword) ? "text" : "password"}
+                                        name={"confirmPassword"}
+                                        label={"Confirm Password"}
+                                        variant="outlined"
+                                        value={input.confirmPassword}
+                                        onChange={handleInput}
+                                    />
+                                </Box>
+                            )}
 
-                                    value={isEditProfile ? input.email : input.confirmPassword}
-                                    onChange={handleInput}
-                                />
-                            </Box>
                             {isChangePassword && (
                                 <Box sx={{display: "flex", justifyContent: "center", gap: 1}}>
                                     <FormControlLabel

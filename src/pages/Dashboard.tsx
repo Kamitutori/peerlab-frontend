@@ -1,4 +1,6 @@
 import {useNavigate} from "react-router-dom";
+import Box from "@mui/material/Box";
+import PaperList from "../components/PaperList.tsx";
 
 export default function Dashboard() {
     const navigate = useNavigate();
