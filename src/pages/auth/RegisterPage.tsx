@@ -13,10 +13,9 @@ import Box from "@mui/material/Box";
 import React, {useState} from "react";
 import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
 import {useQuery} from "@tanstack/react-query";
+import {useNavigate} from "react-router-dom";
 
-function backToLogin() {
-    window.location.href = "http://localhost:5173/login";
-}
+
 
 export default function RegisterPage() {
     /** The registration input and it's handling function. */
@@ -26,6 +25,10 @@ export default function RegisterPage() {
         password: "",
         rep_password: ""
     });
+    const navigate = useNavigate();
+    function backToLogin() {
+        navigate("/login");
+    }
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -104,7 +107,7 @@ export default function RegisterPage() {
             if (data == 200) {
                 setMessageProps(`Registration successful. Verify your email to authenticate and login afterward. Redirecting to login...`, "success");
                 setTimeout(() => {
-                    window.location.href = "http://localhost:5173/login";
+                    navigate("/login");
                 }, 10000);
             }else if (data == 403) {
                 setMessageProps(`Registration failed: ${data}. Please check your inputs. Maybe the email is already in use.`, "error");

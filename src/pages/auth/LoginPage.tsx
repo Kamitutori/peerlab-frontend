@@ -6,15 +6,19 @@ import Box from "@mui/material/Box";
 import React, {useState} from "react";
 import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
 import {useUpdateAuth} from "../../components/auth/AuthenticationContext.tsx";
+import {useNavigate} from "react-router-dom";
 
-function goToRegister() {
-    window.location.href = "http://localhost:5173/register";
-}
+
 
 export default function LoginPage() {
     const emailRegex = /^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)])$/;
-    const {login} = useUpdateAuth();
     const [showPassword, setShowPassword] = useState(false);
+    const {login} = useUpdateAuth();
+    const navigate = useNavigate();
+
+    function goToRegister() {
+        navigate("/register");
+    }
 
     /** The login input and it's handling function. */
     const [input, setInput] = useState({
@@ -23,7 +27,6 @@ export default function LoginPage() {
     });
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-
         const {name, value} = e.target;
         setInput((prev) => ({
             ...prev,
@@ -35,7 +38,7 @@ export default function LoginPage() {
      * Redirection in case of present jwt (assuming, the user is logged in).
      */
     if (localStorage.getItem("jwt") && localStorage.getItem("user")) {
-        window.location.href = "http://localhost:5173/dashboard";
+        navigate("/dashboard");
     }
 
     /** This function performs basic checks before calling the login routine. */

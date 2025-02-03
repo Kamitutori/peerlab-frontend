@@ -226,9 +226,7 @@ function ProfilePage() {
             if (res.status == 200) {
                 setMessageProps("Successfully deleted account. You will be logged out.", "success");
                 setTimeout(() => {
-                    localStorage.removeItem("jwt");
-                    localStorage.removeItem("user");
-                    window.location.href = "http://localhost:5173/login";
+                    logout();
                 }, 3000);
             } else if (res.status == 401) {
                 handleUnauthenticatedLogout();

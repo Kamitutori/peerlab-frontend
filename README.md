@@ -1,10 +1,3 @@
-# Questions to Bakr
-- Why does it seem like the data is not really persisted? Is it due to server restarts? Seems wrong.
-- Maybe better redirection implementation from login->dashboard necessary. but if you fiddle with jwts, f. you anyway..?
-
-## TODO; Auth / RegisterPage
-- incosistent use of redirecting: In LoginPage/RegisterPage it's done with window.location.href, in AuthContext it's with useNavigate.
-
 ## Getting Started
 You will need the node package manager (npm) to actually develop and run anything of the frontend.
 It is the node package manager for Node.js, so you will need to install Node.js first.
@@ -43,7 +36,7 @@ Implementation not 1:1 possible as await needs to be called in an async function
                 setMessageProps(`Registration successful. Verify your email to authenticate and login afterward. 
  Redirecting to login...`, "success");
                 setTimeout(() => {
-                    window.location.href = "http://localhost:5173/login";
+                    navigate("/login");
                 }, 10000);
             } else if (response.status == 403) {
                 setMessageProps(`Registration failed: ${response.status}. Please check your inputs. Maybe the email is already in use.`, "error");

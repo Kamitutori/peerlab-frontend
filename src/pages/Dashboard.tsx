@@ -1,7 +1,10 @@
+import {useNavigate} from "react-router-dom";
+
 export default function Dashboard() {
+    const navigate = useNavigate();
 
     if (!localStorage.getItem("jwt")) {
-        window.location.href = "http://localhost:5173/login";
+        navigate("/login");
     }
 
     return (

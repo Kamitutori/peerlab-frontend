@@ -85,7 +85,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     const logout = () => {
         localStorage.removeItem("jwt");
         localStorage.removeItem("user");
-        window.location.href = "http://localhost:5173/login";
+        navigate("/login");
     };
 
     return (
