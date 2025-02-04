@@ -8,6 +8,7 @@ import Grid from "@mui/material/Grid";
 
 interface ReviewElement {
     id: number;
+    request: RequestElement;
     fileIds: string[];
     summary: string;
     strengths:string;
@@ -17,6 +18,11 @@ interface ReviewElement {
     score: number;
     confidenceLevel: string;
     submissionDate: string;
+}
+
+interface RequestElement {
+    id: number;
+    paperMaxScore: number;
 }
 
 export default function ViewReview() {
@@ -171,7 +177,8 @@ export default function ViewReview() {
                     }}
                 >
                     <Typography variant="h6"><strong>Confidence level : </strong> {reviewObject.confidenceLevel}</Typography>
-                    <Typography variant="h6"><strong>Score : </strong> {reviewObject.score}</Typography>
+                    {reviewObject.score &&
+                        <Typography variant="h6"><strong>Score : </strong> `${reviewObject.score} / ${reviewObject.request.paperMaxScore}`</Typography>}
                 </Box>
                 <Box>
                     Submission Date : {reviewObject.submissionDate}
