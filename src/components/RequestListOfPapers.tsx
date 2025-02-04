@@ -44,11 +44,11 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
             if (res.status === 401) {
                 await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
                 logout();
+            }
             if (!res.ok) {
                 throw new Error("Failed to fetch requests.");
             }
-            return res.json();
-            }
+            return await res.json();
         }
     });
 
