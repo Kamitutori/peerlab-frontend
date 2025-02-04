@@ -38,6 +38,7 @@ export interface PaperData {
     isInternal: boolean;
     authorsNote: string;
     abstractText: string;
+    requests: string[];
     fileId: string;
 }
 
@@ -57,7 +58,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [files, setFiles] = useState<File[]>([]);
     const [warning, setWarning] = useState('');
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-    const [requests, setRequests] = useState<string[]>([]);
+    const [requests, setRequests] = useState<string[]>(initialData.requests || []);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -192,6 +193,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     };
                 })
 
+            console.log("Requests Data:", requestsData);
             try {
                 const requestResponse = await fetch(`http://localhost:8080/api/requests${initialData.id ? `/${initialData.id}` : ''}`, {
                     method: initialData.id ? 'PUT' : 'POST',
