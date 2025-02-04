@@ -140,23 +140,81 @@ export default function SinglePaper({ request }: Props) {
         bannerColor = getBannerColor(request.status);
         bannerMessage = getBannerMessage(request.status);
     }
+
+
     {/*TO DO : change the status of the request when the button is clicked */}
-    const handleAccept = () => {
+    const handleAccept = async () => {
         console.log('Request Accepted');
+        try {
+            const response = await fetch(`/requests/${id}`, {
+                method: 'PUT',  // We specify the HTTP method as PUT
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'ACCEPTED',
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update request');
+            }
+
+            const updatedRequest = await response.json();
+            console.log('Request updated:', updatedRequest);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
-    const handleReject = () => {
+    const handleReject = async () => {
         console.log('Request Rejected');
+        try {
+            const response = await fetch(`/requests/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'REJECTED',
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update request');
+            }
+
+            const updatedRequest = await response.json();
+            console.log('Request updated:', updatedRequest);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     {/* TO DO : Delete the review if the button is clicked*/}
-    const handleDelete = () => {
+    const handleDelete = async () => {
         console.log('Review Deleted');
+        try {
+            const response = await fetch(`/requests/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete request');
+            }
+
+            console.log('Request deleted successfully');
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     return (
         <>
-            <Paper sx={{ width: '100%', padding: '20px', borderRadius: '8px', boxShadow: 3, marginTop: 9}}>
+            <Paper sx={{ width: '100%', maxWidth: '1000px', padding: '20px', borderRadius: '8px', boxShadow: 3, marginTop: 9}}>
                 <Typography variant="h4" sx={{ marginBottom: 2, textAlign: 'center' }}>{paperObject.title}</Typography>
                 {isRequest && (<BannerBox bannerColor={bannerColor} theme={undefined} >
                     <Typography variant="h6" sx={{ flexGrow: 1, color: '#fff', paddingLeft: '10px' }}>
@@ -184,7 +242,7 @@ export default function SinglePaper({ request }: Props) {
                 <Root>
                     <Divider />
                 </Root>
-                <Typography variant="body1"><strong>Reached reviews : </strong> *number of reached reviews* {paperObject.reviewLimit ? ` / ${paperObject.reviewLimit}` : ' '}</Typography>
+                <Typography variant="body1"><strong>Accepted requests : </strong> *number of reached reviews* {paperObject.reviewLimit ? ` / ${paperObject.reviewLimit}` : ' '}</Typography>
                 <Typography variant="body1"><strong>Status :  </strong> {`${paperObject.active ? 'active' : 'inactive'}`}</Typography>
 
 
@@ -193,6 +251,7 @@ export default function SinglePaper({ request }: Props) {
                     <Typography variant="body2" sx={{ fontStyle: 'italic' }}>{paperObject.authorsNote}</Typography>
                     <Divider />
                 </Root>
+                {/*TO DO : real request/review list*/}
                 {!isRequest && (
                 <List
                     sx={{
