@@ -35,7 +35,7 @@ export interface PaperData {
     reviewLimit: number;
     minScore: number;
     maxScore: number;
-    internal: boolean;
+    isInternal: boolean;
     authorsNote: string;
     abstractText: string;
     requests: string[];
@@ -52,7 +52,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [reviewLimit, setReviewLimit] = useState(initialData.reviewLimit || '');
     const [minScore, setMinScore] = useState(initialData.minScore || '');
     const [maxScore, setMaxScore] = useState(initialData.maxScore || '');
-    const [internal, setInternal] = useState(initialData.internal !== undefined ? (initialData.internal ? 'internal' : 'external') : 'internal');
+    const [isInternal, setIsInternal] = useState(initialData.isInternal !== undefined ? (initialData.isInternal ? 'internal' : 'external') : 'internal');
     const [authorsNote, setAuthorsNote] = useState(initialData.authorsNote || '');
     const [abstractText, setAbstractText] = useState(initialData.abstractText || '');
     const [files, setFiles] = useState<File[]>([]);
@@ -84,26 +84,26 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     }, []);
 
     useEffect(() => {
-        if (internal === 'internal') {
+        if (isInternal === 'internal') {
             setMinScore('');
             setMaxScore('');
         }
-    }, [internal]);
+    }, [isInternal]);
 
     const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        const minScoreNumber = Number(minScore);
-        const maxScoreNumber = Number(maxScore);
+        const minScoreNumber = isInternal === 'internal' ? null : Number(minScore);
+        const maxScoreNumber = isInternal === 'internal' ? null : Number(maxScore);
         const reviewLimitNumber = Number(reviewLimit);
         const user = JSON.parse(localStorage.getItem('user') || '{}');
 
         if (!user || !user.id) {
             setWarning('User is not logged in.');
             return;
-        } else if (internal === 'external' && (isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
+        } else if (isInternal === 'external' && (minScoreNumber === null || maxScoreNumber === null || isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
             setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
             return;
         } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
@@ -167,7 +167,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             maxScore: maxScoreNumber,
             fileId,
             active: true,
-            internal: internal === 'internal',
+            isInternal: isInternal === 'internal',
             requests: requests.map(requesteeId => {
                 const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
                 return {
@@ -302,7 +302,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     label="Minimum score"
                                     value={minScore}
                                     onChange={(e) => setMinScore(e.target.value)}
-                                    disabled={internal === 'internal'}
+                                    disabled={isInternal === 'internal' || initialData}
                                 />
                             </Grid2>
                             <Grid2>
@@ -311,7 +311,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     label="Maximum score"
                                     value={maxScore}
                                     onChange={(e) => setMaxScore(e.target.value)}
-                                    disabled={internal === 'internal'}
+                                    disabled={isInternal === 'internal' || initialData}
                                 />
                             </Grid2>
                         </Grid2>
@@ -330,8 +330,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <RadioGroup
                         row
-                        value={internal}
-                        onChange={(e) => setInternal(e.target.value)}
+                        value={isInternal}
+                        onChange={(e) => setIsInternal(e.target.value)}
                     >
                         <FormControlLabel
                             value="internal"
