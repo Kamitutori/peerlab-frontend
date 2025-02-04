@@ -1,13 +1,13 @@
 // TODO: Implement MyReviews
-import ReviewList from "../components/ReviewList.tsx";
+import RequestListOfPapers from "../components/RequestListOfPapers.tsx";
 
 export default function MyReviewsPage() {
     return (
         <div>
             <h1>Reviews</h1>
-            <ReviewList
-                endpoint={`http://localhost:8080/api/reviews`}
-                title={"My Reviews"}
+            <RequestListOfPapers
+                endpoint={`http://localhost:8080/api/requests?status=PENDING`}
+                title={"Requests"}
             />
         </div>
     )
