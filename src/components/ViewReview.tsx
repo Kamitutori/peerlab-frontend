@@ -4,6 +4,7 @@ import {useQuery} from "@tanstack/react-query";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 
 interface ReviewElement {
     id: number;
@@ -54,6 +55,18 @@ export default function ViewReview() {
     const handleBackToPaper = () => {
         console.log('back to paper');
     };
+
+
+    {/*TO DO : download the pdf with the button!!*/}
+    const downloadFile = (fileId: string) => {
+        const fileUrl = `/path/to/files/${fileId}`;
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileId;
+        link.click();
+    };
+
+
     return(
         <Paper sx={{ width: '100%', minWidth: '1000px', maxWidth: '1000px', padding: '20px', borderRadius: '8px', boxShadow: 3, marginTop: 9}}>
             <Box sx={{
@@ -171,8 +184,24 @@ export default function ViewReview() {
                             Back to paper
                         </Button>
                     </Box>
+
+                    {/*TO DO : download files button*/}
                 </Box>
             </Box>
+            <Grid container spacing={2}>
+                {reviewObject.fileIds.map((fileId) => (
+                    <Grid item xs={12} sm={6} md={4} key={fileId}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => downloadFile(fileId)}
+                            fullWidth
+                        >
+                            Download {fileId}
+                        </Button>
+                    </Grid>
+                ))}
+            </Grid>
         </Paper>
     )
 
