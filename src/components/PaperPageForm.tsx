@@ -38,7 +38,6 @@ export interface PaperData {
     isInternal: boolean;
     authorsNote: string;
     abstractText: string;
-    requests: string[];
     fileId: string;
 }
 
@@ -58,7 +57,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [files, setFiles] = useState<File[]>([]);
     const [warning, setWarning] = useState('');
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-    const [requests, setRequests] = useState<string[]>(initialData.requests || []);
+    const [requests, setRequests] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -78,7 +77,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             .then(text => {
                 const data = text ? JSON.parse(text) : [];
                 setReviewers(data);
-                console.log('Reviewers:', data);
             })
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
@@ -155,6 +153,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             }
         }
 
+
         const paperData = {
             title,
             owner,
@@ -168,22 +167,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             fileId,
             active: true,
             isInternal: isInternal === 'internal',
-            requests: requests.map(requesteeId => {
-                const reviewer = reviewers.find(reviewer => reviewer.id === requesteeId);
-                return {
-                    paper: { id: 0 },
-                    status: "PENDING",
-                    requestee: {
-                        id: requesteeId,
-                        name: reviewer?.name || "",
-                        email: reviewer?.email || ""
-                    }
-                };
-            })
         };
-        console.log('Paper data:', paperData);
+
         try {
-            const response = await fetch(`http://localhost:8080/api/papers${initialData.id ? `/${initialData.id}` : ''}`, {
+            const paperResponse = await fetch(`http://localhost:8080/api/papers${initialData.id ? `/${initialData.id}` : ''}`, {
                 method: initialData.id ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -192,12 +179,38 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 body: JSON.stringify(paperData)
             });
 
-            const result = await response.json();
-            console.log('Success:', result);
-            navigate(`/paper/${result.id}`);
+            const paperResult = await paperResponse.json();
+            console.log('Success:', paperResult);
+            const requestsData =
+                requests.map(requesteeId => {
+                    reviewers.find(reviewer => reviewer.id === requesteeId);
+                    return {
+                        requestee: {
+                            id: requesteeId,
+                        },
+                        paperId: paperResult.id
+                    };
+                })
+
+            try {
+                const requestResponse = await fetch(`http://localhost:8080/api/requests${initialData.id ? `/${initialData.id}` : ''}`, {
+                    method: initialData.id ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                    },
+                    body: JSON.stringify(requestsData)
+                });
+                const reviewResult = await requestResponse.json();
+                console.log('Success:', reviewResult);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+            navigate(`/paper/${paperResult.id}`);
         } catch (error) {
             console.error('Error:', error);
         }
+
     };
 
     const handleDownloadClick = async () => {
