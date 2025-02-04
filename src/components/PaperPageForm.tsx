@@ -82,6 +82,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
 
+    console.log(requests);
+
     useEffect(() => {
         if (isInternal === 'internal') {
             setMinScore('');
@@ -102,18 +104,21 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         if (!user || !user.id) {
             setWarning('User is not logged in.');
             return;
-        } else if (isInternal === 'external' && (minScoreNumber === null || maxScoreNumber === null || isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
+        }
+        if (isInternal === 'external' && (minScoreNumber === null || maxScoreNumber === null || isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
             setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
             return;
-        } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
+        }
+        if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
-        } else if (files.length === 0 && !initialData.id) {
+        }
+        if (files.length === 0 && !initialData.id) {
             setWarning("Please upload a file.");
             return;
-        } else {
-            setWarning('');
         }
+        setWarning('');
+
 
         const owner = {
             id: user.id,
