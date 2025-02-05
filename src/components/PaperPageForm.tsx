@@ -20,6 +20,7 @@ import {
 import { useDropzone } from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
 
 interface Reviewer {
@@ -290,9 +291,18 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     };
 
+    const handleCancelClick = () => {
+        navigate(-1); // Navigate back to the previous page
+    };
+
     return (
-        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
-            <Typography variant="h4" component="h1" fontWeight={"bold"}>
+        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10, position: 'relative' }}>
+            {initialData.id && (
+                <IconButton onClick={handleDeleteClick} sx={{ position: 'absolute', top: 35, right: 25 }}>
+                    <DeleteIcon />
+                </IconButton>
+            )}
+            <Typography variant="h4" component="h1" fontWeight={"bold"} sx={{ textAlign: 'leftZ' }}>
                 {initialData.title ? 'Edit Paper' : 'Add Paper'}
             </Typography>
             <form onSubmit={handleSubmit}>
@@ -484,14 +494,12 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     </Typography>
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                    <Button type="button" variant="contained" color="secondary" onClick={handleCancelClick}>
+                        Cancel
+                    </Button>
                     <Button type="submit" variant="contained" color="primary">
                         Submit
                     </Button>
-                    {initialData.id && (
-                        <Button type="button" variant="contained" color="error" onClick={handleDeleteClick}>
-                            Delete paper
-                        </Button>
-                    )}
                 </Box>
             </form>
         </Paper>
