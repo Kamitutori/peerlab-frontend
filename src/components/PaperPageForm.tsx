@@ -39,8 +39,16 @@ export interface PaperData {
     isInternal: boolean;
     authorsNote: string;
     abstractText: string;
-    requests: string[];
+    requests: Request[];
     fileId: string;
+}
+
+interface Request {
+    id?: string;
+    requestee: {
+        id: string;
+    };
+    status?: string;
 }
 
 interface PaperFormProps {
@@ -59,28 +67,39 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [files, setFiles] = useState<File[]>([]);
     const [warning, setWarning] = useState('');
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-    const [requests, setRequests] = useState<string[]>(initialData.requests || []);
+    const [requests, setRequests] = useState<Request[]>(initialData.requests || []);
+    const [requestsToDelete, setRequestsToDelete] = useState<Request[]>([]);
+    const [newRequests, setNewRequests] = useState<Request[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/users/all", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-            }
-        })
-            .then(response => {
+        const fetchReviewers = async (retryCount = 0) => {
+            console.log(`Fetching reviewers, attempt ${retryCount + 1}`);
+            try {
+                const response = await fetch("http://localhost:8080/api/users/all", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                    }
+                });
+
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                return response.text();
-            })
-            .then(text => {
+
+                const text = await response.text();
                 const data = text ? JSON.parse(text) : [];
+                console.log('Fetched reviewers:', data);
                 setReviewers(data);
-            })
-            .catch(error => console.error('Error fetching reviewers:', error));
+            } catch (error) {
+                console.error('Error fetching reviewers:', error);
+                if (retryCount < 3) {
+                    setTimeout(() => fetchReviewers(retryCount + 1), Math.pow(2, retryCount) * 1000);
+                }
+            }
+        };
+        fetchReviewers();
     }, []);
 
     useEffect(() => {
@@ -117,7 +136,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             return;
         }
         setWarning('');
-
 
         const owner = {
             id: user.id,
@@ -184,38 +202,58 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             });
 
             const paperResult = await paperResponse.json();
-            console.log('Success:', paperResult);
-            const requestsData =
-                requests.map(requesteeId => {
-                    reviewers.find(reviewer => reviewer.id === requesteeId);
-                    return {
-                        requestee: {
-                            id: requesteeId,
-                        },
-                        paperId: paperResult.id
-                    };
-                })
+            console.log('Successfully posted paper:', paperResult);
 
-            console.log("Requests Data:", requestsData);
-            try {
-                const requestResponse = await fetch(`http://localhost:8080/api/requests${initialData.id ? `/${initialData.id}` : ''}`, {
-                    method: initialData.id ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            if (newRequests.length > 0) {
+                const requestsData = newRequests.map(request => ({
+                    requestee: {
+                        id: request.requestee.id,
                     },
-                    body: JSON.stringify(requestsData)
-                });
-                const reviewResult = await requestResponse.json();
-                console.log('Success:', reviewResult);
-            } catch (error) {
-                console.error('Error:', error);
+                    paperId: paperResult.id
+                }));
+
+                try {
+                    const requestResponse = await fetch(`http://localhost:8080/api/requests`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                        },
+                        body: JSON.stringify(requestsData)
+                    });
+                    const reviewResult = await requestResponse.json();
+                    console.log('Successfully sent reviews:', reviewResult);
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             }
+
+            for (const request of requestsToDelete) {
+                if (request.id) {
+                    try {
+                        const response = await fetch(`http://localhost:8080/api/requests/${request.id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to delete request');
+                        }
+
+                        console.log('Successfully deleted request:', request.id);
+                    } catch (error) {
+                        console.error('Error deleting request:', error);
+                    }
+                }
+            }
+
             navigate(`/paper/${paperResult.id}`);
         } catch (error) {
             console.error('Error:', error);
         }
-
     };
 
     const handleDownloadClick = async () => {
@@ -249,7 +287,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             const result = text ? JSON.parse(text) : {};
 
             navigate(`/papers`);
-            console.log('Success:', result);
+            console.log('Successfully deleted paper:', result);
         } catch (error) {
             console.error('Error:', error);
             navigate(`/papers`);
@@ -273,18 +311,29 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     };
 
     const handleReviewerChange = (reviewerId: string) => {
-        setRequests(prevSelected =>
-            prevSelected.includes(reviewerId)
-                ? prevSelected.filter(id => id !== reviewerId)
-                : [...prevSelected, reviewerId]
-        );
+        setRequests(prevSelected => {
+            const isAlreadyRequested = prevSelected.some(request => request.requestee.id === reviewerId);
+
+            if (isAlreadyRequested) {
+                const requestToDelete = prevSelected.find(request => request.requestee.id === reviewerId);
+                if (requestToDelete) {
+                    setRequestsToDelete(prev => [...prev, requestToDelete]);
+                }
+                return prevSelected.filter(request => request.requestee.id !== reviewerId);
+            } else {
+                setNewRequests(prev => [...prev, { requestee: { id: reviewerId } }]);
+                return [...prevSelected, { requestee: { id: reviewerId } }];
+            }
+        });
     };
 
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setRequests(reviewers.map(reviewer => reviewer.id));
+            setRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
+            setNewRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
         } else {
             setRequests([]);
+            setNewRequests([]);
         }
     };
 
@@ -471,17 +520,31 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
                     <Table>
                         <TableBody>
-                            {reviewers.map((reviewer) => (
-                                <TableRow key={reviewer.id} sx={{ height: 40 }}>
-                                    <TableCell>{reviewer.name}</TableCell>
-                                    <TableCell align="right">
-                                        <Checkbox
-                                            checked={requests.includes(reviewer.id)}
-                                            onChange={() => handleReviewerChange(reviewer.id)}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {reviewers.map((reviewer) => {
+                                const request = requests.find(request => request.requestee.id === reviewer.id);
+                                const isDisabled = request && (request.status === 'ACCEPTED' || request.status === 'SUBMITTED');
+                                const statusText = request && (request.status === 'ACCEPTED' || request.status === 'SUBMITTED') ? request.status : '';
+
+                                return (
+                                    <TableRow key={reviewer.id} sx={{ height: 40 }}>
+                                        <TableCell>{reviewer.name}</TableCell>
+                                        <TableCell align="right">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {statusText && (
+                                                    <Typography variant="body2" color="green" sx={{ marginRight: 1 }}>
+                                                        {statusText}
+                                                    </Typography>
+                                                )}
+                                                <Checkbox
+                                                    checked={!!request}
+                                                    onChange={() => handleReviewerChange(reviewer.id)}
+                                                    disabled={isDisabled}
+                                                />
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </TableContainer>

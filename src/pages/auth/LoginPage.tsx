@@ -134,11 +134,11 @@ export default function LoginPage() {
                             onChange={handleInput}
                         />
                         <FormControlLabel
-                            style={{color: "#b5b5b5"}}
+                            style={{color: "text.primary"}}
                             label="Show Password"
                             control={
                                 <Checkbox
-                                    style={{color: "#cdcdcd"}}
+                                    style={{color: "text.primary"}}
                                     onChange={() => setShowPassword(!showPassword)}
                                 />
                             }
