@@ -48,6 +48,7 @@ interface Request {
     requestee: {
         id: string;
     };
+    status?: string;
 }
 
 interface PaperFormProps {
@@ -72,24 +73,33 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/users/all", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-            }
-        })
-            .then(response => {
+        const fetchReviewers = async (retryCount = 0) => {
+            console.log(`Fetching reviewers, attempt ${retryCount + 1}`);
+            try {
+                const response = await fetch("http://localhost:8080/api/users/all", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                    }
+                });
+
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                return response.text();
-            })
-            .then(text => {
+
+                const text = await response.text();
                 const data = text ? JSON.parse(text) : [];
+                console.log('Fetched reviewers:', data);
                 setReviewers(data);
-            })
-            .catch(error => console.error('Error fetching reviewers:', error));
+            } catch (error) {
+                console.error('Error fetching reviewers:', error);
+                if (retryCount < 3) {
+                    setTimeout(() => fetchReviewers(retryCount + 1), Math.pow(2, retryCount) * 1000);
+                }
+            }
+        };
+        fetchReviewers();
     }, []);
 
     useEffect(() => {
@@ -320,8 +330,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
             setRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
+            setNewRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
         } else {
             setRequests([]);
+            setNewRequests([]);
         }
     };
 
@@ -508,17 +520,31 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
                     <Table>
                         <TableBody>
-                            {reviewers.map((reviewer) => (
-                                <TableRow key={reviewer.id} sx={{ height: 40 }}>
-                                    <TableCell>{reviewer.name}</TableCell>
-                                    <TableCell align="right">
-                                        <Checkbox
-                                            checked={requests.some(request => request.requestee.id === reviewer.id)}
-                                            onChange={() => handleReviewerChange(reviewer.id)}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {reviewers.map((reviewer) => {
+                                const request = requests.find(request => request.requestee.id === reviewer.id);
+                                const isDisabled = request && (request.status === 'ACCEPTED' || request.status === 'SUBMITTED');
+                                const statusText = request && (request.status === 'ACCEPTED' || request.status === 'SUBMITTED') ? request.status : '';
+
+                                return (
+                                    <TableRow key={reviewer.id} sx={{ height: 40 }}>
+                                        <TableCell>{reviewer.name}</TableCell>
+                                        <TableCell align="right">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {statusText && (
+                                                    <Typography variant="body2" color="green" sx={{ marginRight: 1 }}>
+                                                        {statusText}
+                                                    </Typography>
+                                                )}
+                                                <Checkbox
+                                                    checked={!!request}
+                                                    onChange={() => handleReviewerChange(reviewer.id)}
+                                                    disabled={isDisabled}
+                                                />
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </TableContainer>
