@@ -20,6 +20,7 @@ import {
 import { useDropzone } from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
 
 interface Reviewer {
@@ -38,6 +39,7 @@ export interface PaperData {
     isInternal: boolean;
     authorsNote: string;
     abstractText: string;
+    requests: string[];
     fileId: string;
 }
 
@@ -57,7 +59,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [files, setFiles] = useState<File[]>([]);
     const [warning, setWarning] = useState('');
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-    const [requests, setRequests] = useState<string[]>([]);
+    const [requests, setRequests] = useState<string[]>(initialData.requests || []);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -81,6 +83,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
 
+    console.log(requests);
+
     useEffect(() => {
         if (isInternal === 'internal') {
             setMinScore('');
@@ -101,18 +105,21 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         if (!user || !user.id) {
             setWarning('User is not logged in.');
             return;
-        } else if (isInternal === 'external' && (minScoreNumber === null || maxScoreNumber === null || isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
+        }
+        if (isInternal === 'external' && (minScoreNumber === null || maxScoreNumber === null || isNaN(minScoreNumber) || isNaN(maxScoreNumber) || minScoreNumber >= maxScoreNumber)) {
             setWarning('Please enter valid scores. The maximum score must be higher than the minimum score.');
             return;
-        } else if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
+        }
+        if (isNaN(reviewLimitNumber) || (reviewLimitNumber <= 0 && reviewLimit)) {
             setWarning('Please enter a valid number for the maximum number of reviews.');
             return;
-        } else if (files.length === 0 && !initialData.id) {
+        }
+        if (files.length === 0 && !initialData.id) {
             setWarning("Please upload a file.");
             return;
-        } else {
-            setWarning('');
         }
+        setWarning('');
+
 
         const owner = {
             id: user.id,
@@ -192,6 +199,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     };
                 })
 
+            console.log("Requests Data:", requestsData);
             try {
                 const requestResponse = await fetch(`http://localhost:8080/api/requests${initialData.id ? `/${initialData.id}` : ''}`, {
                     method: initialData.id ? 'PUT' : 'POST',
@@ -283,9 +291,18 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     };
 
+    const handleCancelClick = () => {
+        navigate(-1); // Navigate back to the previous page
+    };
+
     return (
-        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
-            <Typography variant="h4" component="h1" fontWeight={"bold"}>
+        <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10, position: 'relative' }}>
+            {initialData.id && (
+                <IconButton onClick={handleDeleteClick} sx={{ position: 'absolute', top: 35, right: 25 }}>
+                    <DeleteIcon />
+                </IconButton>
+            )}
+            <Typography variant="h4" component="h1" fontWeight={"bold"} sx={{ textAlign: 'leftZ' }}>
                 {initialData.title ? 'Edit Paper' : 'Add Paper'}
             </Typography>
             <form onSubmit={handleSubmit}>
@@ -477,14 +494,12 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     </Typography>
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                    <Button type="button" variant="contained" color="secondary" onClick={handleCancelClick}>
+                        Cancel
+                    </Button>
                     <Button type="submit" variant="contained" color="primary">
                         Submit
                     </Button>
-                    {initialData.id && (
-                        <Button type="button" variant="contained" color="error" onClick={handleDeleteClick}>
-                            Delete paper
-                        </Button>
-                    )}
                 </Box>
             </form>
         </Paper>
