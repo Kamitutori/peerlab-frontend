@@ -98,6 +98,10 @@ export default function PaperList({ endpoint, title, filter }: ListProps) {
                     <Typography>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
+                ) : filteredData.length === 0 ? (
+                    <Typography color={"textSecondary"}>
+                        No papers to display.
+                    </Typography>
                 ) : (
                     <List sx={{ maxHeight: 353, overflow: 'auto' }}>
                         {filteredData.map((paper: Paper, index: number) => (
