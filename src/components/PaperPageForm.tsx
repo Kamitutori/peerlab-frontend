@@ -83,7 +83,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             .catch(error => console.error('Error fetching reviewers:', error));
     }, []);
 
-    console.log(requests);
 
     useEffect(() => {
         if (isInternal === 'internal') {
