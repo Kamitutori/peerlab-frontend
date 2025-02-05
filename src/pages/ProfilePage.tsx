@@ -14,6 +14,7 @@ import {
 import PaperList from "../components/PaperList.tsx";
 import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "../components/AlertDialogProvider.tsx";
+import RequestListOfPapers from "../components/RequestListOfPapers.tsx";
 
 /** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */
 function ProfilePage() {
@@ -406,7 +407,7 @@ function ProfilePage() {
                     }}
                 >
                     <PaperList endpoint={`http://localhost:8080/api/papers`} title="My Papers"/>
-                    <PaperList endpoint={`http://localhost:8080/api/papers`} title="My Reviews"/>
+                    <RequestListOfPapers endpoint={`http://localhost:8080/api/requests?status=PENDING`} title="My Reviews"/>
                 </Grid2>
             </Card>
         </Grid2>

@@ -11,21 +11,12 @@ import {
     Typography
 } from '@mui/material';
 import {useDropzone} from 'react-dropzone';
-import CustomTextField from './CustomTextField';
+import CustomTextField from '../components/CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
-import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-import { useLocation } from "react-router-dom";
-
+import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
 import {ReviewObject} from "../components/ReviewList.tsx";
 
-
-
-
-const ObjectPage = () => {
-    const location = useLocation();
-    console.log(location.state?.source); // "paper_list" or "request_list"
-};
-export default function SingleReviewPage({initialData}: ReviewObject) {
+export default function SingleReviewPage(initialData: ReviewObject) {
     const {logout} = useUpdateAuth();
     const [warning, setWarning] = useState('');
 
@@ -35,16 +26,12 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
     const [weaknesses, setWeaknesses] = useState(initialData.weaknesses || '');
     const [comments, setComments] = useState(initialData.comments || '');
     const [questions, setQuestions] = useState(initialData.questions || '');
-    const [score, setScore] = useState(initialData.score || '');
     const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     /** Properties of the corresponding request needed for a correct submission of a review */
     const [request] = useState(initialData.request || '');
-    const [isExternal] = useState(!initialData.isInternal || true);
-    const [minScore] = useState(initialData.minScore || '');
-    const [maxScore] = useState(initialData.maxScore || '');
 
     /** Checks whether the text fields have to be filled out or a file is uploaded */
     const [isTextRequired, setIsTextRequired] = useState(true);
@@ -61,14 +48,6 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
     /** Handles the submission of the review */
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        const scoreNum = parseInt(score);
-
-        if (isExternal) {
-            if (isNaN(scoreNum) || scoreNum < minScore || scoreNum > maxScore) {
-                setWarning('Please enter a valid score.');
-                return;
-            }
-        }
 
         setWarning('');
 
@@ -78,7 +57,6 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
             weaknesses: weaknesses,
             comments: comments,
             confidenceLevel: confidenceLevel,
-            score: score,
             fileIds: ["1", "2"], //fileIds
             submissionDate: new Date().toISOString(),
             request: request
@@ -142,7 +120,6 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%"}}>
             <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10,}}>
                 <Typography variant="h4" component="h1" sx={{color: 'white'}} fontWeight={"bold"}>
-                    {initialData.title ? 'Edit Review' : 'Add Review'}
                 </Typography>
 
                 {/* Review Form */}
@@ -154,7 +131,7 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
                             value={summary}
                             multiline
                             rows={5.4}
-                            onChange={(e) => setSummary(e.target.value)}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSummary(event.target.value)}
                         />
                         <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%",}}>
                             <CustomTextField
@@ -163,7 +140,7 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
                                 value={strengths}
                                 multiline
                                 rows={9.4}
-                                onChange={(e) => setStrengths(e.target.value)}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setStrengths(event.target.value)}
                             />
                             <CustomTextField
                                 required={isTextRequired}
@@ -171,7 +148,7 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
                                 value={weaknesses}
                                 multiline
                                 rows={9.4}
-                                onChange={(e) => setWeaknesses(e.target.value)}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setWeaknesses(event.target.value)}
                             />
                         </Grid2>
                         <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
@@ -181,7 +158,7 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
                                 value={comments}
                                 multiline
                                 rows={5.4}
-                                onChange={(e) => setComments(e.target.value)}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setComments(event.target.value)}
                             />
                             <CustomTextField
                                 required={isTextRequired}
@@ -189,7 +166,7 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
                                 value={questions}
                                 multiline
                                 rows={5.4}
-                                onChange={(e) => setQuestions(e.target.value)}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setQuestions(event.target.value)}
                             />
                         </Grid2>
                         <Box sx={{display: "flex", alignItems: "center", gap: 2, width: "100%"}}>
@@ -200,7 +177,6 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
                                     labelId="confidence-level-label"
                                     id="confidence-level-select"
                                     label="Confidence Level *"
-                                    value={confidenceLevel}
                                     onChange={handleConfidenceLevel}
                                     sx={{width: "33%"}}
                                 >
@@ -211,20 +187,6 @@ export default function SingleReviewPage({initialData}: ReviewObject) {
                                     ))}
                                 </Select>
                             </FormControl>
-                            {isExternal && (
-                                <>
-                                    <CustomTextField
-                                        sx={{width: "150px"}}
-                                        required={isExternal}
-                                        label="Score"
-                                        value={score}
-                                        onChange={(e) => setScore(e.target.value)}
-                                    />
-                                    <Typography sx={{whiteSpace: "nowrap"}}>
-                                        {`∈ [${minScore || 1}, ${maxScore || 5}]`}
-                                    </Typography>
-                                </>
-                            )}
                         </Box>
                     </Grid2>
 
