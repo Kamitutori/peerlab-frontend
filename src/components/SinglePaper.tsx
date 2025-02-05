@@ -5,12 +5,14 @@ import Button from '@mui/material/Button';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Chip from '@mui/material/Chip';
 import {styled} from '@mui/material/styles';
-import {Card, Grid2, Typography} from "@mui/material";
+import {Card, Divider, Grid2, Typography} from "@mui/material";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
 import RequestListOfRequestees, {RequestObject, UserObject} from "./RequestListOfRequestees.tsx";
 import React, {useState} from "react";
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
+/** The paper object returned by the server. */
 interface PaperElement {
     id: number;
     title: string;
@@ -26,6 +28,7 @@ interface PaperElement {
     owner: UserObject;
 }
 
+/** The wrapping box component of the request state banner. */
 const BannerBox = styled(Box)(({theme, bannerColor}: { bannerColor: string, theme: any }) => ({
     display: 'flex',
     alignItems: 'center',
@@ -41,10 +44,6 @@ export default function SinglePaper() {
     const navigate = useNavigate();
     const {logout} = useUpdateAuth();
     const {showAlert} = useAlertDialog();
-
-    function navigateToEditReview(reviewId: string) {
-        navigate("/edit-review/" + reviewId);
-    }
 
     const [requestofRequestee, setRequestofRequestee] = useState<RequestObject>({
         id: 0,
@@ -82,15 +81,33 @@ export default function SinglePaper() {
         }
     });
 
-    {/* TODO : download link for the paper!!*/
-    }
-    const fileUrl = 'https://example.com/path/to/your/file.pdf';
-    const fileName = 'downloaded-file.pdf';
-    const handleDownload = () => {
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = fileName;
-        link.click();
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${paperObject.fileId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                },
+            })
+            if (response.status === 401) {
+                await showAlert("Invalid Token", "Your token is invalid. You will be logged out.", "", "OK");
+                logout();
+            }
+            if (!response.ok) {
+                await showAlert("Failed to Download", `There was an error when fetching the file: ${await response.text()}.`, "", "OK");
+                return;
+            }
+            let result = await response.text();
+            const linkElement = document.createElement("a");
+            linkElement.href = result;
+            document.body.appendChild(linkElement);
+            linkElement.click();
+            document.body.removeChild(linkElement);
+        } catch (error) {
+            await showAlert("Error during Download", `There was an error during the download: ${error}`, "", "OK")
+        }
+
     };
 
     if (isPaperPending) {
@@ -148,7 +165,6 @@ export default function SinglePaper() {
                     logout();
                 });
         }
-
     }
 
     const paperObject: PaperElement = paperData;
@@ -160,7 +176,7 @@ export default function SinglePaper() {
             || (requestofRequestee.status === "EXPIRED" && !requestofRequestee.reviewId && !paperObject.reviewLimit && paperObject.active)
         );
 
-    /** Banner logic concerning color and message */
+    /** Banner logic concerning coloring and message. */
     let bannerColor = '#FF6347';
     let bannerMessage = "The request is expired."; // Default message
 
@@ -194,7 +210,6 @@ export default function SinglePaper() {
         bannerMessage = getBannerMessage(requestofRequestee.status);
     }
 
-    {/* TODO : change the status of the request when the button is clicked */}
     const handleResponseToRequest = async (event: React.MouseEvent<HTMLButtonElement>) => {
         const buttonId: string = event.currentTarget.id;
         try {
@@ -228,156 +243,176 @@ export default function SinglePaper() {
               sx=
                   {{
                       minWidth: '320px',
-                      maxWidth: '1500px',
+                      maxWidth: '2000px',
                       minHeight: '540px',
                       marginLeft: 10,
                       marginTop: 10,
+                      padding: 2
                   }}
         >
-            {isRequest &&
-                (
-                    <BannerBox bannerColor={bannerColor} theme={undefined}>
-                        <Typography variant="h6" sx={{flexGrow: 1, color: '#fff', paddingLeft: '10px'}}>
-                            {bannerMessage}
-                        </Typography>
-                        {requestofRequestee.status === "PENDING" && (
-                            <>
-                                <Button
-                                    id="acceptButton"
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={handleResponseToRequest}
-                                >
-                                    Accept
-                                </Button>
-                                <Button
-                                    id="rejectButton"
-                                    variant="contained"
-                                    color="secondary"
-                                    sx={{marginLeft: 2}}
-                                    onClick={handleResponseToRequest}
-                                >
-                                    Reject
-                                </Button>
-                            </>
-                        )}
-                    </BannerBox>
-                )}
+            <Typography textAlign="end">
+                Upload Date: {convertISO8601ToDate(paperObject.uploadDate)}
+            </Typography>
+            {isRequest && (
+                <BannerBox
+                    bannerColor={bannerColor}
+                    theme={undefined}
+                    sx={{mb: 2}}
+                >
+                    <Typography variant="h6" sx={{flexGrow: 1, color: 'primary', pl: 1}}>
+                        {bannerMessage}
+                    </Typography>
+                    {requestofRequestee.status === "PENDING" && (
+                        <>
+                            <Button
+                                id="acceptButton"
+                                variant="contained"
+                                color="secondary"
+                                onClick={handleResponseToRequest}
+                            >
+                                Accept
+                            </Button>
+                            <Button
+                                id="rejectButton"
+                                variant="contained"
+                                color="secondary"
+                                sx={{ml: 2}}
+                                onClick={handleResponseToRequest}
+                            >
+                                Reject
+                            </Button>
+                        </>
+                    )}
+                </BannerBox>
+            )}
+            {/* All wrapping grid G1; grows in rows*/}
             <Grid2
                 container
                 spacing={2}
                 sx={{
+
                     display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'stretch', // Ensures both cards are the same height
+                    flexDirection: 'column',
+
+                    alignItems: 'stretch',
                     marginLeft: 1,
                     marginTop: 1,
                     width: '100%',
-                    paddingLeft: '10px', // Add space to prevent overlap by the drawer
-                    paddingTop: '10px',
+                    pl: '10px',
+                    pt: '10px',
 
                 }}
             >
-                {/* The "left side" content */}
-                <Grid2>
-                    <Typography variant="h4">{paperObject.title}</Typography>
-                    <Typography variant="h5">{paperObject.authors}</Typography>
-                    <Typography variant="body1">Uploaded by {isRequest ? paperObject.owner.name : "you"}</Typography>
-                    <Grid2
-                        container
-                        sx={{display: "flex", flexDirection: "row"}}
-                    >
-                        <Chip label={paperObject.active ? 'active' : 'locked'}
-                              color={paperObject.active ? "success" : "warning"}/>
-                        <Chip label={paperObject.internal ? 'Internal' : 'External'} color="primary"/>
-                    </Grid2>
-                    <Grid2>
+                {/* The "top side" content; grid g2, growing in columns */}
+                <Grid2 container spacing={2} sx={{flex: 1, display: "flex", flexDirection: "row"}}>
+                    {/* The left upper box content*/}
+                    <Grid2 sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 1}}>
+                        <Typography variant="h4">{paperObject.title}</Typography>
+                        <Typography variant="h5">{paperObject.authors}</Typography>
+                        <Grid2 container spacing={1}>
+                            <CloudUploadIcon/>
+                            <Typography variant="body1">
+                                Uploaded by {isRequest ? paperObject.owner.name : "you"}
+                            </Typography>
+                        </Grid2>
+                        <Grid2 container spacing={1}>
+                            <Chip label={paperObject.active ? 'active' : 'locked'}
+                                  color={paperObject.active ? "success" : "warning"}
+                            />
+                            <Chip label={paperObject.internal ? 'Internal' : 'External'}
+                                  color="primary"
+                            />
+                        </Grid2>
                         <Typography variant="body1">
                             <strong>Reviews:</strong> {numberOfSubmittedReviews} {paperObject.reviewLimit ? ` / ` : ' '} {paperObject.reviewLimit}
                         </Typography>
-                        {/* Optional "Review Progress Bar" */}
+                        {/* Optional "Review Progress Bar"; grid need if implemented */}
+                        <Button
+                            variant="contained"
+                            onClick={handleDownload}
+                            startIcon={<FileDownloadIcon/>}
+                            sx={{maxWidth: "200px"}}
+                        >
+                            Download Paper
+                        </Button>
                     </Grid2>
-                    <Button
-                        variant="contained"
-                        onClick={handleDownload}
-                        startIcon={<FileDownloadIcon/>}
-                    >
-                        Download Paper
-                    </Button>
-                    <Box
-                        sx={{
-                            maxWidth: "600px", // Set maximum width for the box
-                            maxHeight: "300px", // Set maximum height for the scrollable area
-                            overflowY: "auto", // Enable vertical scrolling
-                            padding: "16px", // Add some padding
-                            border: "1px solid #ddd", // Add a light border
-                            borderRadius: "8px", // Optional: Add rounded corners
-                            backgroundColor: "background.paper", // Optional: Light background color
-                        }}
-                    >
-                        <>
+
+                    {/* Upload and Authors note*/}
+                    <Grid2 sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 1}}>
+                        <Box
+                            sx={{
+                                maxWidth: "400px",
+                                maxHeight: "300px",
+                                height: "210px",
+                                overflowY: "auto",
+                                padding: 2,
+                                border: "1px solid #777",
+                                borderRadius: "8px",
+                                backgroundColor: "background.default",
+                            }}
+                        >
+                            <Typography variant="h6" textAlign="center">Author's Note</Typography>
+                            <Divider></Divider>
+                            <Typography variant="body1">
+                                {paperObject.authorsNote ? paperObject.authorsNote : `${paperObject.owner.name} has made no comments on the paper.`}
+                            </Typography>
+                        </Box>
+                    </Grid2>
+                </Grid2>
+
+                {/* grid G3 The "bottom side" content, */}
+                <Grid2 container spacing={2} sx={{flex: 1, display: 'flex', flexDirection: 'row', gap: 1}}>
+                    {/* Abstract */}
+                    <Grid2>
+                        <Box
+                            sx={{
+                                height: "400px",
+                                width: "600px",
+                                overflowY: "auto",
+                                padding: 2,
+                                border: "1px solid #777",
+                                borderRadius: "8px",
+                                backgroundColor: "background.default", // Optional: Light background color
+                            }}
+                        >
                             <Typography variant="h6">Abstract</Typography>
+                            <Divider sx={{mb: 1}}></Divider>
                             <Typography variant="body1">
                                 {paperObject.abstractText}
                             </Typography>
-                        </>
-                    </Box>
-                    {!isRequest && (
-                        <RequestListOfRequestees requests={paperObject.requests}/>
-                    )}
+                        </Box>
+                    </Grid2>
+
+                    <Grid2>
+                        {/* Requests */}
+                        {!isRequest && (
+                            <RequestListOfRequestees requests={paperObject.requests}/>
+                        )}
+                    </Grid2>
                 </Grid2>
 
-                {/* The "right side" content, i.e. Upload date, authors note & edit button */}
-                <Grid2>
+                {/* Administrative Buttons / Last row */}
+                <Grid2 container spacing={2} sx={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
+                    {!isRequest && (
+                        <Button
+                            variant="outlined"
+                            onClick={() => navigate(`/edit-paper/${id}`)}
+                            sx={{}}
+                        >
+                            Edit Paper
+                        </Button>
+                    )}
+                    {(openToReview && requestofRequestee.status !== "SUBMITTED") && (
+                        <Button variant="outlined" onClick={() => navigate(`/add-review/${id}`)}>
+                            Add Review
+                        </Button>
+                    )}
                     {isRequest && requestofRequestee.reviewId && (
                         <Button variant="outlined"
                                 onClick={() => navigate(`/view-review/${requestofRequestee.reviewId}`)}>
                             View Review
                         </Button>
                     )}
-                    <Typography textAlign="end">
-                        Upload Date: {convertISO8601ToDate(paperObject.uploadDate)}
-                    </Typography>
-                    <>
-                        <Box
-                            sx={{
-                                maxWidth: "400px", // Set maximum width for the box
-                                maxHeight: "300px", // Set maximum height for the scrollable area
-                                overflowY: "auto", // Enable vertical scrolling
-                                padding: "16px", // Add some padding
-                                border: "1px solid #ddd", // Add a light border
-                                borderRadius: "8px", // Optional: Add rounded corners
-                                backgroundColor: "background.paper", // Optional: Light background color
-                            }}
-                        >
-                            <>
-                                <Typography variant="h6">Author's Note</Typography>
-                                <Typography variant="body1">
-                                    {paperObject.authorsNote ? paperObject.authorsNote : "The author has made no comments on the paper."}
-                                </Typography>
-                            </>
-                        </Box>
-                    </>
-                    {(openToReview && requestofRequestee.status !== "SUBMITTED") && (
-                        <Button variant="outlined" onClick={() => navigate(`/add-review/${id}`)}>
-                            Add Review
-                        </Button>
-                    )}
-                    {requestofRequestee.status === "SUBMITTED" && (
-                        <>
-                            <Button variant="outlined"
-                                    onClick={() => navigateToEditReview(requestofRequestee.reviewId ? `${requestofRequestee.reviewId}` : "error")}>
-                                Edit Review
-                            </Button>
-                        </>
-                    )}
-                    <Button
-                        variant="outlined"
-                        onClick={() => navigate(`/edit-paper/${id}`)}
-                        sx={{}}
-                    >
-                        Edit Paper
-                    </Button>
                 </Grid2>
             </Grid2>
         </Card>

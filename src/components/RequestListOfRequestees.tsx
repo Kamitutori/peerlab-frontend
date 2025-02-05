@@ -75,14 +75,13 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
         <Card
             sx={{
                 margin: "auto",
-                mt: 4,
                 boxShadow: 3,
                 backgroundColor: "background.default",
                 minWidth: 300,
             }}
         >
             {/* Content of the List */}
-            <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
+            <CardContent sx={{maxHeight: 400, overflow: 'auto', padding: 0}}>
                 <Typography
                     variant="h6"
                     component="div"
