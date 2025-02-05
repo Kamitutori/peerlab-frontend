@@ -30,9 +30,11 @@ export interface ListProps {
     endpoint: string;
     title: string;
     filter?: (paper: Paper) => boolean;
+    width?: string | number;
+    height?: string | number;
 }
 
-export default function PaperList({ endpoint, title, filter }: ListProps) {
+export default function PaperList({ endpoint, title, filter, width = 1000, height = 300 }: ListProps) {
     const { showAlert } = useAlertDialog();
     const { logout } = useUpdateAuth();
     const navigate = useNavigate();
@@ -71,10 +73,10 @@ export default function PaperList({ endpoint, title, filter }: ListProps) {
                 mt: 4,
                 boxShadow: 3,
                 backgroundColor: "background.default",
-                minWidth: 300,
+                minWidth: width,
             }}
         >
-            <CardContent sx={{ minWidth: 600, maxHeight: 400, overflow: 'hidden', padding: 0 }}>
+            <CardContent sx={{padding: 0 }}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -103,7 +105,7 @@ export default function PaperList({ endpoint, title, filter }: ListProps) {
                         No papers to display.
                     </Typography>
                 ) : (
-                    <List sx={{ maxHeight: 353, overflow: 'auto' }}>
+                    <List sx={{ maxHeight: height, overflow: 'auto' }}>
                         {filteredData.map((paper: Paper, index: number) => (
                             <div key={paper.id}>
                                 <ListItemButton
