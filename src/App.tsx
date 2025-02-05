@@ -20,7 +20,7 @@ import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import EditReviewPage from "./pages/EditReviewPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
-//import SinglePaper from "./components/SinglePaper.tsx";
+import SinglePaper from "./components/SinglePaper.tsx";
 
 function App() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -135,7 +135,7 @@ function App() {
                                         }
 
                                     />
-                                    {/*
+                                    {
                                     <Route
                                         path="/paper/:id"
                                         element={
@@ -147,7 +147,7 @@ function App() {
                                             </PrivateRoute>
                                         }
                                     />
-                                    */}
+                                    }
                                     <Route
                                         path="/edit-paper/:id"
                                         element={
