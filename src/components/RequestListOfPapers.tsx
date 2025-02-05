@@ -28,10 +28,9 @@ export interface ListProps {
 export default function RequestListOfPapers({endpoint, title}: ListProps) {
     const { showAlert } = useAlertDialog();
     const {logout} = useUpdateAuth();
-    const LOGOUT_ALERT_TITLE = "Forced Logout";
-    const LOGOUT_ALERT_MESSAGE = "You will be logged out shortly as your token is invalid.";
     const navigate = useNavigate();
 
+    /** Fetches the requests from the server. */
     const {data, isLoading, error} = useQuery({
         queryKey: [endpoint],
         queryFn: async () => {
@@ -43,13 +42,14 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
                 },
             });
             if (res.status === 401) {
-                await showAlert(LOGOUT_ALERT_TITLE, LOGOUT_ALERT_MESSAGE, "", "");
-                setTimeout(() => {logout();}, 5000);}
+                await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
+                logout();
             if (!res.ok) {
                 throw new Error("Failed to fetch requests.");
             }
             return res.json();
-        },
+            }
+        }
     });
 
     /** Sorts the received requests by their creation date. Order is from most to least recent. */

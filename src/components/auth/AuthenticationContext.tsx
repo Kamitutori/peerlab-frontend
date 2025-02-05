@@ -22,7 +22,7 @@ type AuthContextType = {
 };
 
 type AuthUpdateContextType = {
-    login: (data: { email: string; password: string }) => Promise<void>;
+    login: (data: { email: string; password: string }) => Promise<{ success: boolean; HTTPcode?: number; message?: string; }>;
     logout: () => void;
 };
 
@@ -67,25 +67,26 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
             });
-            const res = await response.json();
 
             if (response.ok) {
+                const res = await response.json();
                 setToken(res.token);
                 setUser(res.user);
-                navigate("/dashboard");
-            } else if (response.status === 400) {
-                alert("Invalid email or password.");
+                localStorage.setItem("jwt", res.token);
+                localStorage.setItem("user", JSON.stringify(res.user));
+                return {success: true};
+            } else {
+                return {success: false, HTTPcode: response.status, message: await response.text()};
             }
         } catch (error) {
-            console.error("LoginPage error:", error);
-            alert("LoginPage failed. Please try again.");
+            return {success: false, message: `Login error: ${error}`};
         }
     };
 
     const logout = () => {
         localStorage.removeItem("jwt");
         localStorage.removeItem("user");
-        window.location.href = "http://localhost:5173/login";
+        navigate("/login");
     };
 
     return (

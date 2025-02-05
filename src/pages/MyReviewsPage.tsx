@@ -6,7 +6,7 @@ export default function MyReviewsPage() {
         <div>
             <h1>Reviews</h1>
             <ReviewList
-                endpoint={`https://my-json-server.typicode.com/kamitutori/peerlab-frontend/reviewList`}
+                endpoint={`http://localhost:8080/api/reviews`}
                 title={"My Reviews"}
             />
         </div>

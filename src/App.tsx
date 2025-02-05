@@ -1,25 +1,26 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import {useEffect, useState} from 'react';
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {CssBaseline, ThemeProvider} from "@mui/material";
 import AuthProvider from "./components/auth/AuthenticationContext";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import { darkTheme, lightTheme } from "./theme";
+import {darkTheme, lightTheme} from "./theme";
 
 import LoginPage from "./pages/auth/LoginPage.tsx";
 import Dashboard from "./pages/Dashboard";
 import MyPapersPage from "./pages/MyPapersPage.tsx";
 import MyReviewsPage from "./pages/MyReviewsPage.tsx";
 import NoPage from "./pages/NoPage";
-import TopMenuBar from "./components/TopBar";
+import TopMenuBar from "./components/MenuBar.tsx";
 import RegisterPage from "./pages/auth/RegisterPage.tsx";
 import ForgotPassword from "./pages/auth/ForgotPassword";
-import SinglePaper from "./components/SinglePaper.tsx";
 import EditPaperPage from "./pages/EditPaperPage.tsx";
 import PaperList from "./components/PaperList.tsx";
 import AddPaperPage from "./pages/AddPaperPage.tsx";
+import AddReviewPage from "./pages/AddReviewPage.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
+import EditReviewPage from "./pages/EditReviewPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
-import ProfilePage from "./pages/ProfilePage";
-import ViewReview from "./components/ViewReview.tsx";
+import SinglePaper from "./components/SinglePaper.tsx";
 
 function App() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -134,6 +135,7 @@ function App() {
                                         }
 
                                     />
+                                    {
                                     <Route
                                         path="/paper/:id"
                                         element={
@@ -145,6 +147,7 @@ function App() {
                                             </PrivateRoute>
                                         }
                                     />
+                                    }
                                     <Route
                                         path="/edit-paper/:id"
                                         element={
@@ -168,12 +171,23 @@ function App() {
                                         }
                                     />
                                     <Route
-                                        path="/review/:id"
+                                        path="/add-review"
                                         element={
                                             <PrivateRoute>
                                                 <>
                                                     <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
-                                                    <ViewReview/>
+                                                    <AddReviewPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/edit-review"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <EditReviewPage/>
                                                 </>
                                             </PrivateRoute>
                                         }
