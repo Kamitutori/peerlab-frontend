@@ -9,7 +9,7 @@ import {Card, Divider, Grid2, Typography} from "@mui/material";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
 import RequestListOfRequestees, {RequestObject, UserObject} from "./RequestListOfRequestees.tsx";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 /** The paper object returned by the server. */
@@ -36,7 +36,6 @@ const BannerBox = styled(Box)(({theme, bannerColor}: { bannerColor: string, them
     backgroundColor: bannerColor,
     padding: theme.spacing(1.5),
     borderRadius: '4px',
-    marginBottom: theme.spacing(2),
 }));
 
 export default function SinglePaper() {
@@ -45,6 +44,7 @@ export default function SinglePaper() {
     const {logout} = useUpdateAuth();
     const {showAlert} = useAlertDialog();
 
+    /** If the user is a requestee, this const will be set to the request he received. */
     const [requestofRequestee, setRequestofRequestee] = useState<RequestObject>({
         id: 0,
         status: '',
@@ -61,6 +61,7 @@ export default function SinglePaper() {
         creationDate: '',
     });
 
+    /** This query fetches the paper to display. */
     const {
         isPending: isPaperPending,
         isError: isPaperError,
@@ -81,6 +82,7 @@ export default function SinglePaper() {
         }
     });
 
+    /** This function downloads the paper file from the server. */
     const handleDownload = async () => {
         try {
             const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${paperObject.fileId}`, {
@@ -110,6 +112,7 @@ export default function SinglePaper() {
 
     };
 
+    /** Checks the current status of the fetch of the paper. */
     if (isPaperPending) {
         return <span>Loading...</span>;
     }
@@ -117,6 +120,11 @@ export default function SinglePaper() {
         return <span>{`Error!: ${paperError.message}`}</span>;
     }
 
+
+    const paperObject: PaperElement = paperData;
+    const numberOfSubmittedReviews = paperObject.requests.filter((request) => request.status === "SUBMITTED").length;
+
+    /** Converts the date of the paper form iso 8601 to format 'DD.MM.YYYY at HH:MM'.*/
     const convertISO8601ToDate = (isoString: string) => {
         try {
             const date = new Date(isoString);
@@ -136,13 +144,8 @@ export default function SinglePaper() {
             return
         }
     }
-
-    const isRequest = determineView();
-    if (isRequest) {
-        setRequestofRequestee(paperData.requests[0]);
-    }
-
-    function determineView() {
+/*
+    const determineView = () => {
         const userJson = localStorage.getItem('user');
         if (userJson) {
             try {
@@ -152,7 +155,7 @@ export default function SinglePaper() {
                             logout();
                         });
                 }
-                return JSON.parse(userJson).name === paperData.paperOwnerName;
+                return JSON.parse(userJson).name !== paperData.paperOwnerName;
             } catch (error) {
                 showAlert("User Object Error", "Unexpected behavior: User object in local storage is not a valid JSON object. You are logged out as a result.", "", "OK")
                     .then(() => {
@@ -166,9 +169,22 @@ export default function SinglePaper() {
                 });
         }
     }
+*/
 
-    const paperObject: PaperElement = paperData;
-    const numberOfSubmittedReviews = paperObject.requests.filter((request) => request.status === "SUBMITTED").length;
+    /** Determines whether the user visiting this site is the owner or a requestee. */
+    const [isRequest, setIsRequest] = useState<boolean>(false);
+    useEffect(() => {
+        const userJson = localStorage.getItem("user");
+        if (userJson && (JSON.parse(userJson)?.name !== paperData.paperOwnerName)) {
+            setIsRequest(true);
+        }
+        if (isRequest && paperData.requests.length > 0) {
+            setRequestofRequestee(paperData.requests[0]);
+        }
+    }, [isRequest, paperData.requests]);
+
+
+
 
     const openToReview = isRequest
         && (
@@ -181,6 +197,7 @@ export default function SinglePaper() {
     let bannerMessage = "The request is expired."; // Default message
 
     if (isRequest) {
+        /** Determines the color of the banner depending on the status of the request. */
         const getBannerColor = (status: string): string => {
             switch (status) {
                 case "ACCEPTED":
@@ -191,6 +208,7 @@ export default function SinglePaper() {
             }
         };
 
+        /** Determines what message to display on the request banner. */
         const getBannerMessage = (status: string): string => {
             switch (status) {
                 case "PENDING":
@@ -210,18 +228,17 @@ export default function SinglePaper() {
         bannerMessage = getBannerMessage(requestofRequestee.status);
     }
 
+    /** This function sends a request to the server to update the request status according to the users input which is either 'ACCEPTED' or 'REJECTED'. */
     const handleResponseToRequest = async (event: React.MouseEvent<HTMLButtonElement>) => {
         const buttonId: string = event.currentTarget.id;
         try {
-            const response = await fetch(`http://localhost:8080/requests/${id}`, {
+            const response = await fetch(`http://localhost:8080/api/requests/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                 },
-                body: JSON.stringify({
-                    status: buttonId === "acceptButton" ? 'ACCEPTED' : 'REJECTED',
-                }),
+                body: JSON.stringify(buttonId === "acceptButton" ? "ACCEPTED" : "REJECTED")
             });
             if (response.status === 401) {
                 await showAlert("Invalid Token", "Your token is invalid. You will be logged out.", "", "OK");
@@ -231,7 +248,7 @@ export default function SinglePaper() {
                 await showAlert("Failed to update request", `The request could not be updated: ${await response.text()}`, "", "OK");
             }
             const updatedRequest: RequestObject = await response.json();
-            paperObject.requests[0] = updatedRequest;
+            //paperObject.requests[0] = updatedRequest;
             setRequestofRequestee(updatedRequest);
         } catch (error) {
             await showAlert("Error", `An error occurred while updating the request: ${error}`, "", "OK");
@@ -243,7 +260,7 @@ export default function SinglePaper() {
               sx=
                   {{
                       minWidth: '320px',
-                      maxWidth: '2000px',
+                      maxWidth: '1000px',
                       minHeight: '540px',
                       marginLeft: 10,
                       marginTop: 10,
@@ -257,7 +274,7 @@ export default function SinglePaper() {
                 <BannerBox
                     bannerColor={bannerColor}
                     theme={undefined}
-                    sx={{mb: 2}}
+                    sx={{ mt: 1 }}
                 >
                     <Typography variant="h6" sx={{flexGrow: 1, color: 'primary', pl: 1}}>
                         {bannerMessage}
@@ -290,10 +307,8 @@ export default function SinglePaper() {
                 container
                 spacing={2}
                 sx={{
-
                     display: 'flex',
                     flexDirection: 'column',
-
                     alignItems: 'stretch',
                     marginLeft: 1,
                     marginTop: 1,
@@ -416,6 +431,5 @@ export default function SinglePaper() {
                 </Grid2>
             </Grid2>
         </Card>
-    )
-        ;
+    );
 }

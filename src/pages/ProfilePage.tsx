@@ -407,7 +407,7 @@ function ProfilePage() {
                     }}
                 >
                     <PaperList endpoint={`http://localhost:8080/api/papers`} title="My Papers"/>
-                    <RequestListOfPapers endpoint={`http://localhost:8080/api/requests?status=ACCEPTED`} title="My Reviews"/>
+                    <RequestListOfPapers endpoint={`http://localhost:8080/api/requests?status=PENDING`} title="My Reviews"/>
                 </Grid2>
             </Card>
         </Grid2>
