@@ -23,7 +23,7 @@ export default function EditPaperPage() {
     if (!initialData) {
         return <div>Loading...</div>;
     }
-    console.log("INITIAL DATA", initialData);
+    console.log("Successfully fetched data from database", initialData);
     return (
         <PaperPageForm
             initialData={initialData}
