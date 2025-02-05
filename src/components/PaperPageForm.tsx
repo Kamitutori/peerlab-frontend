@@ -378,7 +378,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     label="Minimum score"
                                     value={minScore}
                                     onChange={(e) => setMinScore(e.target.value)}
-                                    disabled={isInternal === 'internal' || !!initialData}
+                                    disabled={isInternal === 'internal'}
                                 />
                             </Grid2>
                             <Grid2>
@@ -387,7 +387,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     label="Maximum score"
                                     value={maxScore}
                                     onChange={(e) => setMaxScore(e.target.value)}
-                                    disabled={isInternal === 'internal' || !!initialData}
+                                    disabled={isInternal === 'internal'}
                                 />
                             </Grid2>
                         </Grid2>

@@ -215,12 +215,8 @@ export default function SinglePaper() {
                 await showAlert("Failed to Download", `There was an error when fetching the file: ${await response.text()}.`, "", "OK");
                 return;
             }
-            let result = await response.text();
-            const linkElement = document.createElement("a");
-            linkElement.href = result;
-            document.body.appendChild(linkElement);
-            linkElement.click();
-            document.body.removeChild(linkElement);
+            const result = await response.text();
+            window.open(result, '_blank');
         } catch (error) {
             await showAlert("Error during Download", `There was an error during the download: ${error}`, "", "OK")
         }
