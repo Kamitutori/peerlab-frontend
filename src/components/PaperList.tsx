@@ -74,7 +74,7 @@ export default function PaperList({ endpoint, title, filter }: ListProps) {
                 minWidth: 300,
             }}
         >
-            <CardContent sx={{ maxHeight: 400, overflow: 'hidden', padding: 0 }}>
+            <CardContent sx={{ minWidth: 600, maxHeight: 400, overflow: 'hidden', padding: 0 }}>
                 <Typography
                     variant="h6"
                     component="div"
