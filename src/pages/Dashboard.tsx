@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import PaperList from "../components/PaperList.tsx";
 import RequestListOfPapers from "../components/RequestListOfPapers.tsx";
 import {Divider, Grid2, Typography} from "@mui/material";
-import ReviewList from "../components/ReviewList.tsx";
 import Paper from "@mui/material/Paper";
 
 export default function Dashboard() {
@@ -41,8 +40,8 @@ export default function Dashboard() {
                         height={300}
                     />
                     <Grid2>
-                        <ReviewList
-                            endpoint={'http://localhost:8080/api/reviews'}
+                        <RequestListOfPapers
+                            endpoint={`http://localhost:8080/api/requests?status=ACCEPTED`}
                             title={"Reviews to do"}
                             width={500}
                             height={300}

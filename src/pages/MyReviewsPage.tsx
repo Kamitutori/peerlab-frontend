@@ -25,13 +25,13 @@ export default function MyReviewsPage() {
             <Box sx={{flexGrow: 1, marginLeft: 4, marginRight: 4, marginBottom: 4}}>
                 <RequestListOfPapers
                     endpoint={`http://localhost:8080/api/requests?status=PENDING`}
-                    title="Pending Reviews"
+                    title="Pending Requests"
                 />
                 <Grid2 container spacing={4} justifyContent={"center"}>
                     <Grid2>
                         <RequestListOfPapers
                             endpoint={`http://localhost:8080/api/requests?status=ACCEPTED`}
-                            title="Accepted Reviews"
+                            title="Reviews to do"
                             width={500}
                             height={300}
                         />
@@ -61,7 +61,7 @@ export default function MyReviewsPage() {
                         <Grid2>
                             <RequestListOfPapers
                                 endpoint={`http://localhost:8080/api/requests?status=REJECTED`}
-                                title="Rejected Reviews"
+                                title="Rejected Requests"
                                 width={500}
                                 height={300}
                             />
@@ -69,7 +69,7 @@ export default function MyReviewsPage() {
                         <Grid2>
                             <RequestListOfPapers
                                 endpoint={`http://localhost:8080/api/reviews?status=EXPIRED`}
-                                title="Reviews"
+                                title="Expired Requests"
                                 width={500}
                                 height={300}
                             />
