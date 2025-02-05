@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Chip from '@mui/material/Chip';
 import {styled} from '@mui/material/styles';
-import {Card, Divider, Grid2, Typography} from "@mui/material";
+import {Card, Divider, Grid2, Typography, useTheme} from "@mui/material";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
 import RequestListOfRequestees, {RequestObject, UserObject} from "./RequestListOfRequestees.tsx";
@@ -43,6 +43,8 @@ export default function SinglePaper() {
     const navigate = useNavigate();
     const {logout} = useUpdateAuth();
     const {showAlert} = useAlertDialog();
+    const theme = useTheme();
+    const isLightMode = theme.palette.mode === "light";
 
     /** If the user is a requestee, this const will be set to the request he received. */
     const [requestofRequestee, setRequestofRequestee] = useState<RequestObject>({
@@ -66,7 +68,8 @@ export default function SinglePaper() {
         isPending: isPaperPending,
         isError: isPaperError,
         error: paperError,
-        data: paperData
+        data: paperData,
+        refetch
     } = useQuery({
         queryKey: ["paper", id],
         queryFn: async () => {
@@ -79,8 +82,120 @@ export default function SinglePaper() {
             });
             if (!res.ok) throw new Error("Failed to fetch paper");
             return res.json();
+        },
+    });
+
+    const [paperObject, setPaperObject] = useState<PaperElement>({
+        id: 0,
+        title: "",
+        authors: "",
+        fileId: "",
+        internal: false,
+        abstractText: "",
+        authorsNote: "",
+        active: false,
+        uploadDate: "",
+        reviewLimit: 0,
+        requests: [],
+        owner: {
+            id: 0,
+            name: "",
+            email: "",
+            password: ""
         }
     });
+    const [numberOfSubmittedReviews, setNumberOfSubmittedReviews] = useState<number>(-1);
+    useEffect(() => {
+        if (!isPaperError && !isPaperPending && paperData) {
+            setPaperObject(paperData);
+            setNumberOfSubmittedReviews(paperData.requests.filter((request: RequestObject) => request.reviewId === null).length);
+        }
+    }, [isPaperError, isPaperPending, paperData]);
+
+    /** Determines whether the user visiting this site is the owner or a requestee and isolates their request if so. */
+    const [isRequest, setIsRequest] = useState<boolean>(false);
+    useEffect(() => {
+        const userJson = localStorage.getItem("user");
+        if (!paperData || isPaperPending || isPaperError) {
+            setIsRequest(false);
+        }
+        if (userJson && (JSON.parse(userJson)?.name !== paperObject.owner.name) && paperObject.owner.name !== "") {
+            setIsRequest(true);
+            if (paperData.requests.length > 0) {
+                setRequestofRequestee(paperData.requests[0]);
+            }
+        }
+    }, [isPaperPending, isPaperError, paperData, paperObject]);
+
+    const openToReview = isRequest
+        && (
+            (requestofRequestee.status === "ACCEPTED" && !requestofRequestee.reviewId)
+            || (requestofRequestee.status === "EXPIRED" && !requestofRequestee.reviewId && !paperObject.reviewLimit && paperObject.active)
+        );
+
+    /** Banner logic concerning coloring and message. */
+    let bannerColor = '#FF6347';
+    let bannerMessage = "The request is expired."; // Default message
+
+    if (isRequest) {
+        /** Determines the color of the banner depending on the status of the request. */
+        const getBannerColor = (status: string): string => {
+            switch (status) {
+                case "PENDING":
+                    return isLightMode ? "#c1b80b" : "#b3b300";
+                case "ACCEPTED":
+                    return isLightMode ? "#449fd5" : "#008ae6";
+                case "SUBMITTED":
+                    return isLightMode ? "#2f8c2f" : "#018a01";
+                case "REJECTED":
+                    return "#ff0000";
+                case "EXPIRED":
+                    return isLightMode ? "#dadada" : "#000000";
+                default:
+                    return "secondary";
+            }
+        };
+
+        /** Determines what message to display on the request banner. */
+        const getBannerMessage = (status: string): string => {
+            switch (status) {
+                case "PENDING":
+                    return "You were requested to write a review : ";
+                case "ACCEPTED":
+                    return "You have accepted the request to write a review.";
+                case "SUBMITTED":
+                    return "Your review is submitted.";
+                case "REJECTED":
+                    return "You have rejected the request.";
+                case "EXPIRED":
+                    return "The request has expired.";
+                default:
+                    return "Unknown status."
+            }
+        };
+        bannerColor = getBannerColor(requestofRequestee.status);
+        bannerMessage = getBannerMessage(requestofRequestee.status);
+    }
+
+    /** Converts the date of the paper form iso 8601 to format 'DD.MM.YYYY at HH:MM'.*/
+    const convertISO8601ToDate = (isoString: string) => {
+        try {
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) {
+                return "Date is invalid."
+            }
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+
+            return `${day}.${month}.${year} at ${hours}:${minutes}`;
+        } catch (error) {
+            //await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format: ", "", "OK");
+            return
+        }
+    }
 
     /** This function downloads the paper file from the server. */
     const handleDownload = async () => {
@@ -109,130 +224,14 @@ export default function SinglePaper() {
         } catch (error) {
             await showAlert("Error during Download", `There was an error during the download: ${error}`, "", "OK")
         }
-
     };
-
-    /** Checks the current status of the fetch of the paper. */
-    if (isPaperPending) {
-        return <span>Loading...</span>;
-    }
-    if (isPaperError) {
-        return <span>{`Error!: ${paperError.message}`}</span>;
-    }
-
-
-    const paperObject: PaperElement = paperData;
-    const numberOfSubmittedReviews = paperObject.requests.filter((request) => request.status === "SUBMITTED").length;
-
-    /** Converts the date of the paper form iso 8601 to format 'DD.MM.YYYY at HH:MM'.*/
-    const convertISO8601ToDate = (isoString: string) => {
-        try {
-            const date = new Date(isoString);
-            if (isNaN(date.getTime())) {
-                //TODO this is a loop; implement error treatment.
-                //await showAlert("Invalid ISO-8601 Date", "The received date is not in the specified ISO-8601 format.", "", "OK");
-            }
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-
-            return `${day}.${month}.${year} at ${hours}:${minutes}`;
-        } catch (error) {
-            //await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format.", "", "OK");
-            return
-        }
-    }
-/*
-    const determineView = () => {
-        const userJson = localStorage.getItem('user');
-        if (userJson) {
-            try {
-                if (JSON.parse(userJson).name === undefined || JSON.parse(userJson).email === undefined) {
-                    showAlert("User Object Error", "Unexpected behavior: User object in local storage is undefined. You will be logged out as a result.", "", "OK")
-                        .then(() => {
-                            logout();
-                        });
-                }
-                return JSON.parse(userJson).name !== paperData.paperOwnerName;
-            } catch (error) {
-                showAlert("User Object Error", "Unexpected behavior: User object in local storage is not a valid JSON object. You are logged out as a result.", "", "OK")
-                    .then(() => {
-                        logout();
-                    });
-            }
-        } else {
-            showAlert("Invalid Storage State", "There is no user object in your local storage. You will be logged out.", "", "OK")
-                .then(() => {
-                    logout();
-                });
-        }
-    }
-*/
-
-    /** Determines whether the user visiting this site is the owner or a requestee. */
-    const [isRequest, setIsRequest] = useState<boolean>(false);
-    useEffect(() => {
-        const userJson = localStorage.getItem("user");
-        if (userJson && (JSON.parse(userJson)?.name !== paperData.paperOwnerName)) {
-            setIsRequest(true);
-        }
-        if (isRequest && paperData.requests.length > 0) {
-            setRequestofRequestee(paperData.requests[0]);
-        }
-    }, [isRequest, paperData.requests]);
-
-
-
-
-    const openToReview = isRequest
-        && (
-            (requestofRequestee.status === "ACCEPTED" && !requestofRequestee.reviewId)
-            || (requestofRequestee.status === "EXPIRED" && !requestofRequestee.reviewId && !paperObject.reviewLimit && paperObject.active)
-        );
-
-    /** Banner logic concerning coloring and message. */
-    let bannerColor = '#FF6347';
-    let bannerMessage = "The request is expired."; // Default message
-
-    if (isRequest) {
-        /** Determines the color of the banner depending on the status of the request. */
-        const getBannerColor = (status: string): string => {
-            switch (status) {
-                case "ACCEPTED":
-                case "SUBMITTED":
-                    return "#90EE90"; // Green
-                default:
-                    return "#FF6347"; // Red
-            }
-        };
-
-        /** Determines what message to display on the request banner. */
-        const getBannerMessage = (status: string): string => {
-            switch (status) {
-                case "PENDING":
-                    return "A review has been requested : ";
-                case "ACCEPTED":
-                    return "The request has been accepted.";
-                case "SUBMITTED":
-                    return "The review has been submitted.";
-                case "REJECTED":
-                    return "The request has been rejected.";
-                default:
-                    return "The request is expired.";
-            }
-        };
-
-        bannerColor = getBannerColor(requestofRequestee.status);
-        bannerMessage = getBannerMessage(requestofRequestee.status);
-    }
 
     /** This function sends a request to the server to update the request status according to the users input which is either 'ACCEPTED' or 'REJECTED'. */
     const handleResponseToRequest = async (event: React.MouseEvent<HTMLButtonElement>) => {
         const buttonId: string = event.currentTarget.id;
+        console.log(buttonId);
         try {
-            const response = await fetch(`http://localhost:8080/api/requests/${id}`, {
+            const response = await fetch(`http://localhost:8080/api/requests/${requestofRequestee.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -245,15 +244,22 @@ export default function SinglePaper() {
                 logout();
             }
             if (!response.ok) {
-                await showAlert("Failed to update request", `The request could not be updated: ${await response.text()}`, "", "OK");
+                await showAlert("Failed to Update Request", `The request could not be updated: ${await response.text()}`, "", "OK");
             }
-            const updatedRequest: RequestObject = await response.json();
-            //paperObject.requests[0] = updatedRequest;
-            setRequestofRequestee(updatedRequest);
+            await response.json();
+            await refetch();
         } catch (error) {
             await showAlert("Error", `An error occurred while updating the request: ${error}`, "", "OK");
         }
     };
+
+    /** Checks the current status of the fetch of the paper. */
+    if (isPaperPending) {
+        return <span>Loading...</span>;
+    }
+    if (isPaperError) {
+        return <span>{`Error!: ${paperError.message}`}</span>;
+    }
 
     return (
         <Card variant="outlined"
@@ -264,7 +270,8 @@ export default function SinglePaper() {
                       minHeight: '540px',
                       marginLeft: 10,
                       marginTop: 10,
-                      padding: 2
+                      paddingLeft: '10px',
+                      paddingRight: '10px',
                   }}
         >
             <Typography textAlign="end">
@@ -274,7 +281,7 @@ export default function SinglePaper() {
                 <BannerBox
                     bannerColor={bannerColor}
                     theme={undefined}
-                    sx={{ mt: 1 }}
+                    sx={{mt: 1}}
                 >
                     <Typography variant="h6" sx={{flexGrow: 1, color: 'primary', pl: 1}}>
                         {bannerMessage}
@@ -284,15 +291,15 @@ export default function SinglePaper() {
                             <Button
                                 id="acceptButton"
                                 variant="contained"
-                                color="secondary"
+                                color="primary"
                                 onClick={handleResponseToRequest}
                             >
                                 Accept
                             </Button>
                             <Button
                                 id="rejectButton"
-                                variant="contained"
-                                color="secondary"
+                                variant="outlined"
+                                color="primary"
                                 sx={{ml: 2}}
                                 onClick={handleResponseToRequest}
                             >
@@ -310,12 +317,11 @@ export default function SinglePaper() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'stretch',
-                    marginLeft: 1,
-                    marginTop: 1,
+                    mx: '10px',
+                    my: '10px',
                     width: '100%',
-                    pl: '10px',
-                    pt: '10px',
-
+                    px: '10px',
+                    py: '10px',
                 }}
             >
                 {/* The "top side" content; grid g2, growing in columns */}
@@ -334,7 +340,7 @@ export default function SinglePaper() {
                             <Chip label={paperObject.active ? 'active' : 'locked'}
                                   color={paperObject.active ? "success" : "warning"}
                             />
-                            <Chip label={paperObject.internal ? 'Internal' : 'External'}
+                            <Chip label={paperObject.internal ? 'internal' : 'external'}
                                   color="primary"
                             />
                         </Grid2>
@@ -407,7 +413,16 @@ export default function SinglePaper() {
                 </Grid2>
 
                 {/* Administrative Buttons / Last row */}
-                <Grid2 container spacing={2} sx={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
+                <Grid2 container
+                       spacing={2}
+                       sx=
+                           {{
+                               display: 'flex',
+                               flexDirection: 'row',
+                               justifyContent: 'flex-start',
+
+                }}
+                >
                     {!isRequest && (
                         <Button
                             variant="outlined"
@@ -418,13 +433,13 @@ export default function SinglePaper() {
                         </Button>
                     )}
                     {(openToReview && requestofRequestee.status !== "SUBMITTED") && (
-                        <Button variant="outlined" onClick={() => navigate(`/add-review/${id}`)}>
+                        <Button variant="outlined" onClick={() => navigate(`requests/${id}/add-review/`)}>
                             Add Review
                         </Button>
                     )}
                     {isRequest && requestofRequestee.reviewId && (
                         <Button variant="outlined"
-                                onClick={() => navigate(`/view-review/${requestofRequestee.reviewId}`)}>
+                                onClick={() => navigate(`/review/${requestofRequestee.reviewId}`)}>
                             View Review
                         </Button>
                     )}
