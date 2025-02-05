@@ -521,7 +521,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     <Table>
                         <TableBody>
                             {reviewers.map((reviewer) => {
-                                const request = requests.find(request => request.requestee.id === reviewer.id);
+                                const request = requests.find(request => request.requestee.id === reviewer.id && request.status !== 'REJECTED');
                                 const isDisabled = request && (request.status === 'ACCEPTED' || request.status === 'SUBMITTED');
                                 const statusText = request && (request.status === 'ACCEPTED' || request.status === 'SUBMITTED') ? request.status : '';
 
