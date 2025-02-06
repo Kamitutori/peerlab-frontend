@@ -15,7 +15,8 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Typography
+    Typography,
+    FormHelperText
 } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import CustomTextField from './CustomTextField';
@@ -110,6 +111,26 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     }, [isInternal]);
 
     const navigate = useNavigate();
+    const [authorsNoteCount, setAuthorsNoteCount] = useState(authorsNote.length);
+    const [abstractTextCount, setAbstractTextCount] = useState(abstractText.length);
+
+    const handleAuthorsNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (value.length <= 2000) {
+            setAuthorsNoteCount(value.length);
+            setAuthorsNote(value);
+            setIsEdited(true);
+        }
+    };
+
+    const handleAbstractTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (value.length <= 2000) {
+            setAbstractTextCount(value.length);
+            setAbstractText(value);
+            setIsEdited(true);
+        }
+    };
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -425,17 +446,21 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         </Grid2>
                     </Grid2>
                     <Grid2>
-                        <CustomTextField
-                            label="Authors note"
-                            value={authorsNote}
-                            onChange={(e) => {
-                                setAuthorsNote(e.target.value)
-                                setIsEdited(true)
-                            }}
-                            multiline
-                            rows={9.4}
-                            sx={{ width: '100%' }}
-                        />
+                        <Box sx={{ position: 'relative', width: '100%' }}>
+                            <CustomTextField
+                                label="Authors note"
+                                value={authorsNote}
+                                onChange={handleAuthorsNoteChange}
+                                multiline
+                                rows={9.4}
+                                sx={{ width: '100%' }}
+                            />
+                            <FormHelperText sx={{ position: 'absolute', right: 0, bottom: '-20px' }}>
+                                <Typography variant="body2" color="text.secondary" fontSize={12}>
+                                    {`${authorsNoteCount}/2000`}
+                                </Typography>
+                            </FormHelperText>
+                        </Box>
                     </Grid2>
                 </Grid2>
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -461,17 +486,21 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         />
                     </RadioGroup>
                 </Box>
-                <CustomTextField
-                    label="Abstract Text"
-                    value={abstractText}
-                    onChange={(e) => {
-                        setAbstractText(e.target.value)
-                        setIsEdited(true)
-                    }}
-                    multiline
-                    rows={4}
-                    sx={{ width: '100%', marginTop: 2 }}
-                />
+                <Box sx={{ position: 'relative', width: '100%', marginTop: 2 }}>
+                    <CustomTextField
+                        label="Abstract Text"
+                        value={abstractText}
+                        onChange={handleAbstractTextChange}
+                        multiline
+                        rows={4}
+                        sx={{ width: '100%' }}
+                    />
+                    <FormHelperText sx={{ position: 'absolute', right: 0, bottom: '-20px' }}>
+                        <Typography variant="body2" color="text.secondary" fontSize={12}>
+                            {`${abstractTextCount}/2000`}
+                        </Typography>
+                    </FormHelperText>
+                </Box>
                 {initialData.id ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
                         <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
@@ -489,7 +518,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                      border: '2px dashed grey',
                                      padding: 4,
                                      textAlign: 'center',
-                                     marginTop: 2
+                                     marginTop: 5
                                  }}>
                                 <input {...getInputProps()} />
                                 <Typography sx={{ color: 'primary' }}>
