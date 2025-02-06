@@ -20,13 +20,14 @@ import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import PeerLabIcon from '../assets/peerlabLogo_squared.svg';
+import PeerLabIcon from '../assets/peerlab_logo_minimal_transparent_white.svg';
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useUpdateAuth } from "./auth/AuthenticationContext.tsx";
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
+
 
 const drawerWidth = 240;
 
@@ -147,7 +148,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
             if (userJson) {
                 try {
                     setUsername(JSON.parse(userJson).name);
-                } catch (error) {
+                } catch {
                     showAlert("User Object Error", "Unexpected behavior: User object in local storage is not a valid JSON object. You will be logged out as a result.", "", "OK")
                         .then(() => { logout(); });
                 }
@@ -167,7 +168,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
         return () => {
             window.removeEventListener(LOCAL_STORAGE_UPDATE_EVENT, handleStorageChange);
         };
-    }, []);
+    });
 
     return (
         <Box sx={{ flexGrow: 1, display: 'flex' }}>
@@ -188,7 +189,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
                         <MenuIcon />
                     </IconButton>
                     <img src={PeerLabIcon} width="50" height="50" alt="logo" />
-                    <Typography variant="h6" component="div" align={"left"} sx={{ flexGrow: 1, marginLeft: 1 }}>
+                    <Typography variant="h6" component="div" align={"left"} sx={{ flexGrow: 1, marginLeft: 2 }}>
                         {username}
                     </Typography>
                     <Button color="inherit" onClick={toggleTheme}>
