@@ -51,6 +51,104 @@ Implementation not 1:1 possible as await needs to be called in an async function
     }
 ```
 
+```typescript jsx
+return (
+    <>
+        <Paper sx={{
+            width: '100%',
+            maxWidth: '1000px',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: 3,
+            marginTop: 9
+        }}>
+            <Typography variant="h4" sx={{marginBottom: 2, textAlign: 'center'}}>{paperObject.title}</Typography>
+            {isRequest &&
+                (
+                    <BannerBox bannerColor={bannerColor} theme={undefined}>
+                        <Typography variant="h6" sx={{flexGrow: 1, color: '#fff', paddingLeft: '10px'}}>
+                            {bannerMessage}
+                        </Typography>
+                        {requestofRequestee.status === "PENDING" && (
+                            <>
+                                <Button variant="contained" color="secondary" onClick={handleAccept}>Accept</Button>
+                                <Button variant="contained" color="secondary" sx={{marginLeft: 2}}
+                                        onClick={handleReject}>Reject</Button>
+                            </>
+                        )}
+                    </BannerBox>
+                )}
+            <Stack direction="row" spacing={2} justifyContent="space-between" sx={{marginBottom: 2}}>
+                <Chip label={paperObject.internal ? 'Internal' : 'External'} color="primary"/>
+                <Button
+                    variant="contained"
+                    onClick={handleDownload}
+                    startIcon={<FileDownloadIcon/>}
+                >
+                    Download Paper
+                </Button>
+            </Stack>
+            <Typography variant="body1"><strong>Authors : </strong> {paperObject.authors}</Typography>
+            <Typography variant="body1"><strong>Preview : </strong> {paperObject.abstractText}</Typography>
+            <Root>
+                <Divider/>
+            </Root>
+            <Typography variant="body1"><strong>Accepted requests : </strong> *number of reached
+                reviews* {paperObject.reviewLimit ? ` / ${paperObject.reviewLimit}` : ' '}</Typography>
+            <Typography variant="body1"><strong>Status : </strong> {`${paperObject.active ? 'active' : 'inactive'}`}
+            </Typography>
+
+            <Root>
+                <Divider>Author's Note</Divider>
+                <Typography variant="body2" sx={{fontStyle: 'italic'}}>{paperObject.authorsNote}</Typography>
+                <Divider/>
+            </Root>
+            {/*TO DO : real request/review list*/}
+            {!isRequest && (
+                <RequestListOfRequestees requests={paperObject.requests}/>
+            )}
+            <Stack spacing={2} direction="row" justifyContent="flex-end" sx={{marginTop: 2}}>
+                <Button variant="outlined" onClick={() => navigate(`/edit-paper/${id}`)}>Edit</Button>
+                {isRequest && requestofRequestee.reviewId && (
+                    <Button variant="outlined"
+                            onClick={() => navigate(`/view-review/${requestofRequestee.reviewId}`)}>
+                        View Review
+                    </Button>
+                )}
+                {openToReview && (
+                    <Button variant="outlined" onClick={() => navigate(`/add-review/${id}`)}>
+                        Add Review
+                    </Button>
+                )}
+            </Stack>
+            {isRequest && requestofRequestee.reviewId && (
+                <Stack direction="row" justifyContent="flex-end" sx={{marginTop: 2}}>
+                    <Button
+                        variant="outlined"
+                        onClick={() => navigate(`/edit-review/${requestofRequestee.reviewId}`)}
+                        color="primary"
+                        sx={{marginRight: 2}}
+                    >
+                        Edit the Review
+                    </Button>
+                </Stack>
+            )}
+            {isRequest && requestofRequestee.reviewId && (
+                <Stack spacing={2} direction="row" justifyContent="flex-end">
+                    <Button variant="outlined" onClick={handleDelete}>
+                        Delete review
+                    </Button>
+                </Stack>)}
+        </Paper>
+
+        <div style={{
+            paddingLeft: '10px',
+            paddingRight: '10px'
+        }}>{`Upload Date: ${convertISO8601ToDate(paperObject.uploadDate)}`}</div>
+    </>
+);
+```
+
 # Frontend Tech Stack
 - Language: TypeScript
 - Framework: React

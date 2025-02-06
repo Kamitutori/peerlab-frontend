@@ -135,7 +135,7 @@ function App() {
                                         }
 
                                     />
-                                    {
+
                                     <Route
                                         path="/paper/:id"
                                         element={
@@ -147,7 +147,7 @@ function App() {
                                             </PrivateRoute>
                                         }
                                     />
-                                    }
+
                                     <Route
                                         path="/edit-paper/:id"
                                         element={

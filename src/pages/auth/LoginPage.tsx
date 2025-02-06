@@ -1,7 +1,8 @@
 import {Alert, Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
+import peerLabLogoTransparent from "../../assets/PeerLab_squared_outlined.svg";
+//import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
 import {useUpdateAuth} from "../../components/auth/AuthenticationContext.tsx";
 import {useNavigate} from "react-router-dom";
 
@@ -100,7 +101,7 @@ export default function LoginPage() {
                     >
                         <img src={peerLabLogoTransparent}
                              alt="PeerLab logo"
-                             style={{height: 100, width: 100}}
+                             style={{height: 150, width: 150}}
                         />
                         <h1>
                             Login
@@ -133,11 +134,11 @@ export default function LoginPage() {
                             onChange={handleInput}
                         />
                         <FormControlLabel
-                            style={{color: "#b5b5b5"}}
+                            style={{color: "text.primary"}}
                             label="Show Password"
                             control={
                                 <Checkbox
-                                    style={{color: "#cdcdcd"}}
+                                    style={{color: "text.primary"}}
                                     onChange={() => setShowPassword(!showPassword)}
                                 />
                             }
