@@ -82,9 +82,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
 
     // Refs and parameters
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Extract request ID from URL parameters
     const { id } = useParams<{ id: string }>();
+
+    // Alert dialog utility to show messages
     const { showAlert } = useAlertDialog();
+
+    // React Router's navigate function to redirect user
     const navigate = useNavigate();
+
+    // Local state to store paper data and request
     let [request] = useState<RequestData | null>(null);
     let [isExternal] = useState(false);
     let [minScore] = useState<number>(NaN);
@@ -95,7 +103,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         setIsTextRequired(files.length === 0);
     }, [files]);
 
-    // Fetch request data for the review
+    // React Query to fetch request data from the API
     const {
         isPending: isRequestPending,
         isError: isRequestError,
@@ -104,6 +112,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
     } = useQuery({
         queryKey: ["request", id],
         queryFn: async () => {
+            // Make a GET request to fetch request details
             const res = await fetch(`http://localhost:8080/api/requests/${id}`, {
                 method: "GET",
                 headers: {
