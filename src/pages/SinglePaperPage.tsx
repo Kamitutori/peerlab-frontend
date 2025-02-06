@@ -291,7 +291,7 @@ export default function SinglePaperPage() {
                       px: '10px',
                   }}
         >
-            <Typography textAlign="end">
+            <Typography textAlign="end" sx={{mr: 3, mt: 2}}>
                 Upload Date: {uploadDate}
             </Typography>
             {isRequest && (
@@ -375,7 +375,7 @@ export default function SinglePaperPage() {
                     </Grid2>
 
                     {/* Upload and Authors note*/}
-                    <Grid2 sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 1}}>
+                    <Grid2 sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 1, ml: 9}}>
                         <Box
                             sx={{
                                 maxWidth: "400px",
