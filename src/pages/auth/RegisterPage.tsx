@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
+import peerLabLogoTransparent from "../../assets/peerlab_logo_squared_transparent.svg";
 import {useNavigate} from "react-router-dom";
 
 export default function RegisterPage() {
@@ -99,7 +99,7 @@ export default function RegisterPage() {
     return (
         <Box>
             <Paper sx={{
-                bgcolor: "#333",
+                bgcolor: "background.paper",
                 overflow: "hidden",
                 wordWrap: "break-word",
                 maxWidth: "400px",
@@ -119,9 +119,9 @@ export default function RegisterPage() {
                     >
                         <img src={peerLabLogoTransparent}
                              alt="PeerLab logo"
-                             style={{height: 100, width: 100}}
+                             style={{height: 150, width: 150}}
                         />
-                        <h1 style={{color: "#fff"}}>
+                        <h1 style={{color: "text.primary"}}>
                             Register
                         </h1>
                         {showMessage && (
@@ -157,10 +157,10 @@ export default function RegisterPage() {
                             onChange={handleInput}
                         />
                         <FormControlLabel
-                            style={{color: "#b5b5b5"}}
+                            style={{color: "text.primary"}}
                             label="Show Password"
                             control={
-                                <Checkbox style={{color: "#cdcdcd"}}
+                                <Checkbox style={{color: "text.primary"}}
                                           onChange={() => setShowPassword(!showPassword)}
                                 />
                             }

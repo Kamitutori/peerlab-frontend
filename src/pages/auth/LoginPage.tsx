@@ -1,8 +1,7 @@
 import {Alert, Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../../assets/PeerLab_squared_outlined.svg";
-//import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
+import peerLabLogoTransparent from "../../assets/peerlab_logo_squared_transparent.svg";
 import {useUpdateAuth} from "../../components/auth/AuthenticationContext.tsx";
 import {useNavigate} from "react-router-dom";
 
