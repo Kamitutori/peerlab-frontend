@@ -19,7 +19,7 @@ interface PaperElement {
     title: string;
     authors: string;
     fileId: string;
-    internal: boolean;
+    isInternal: boolean;
     abstractText: string;
     authorsNote: string;
     isActive: boolean;
@@ -117,7 +117,7 @@ export default function SinglePaperPage() {
         title: "",
         authors: "",
         fileId: "",
-        internal: false,
+        isInternal: false,
         abstractText: "",
         authorsNote: "",
         isActive: false,
@@ -353,7 +353,7 @@ export default function SinglePaperPage() {
                             <Chip label={paperObject.isActive ? 'active' : 'locked'}
                                   color={paperObject.isActive ? "success" : "warning"}
                             />
-                            <Chip label={paperObject.internal ? 'internal' : 'external'}
+                            <Chip label={paperObject.isInternal ? 'internal' : 'external'}
                                   color="primary"
                             />
                         </Grid2>
