@@ -9,15 +9,17 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, {useState} from "react";
-import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
+import peerLabLogoLight from "../../assets/peerlab_logo_squared_transparent.svg";
+import peerLabLogoDark from "../../assets/peerlab_logo_squared_transparent_white.svg"
 import {useNavigate} from "react-router-dom";
+import {useTheme} from "@mui/material/styles";
 
 export default function RegisterPage() {
     const strongPasswordRegex: RegExp = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
     const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const theme = useTheme();
     function backToLogin() {
         navigate("/login");
     }
@@ -99,7 +101,7 @@ export default function RegisterPage() {
     return (
         <Box>
             <Paper sx={{
-                bgcolor: "#333",
+                bgcolor: "background.paper",
                 overflow: "hidden",
                 wordWrap: "break-word",
                 maxWidth: "400px",
@@ -117,11 +119,11 @@ export default function RegisterPage() {
                                alignItems: "center",
                            }}
                     >
-                        <img src={peerLabLogoTransparent}
+                        <img src={theme.palette.mode === 'dark' ? peerLabLogoDark : peerLabLogoLight}
                              alt="PeerLab logo"
-                             style={{height: 100, width: 100}}
+                             style={{ height: 150, width: 150 }}
                         />
-                        <h1 style={{color: "#fff"}}>
+                        <h1 style={{color: "text.primary"}}>
                             Register
                         </h1>
                         {showMessage && (
@@ -157,10 +159,10 @@ export default function RegisterPage() {
                             onChange={handleInput}
                         />
                         <FormControlLabel
-                            style={{color: "#b5b5b5"}}
+                            style={{color: "text.primary"}}
                             label="Show Password"
                             control={
-                                <Checkbox style={{color: "#cdcdcd"}}
+                                <Checkbox style={{color: "text.primary"}}
                                           onChange={() => setShowPassword(!showPassword)}
                                 />
                             }

@@ -13,6 +13,13 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
 
+export interface UserObject {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+}
+
 /** The request object as returned by the server endpoint. */
 export interface RequestObject {
     id: number;
@@ -20,8 +27,7 @@ export interface RequestObject {
     paperId: number;
     paperTitle: string;
     paperOwnerName: string;
-    requesteeId: number;
-    requesteeName: string;
+    requestee: UserObject;
     reviewId: number | null;
     creationDate: string;
 }
@@ -37,10 +43,11 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
     const isLightMode = theme.palette.mode === "light";
 
     /** Sorts the received requests first by their status in below order and secondary in alphabetical order. */
+
     requests.sort((a: RequestObject, b: RequestObject) => {
         const statusOrder = ["SUBMITTED", "ACCEPTED", "PENDING", "REJECTED", "EXPIRED"];
         const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
-        return statusComparison !== 0 ? statusComparison : a.requesteeName.localeCompare(b.requesteeName);
+        return statusComparison !== 0 ? statusComparison : a.requestee.name.localeCompare(b.requestee.name);
     });
 
     /** Redirects to the review with the given id. */
@@ -51,9 +58,9 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
     /** Adapts the color scheme of the requests to their status and the current theme. */
     const matchColor = (status: string) => {
         if (status === "PENDING") {
-            return isLightMode ? "#c1b80b": "#b3b300";
+            return isLightMode ? "#c1b80b" : "#b3b300";
         } else if (status === "ACCEPTED") {
-            return isLightMode ? "#449fd5": "#008ae6";
+            return isLightMode ? "#449fd5" : "#008ae6";
         } else if (status === "SUBMITTED") {
             return isLightMode ? "#2f8c2f" : "#018a01";
         } else if (status === "REJECTED") {
@@ -68,14 +75,13 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
         <Card
             sx={{
                 margin: "auto",
-                mt: 4,
                 boxShadow: 3,
                 backgroundColor: "background.default",
                 minWidth: 300,
             }}
         >
             {/* Content of the List */}
-            <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
+            <CardContent sx={{maxHeight: 400, overflow: 'auto', padding: 0}}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -93,61 +99,74 @@ export default function RequestListOfRequestees({requests}: ListOfRequests) {
                         minHeight: '50px', // Ensures enough height for vertical centering
                     }}
                 >
-                    Reviews
+                    Requests
                 </Typography>
-                <List sx={{maxHeight: 353, overflow: 'auto'}}>
-                    {requests.map((request:
-                               {
-                                   id: number;
-                                   status: string;
-                                   requesteeName: string;
-                                   reviewId: number | null
-                               },
-                               index: number) => (
-                        <div key={request.id}>
-                            {/* Requests mapped as List Element */}
-                            <ListItemButton
-                                disabled={request.status !== "SUBMITTED"}
-                                onClick={() => handleClick(request.reviewId === null ? 0 : request.reviewId)}
-                                sx={{
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                        backgroundColor: "background.paper",
-                                    },
-                                }}
-                            >
-                                <ListItemAvatar>
-                                    <Avatar>
-                                        <ArticleIcon sx={{color: 'background.default'}}/>
-                                    </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary={request.requesteeName}
-                                    secondary={request.status}
-                                    slotProps={{
-                                        primary: {
-                                            noWrap: true,
-                                            sx: {
-                                                fontSize: "0.875rem",
-                                                textOverflow: "ellipsis",
-                                                overflow: "hidden",
-                                                color: "primary",
-                                            },
+                {(requests.length === 0) && (
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            textAlign: "center",
+                            padding: 2,
+                            color: "text.secondary",
+                        }}
+                    >
+                        There are no requests.
+                    </Typography>
+                )}
+                {(requests.length !== 0) && (
+                    <List sx={{maxHeight: 353, overflow: 'auto'}}>
+                        {requests.map((request:
+                                       {
+                                           id: number;
+                                           status: string;
+                                           requestee: UserObject;
+                                           reviewId: number | null
+                                       },
+                                       index: number) => (
+                            <div key={request.id}>
+                                {/* Requests mapped as List Element */}
+                                <ListItemButton
+                                    disabled={request.status !== "SUBMITTED"}
+                                    onClick={() => handleClick(request.reviewId === null ? 0 : request.reviewId)}
+                                    sx={{
+                                        borderRadius: 2,
+                                        "&:hover": {
+                                            backgroundColor: "background.paper",
                                         },
-                                        secondary: {
-                                            sx: {
-                                                fontSize: "0.75rem",
-                                                color: matchColor(request.status),
-                                            },
-                                        }
                                     }}
-                                />
-                            </ListItemButton>
-                            {index < requests.length - 1 && <Divider sx={{backgroundColor: "grey"}}/>}
-                        </div>
-                    ))}
-                </List>
-
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar>
+                                            <ArticleIcon sx={{color: 'background.default'}}/>
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={request.requestee.name}
+                                        secondary={request.status}
+                                        slotProps={{
+                                            primary: {
+                                                noWrap: true,
+                                                sx: {
+                                                    fontSize: "0.875rem",
+                                                    textOverflow: "ellipsis",
+                                                    overflow: "hidden",
+                                                    color: "primary",
+                                                },
+                                            },
+                                            secondary: {
+                                                sx: {
+                                                    fontSize: "0.75rem",
+                                                    color: matchColor(request.status),
+                                                },
+                                            }
+                                        }}
+                                    />
+                                </ListItemButton>
+                                {index < requests.length - 1 && <Divider sx={{backgroundColor: "grey"}}/>}
+                            </div>
+                        ))}
+                    </List>
+                )}
             </CardContent>
         </Card>
     );

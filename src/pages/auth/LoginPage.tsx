@@ -1,36 +1,36 @@
-import {Alert, Button, Checkbox, FormControlLabel, Paper, Stack, TextField} from "@mui/material";
+import { Alert, Button, Checkbox, FormControlLabel, Paper, Stack, TextField } from "@mui/material";
 import Box from "@mui/material/Box";
-import React, {useState} from "react";
-import peerLabLogoTransparent from "../../assets/peerlabLogo_transparent.svg";
-import {useUpdateAuth} from "../../components/auth/AuthenticationContext.tsx";
-import {useNavigate} from "react-router-dom";
+import React, { useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import peerLabLogoLight from "../../assets/peerlab_logo_squared_transparent.svg";
+import peerLabLogoDark from "../../assets/peerlab_logo_squared_transparent_white.svg";
+import { useUpdateAuth } from "../../components/auth/AuthenticationContext.tsx";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    //const strongPasswordRegex: RegExp = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/;
     const [showPassword, setShowPassword] = useState(false);
-    const {login} = useUpdateAuth();
+    const { login } = useUpdateAuth();
     const navigate = useNavigate();
+    const theme = useTheme();
 
     function goToRegister() {
         navigate("/register");
     }
 
-    /** The login input and it's handling function. */
     const [input, setInput] = useState({
         email: "",
         password: "",
     });
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setInput((prev) => ({
             ...prev,
             [name]: value,
         }));
     };
 
-    /** The props of a message the user receives as feedback on trying to login. */
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<'error' | 'success' | 'warning' | ''>('');
     const [showMessage, setShowMessage] = useState(false);
@@ -45,17 +45,13 @@ export default function LoginPage() {
         setShowMessage(true);
     }
 
-    /**
-     * Redirection in case of present jwt (assuming, the user is logged in).
-     */
     if (localStorage.getItem("jwt") && localStorage.getItem("user")) {
         navigate("/dashboard");
     }
 
-    /** This function performs basic checks before calling the login routine. */
     const loginToApplication = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const {email, password} = input;
+        const { email, password } = input;
         if (email === "" || password === "") {
             setMessageProps("Please fill in all fields.", "warning");
             return;
@@ -64,11 +60,7 @@ export default function LoginPage() {
             setMessageProps("Please enter a valid email address.", "warning");
             return;
         }
-        /*if (!strongPasswordRegex.test(input.password)) {
-            setMessageProps("Password unsafe.\n Requirements:\n Length between 8 and 32  as well as at least one uppercase and lowercase letter, number and special character.", "warning");
-            return;
-        }*/
-        const response = await login({email, password});
+        const response = await login({ email, password });
         if (response.success) {
             navigate("/dashboard");
         } else {
@@ -76,7 +68,6 @@ export default function LoginPage() {
         }
     };
 
-    /** The login page components. */
     return (
         <Box>
             <Paper sx={{
@@ -98,9 +89,9 @@ export default function LoginPage() {
                             alignItems: "center",
                         }}
                     >
-                        <img src={peerLabLogoTransparent}
+                        <img src={theme.palette.mode === 'dark' ? peerLabLogoDark : peerLabLogoLight}
                              alt="PeerLab logo"
-                             style={{height: 100, width: 100}}
+                             style={{ height: 150, width: 150 }}
                         />
                         <h1>
                             Login
@@ -110,10 +101,10 @@ export default function LoginPage() {
                                 severity={messageType as 'error' | 'success'}
                                 sx={{
                                     whiteSpace: 'pre-line',
-                                    width: "100%" ,
+                                    width: "100%",
                                     textAlign: "center",
                                     alignItems: "center"
-                            }}
+                                }}
                             >
                                 {message}
                             </Alert>
@@ -133,11 +124,11 @@ export default function LoginPage() {
                             onChange={handleInput}
                         />
                         <FormControlLabel
-                            style={{color: "#b5b5b5"}}
+                            style={{ color: "text.primary" }}
                             label="Show Password"
                             control={
                                 <Checkbox
-                                    style={{color: "#cdcdcd"}}
+                                    style={{ color: "text.primary" }}
                                     onChange={() => setShowPassword(!showPassword)}
                                 />
                             }

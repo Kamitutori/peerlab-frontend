@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import PaperList from "../components/PaperList.tsx";
 import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
-import {useAlertDialog} from "../components/AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
+import RequestListOfPapers from "../components/RequestListOfPapers.tsx";
 
 /** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */
 function ProfilePage() {
@@ -40,7 +41,7 @@ function ProfilePage() {
                     }
                     setUserName(JSON.parse(userJson).name);
                     setUserEmail(JSON.parse(userJson).email)
-                } catch (error) {
+                } catch {
                     showAlert("User Object Error", "Unexpected behavior: User object in local storage is not a valid JSON object. You are logged out as a result.", "", "OK")
                         .then(() => {
                             logout();
@@ -62,7 +63,7 @@ function ProfilePage() {
         return () => {
             window.removeEventListener(LOCAL_STORAGE_UPDATE_EVENT, handleStorageChange);
         };
-    }, []);
+    });
 
     /** The props of a message the user receives as feedback on changing his account. */
     const [message, setMessage] = useState<string | null>(null);
@@ -155,7 +156,7 @@ function ProfilePage() {
     }
 
     const handleAccountDeletion = async () => {
-        const result = await showAlert("Account Deletion", "Are you sure you want to delete your account? All data will be lost.", "Delete", "Cancel");
+        const result = await showAlert("Account deletion", "Are you sure you want to delete your account? All data will be lost.", "Delete", "Cancel");
         if (!result) return;
         try {
             const res = await fetch("http://localhost:8080/api/users", {
@@ -181,7 +182,7 @@ function ProfilePage() {
 
     function stringAvatar(name: string) {
         // Handle empty or invalid name
-        if (!name || typeof name !== "string") {
+        if (!name) {
             return {
                 sx: { bgcolor: "theme.palette.secondary.main" },
                 children: "",
@@ -406,7 +407,7 @@ function ProfilePage() {
                     }}
                 >
                     <PaperList endpoint={`http://localhost:8080/api/papers`} title="My Papers"/>
-                    <PaperList endpoint={`http://localhost:8080/api/papers`} title="My Reviews"/>
+                    <RequestListOfPapers endpoint={`http://localhost:8080/api/requests?status=PENDING`} title="My Reviews"/>
                 </Grid2>
             </Card>
         </Grid2>

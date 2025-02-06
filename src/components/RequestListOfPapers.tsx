@@ -13,19 +13,20 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
+
 import {RequestObject} from "./RequestListOfRequestees.tsx";
 
 /** The props for the list of papers; the title of the list and the endpoint to fetch its data from. */
 export interface ListProps {
     endpoint: string;
     title: string;
+    width?: string | number;
+    height?: string | number;
 }
 
-// TODO | ALERT: Implementation not compatible with current single paper page implementation with props. Need tot alk about navigational context on monday.
-// TODO | ALERT: This implementation expects a request dto with a date. You may encounter issues with the current backend.
 /** This function processes and returns a list of all papers the user was requested to review. */
-export default function RequestListOfPapers({endpoint, title}: ListProps) {
+export default function RequestListOfPapers({endpoint, title, width = 600, height = 300}: ListProps) {
     const { showAlert } = useAlertDialog();
     const {logout} = useUpdateAuth();
     const navigate = useNavigate();
@@ -44,11 +45,11 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
             if (res.status === 401) {
                 await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
                 logout();
+            }
             if (!res.ok) {
                 throw new Error("Failed to fetch requests.");
             }
-            return res.json();
-            }
+            return await res.json();
         }
     });
 
@@ -59,9 +60,7 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
         });
     }
 
-    /** Redirects to the paper with the given id.
-     * WARNING: This is where the implementation with the single paper page is not compatible.
-     * */
+    /** Redirects to the paper with the given id. */
     const handleClick = (paperId: number) => {
         navigate(`/paper/${paperId}`);
     };
@@ -74,11 +73,11 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
                 mt: 4,
                 boxShadow: 3,
                 backgroundColor: "background.default",
-                minWidth: 300,
+                minWidth: width,
             }}
         >
             {/* Content of the List */}
-            <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
+            <CardContent sx={{padding: 0 }}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -90,10 +89,10 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
                         px: "2px",
                         width: '100%',
                         textAlign: 'center',
-                        display: 'flex', // Enables flexbox for vertical centering
-                        justifyContent: 'center', // Centers content horizontally
+                        display: 'flex',
+                        justifyContent: 'center',
                         alignItems: 'center',
-                        minHeight: '50px', // Ensures enough height for vertical centering
+                        minHeight: '50px',
                     }}
                 >
                     {title}
@@ -102,8 +101,12 @@ export default function RequestListOfPapers({endpoint, title}: ListProps) {
                     <Typography>Loading requests...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load requests.</Typography>
+                ) : data.length === 0 ? (
+                    <Typography color={"textSecondary"}>
+                        No requests to display.
+                    </Typography>
                 ) : (
-                    <List sx={{maxHeight: 353, overflow: 'auto'}}>
+                    <List sx={{ maxHeight: height, overflow: 'auto' }}>
                         {data.map((request:
                                    {
                                        id: number;

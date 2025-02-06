@@ -1,37 +1,28 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { ReactNode, useState, useRef } from 'react';
 import AlertDialog from './AlertDialog';
+import { AlertDialogContext } from '../utils/alertDialogUtils';
 
-interface AlertDialogContextType {
-    showAlert: (title: string, message: string, okText: string, cancelText: string) => Promise<boolean>;
-}
+export default function AlertDialogProvider({ children }: { children: ReactNode }) {
+    const resolveRef = useRef<(value: boolean) => void>(() => {});
 
-const AlertDialogContext = createContext<AlertDialogContextType | null>(null);
-
-export function useAlertDialog() {
-    const context = useContext(AlertDialogContext);
-    if (!context) throw new Error("useAlertDialog must be used within an AlertDialogProvider.");
-    return context;
-}
-
-export default function AlertDialogProvider({children}: { children: ReactNode })  {
     const [dialogState, setDialogState] = useState({
         open: false,
         title: '',
         message: '',
         okText: '',
-        cancelText: '',
-        resolve: (value: boolean) => {}
+        cancelText: ''
     });
 
     const showAlert = (title: string, message: string, okText: string, cancelText: string) => {
         return new Promise<boolean>((resolve) => {
-            setDialogState({ open: true, title, message, okText, cancelText, resolve });
+            resolveRef.current = resolve; // Store resolve in a ref
+            setDialogState({ open: true, title, message, okText, cancelText });
         });
     };
 
     const handleClose = (result: boolean) => {
+        resolveRef.current(result); // Call resolve from ref
         setDialogState((prevState) => ({ ...prevState, open: false }));
-        dialogState.resolve(result);
     };
 
     return (
@@ -47,4 +38,4 @@ export default function AlertDialogProvider({children}: { children: ReactNode })
             />
         </AlertDialogContext.Provider>
     );
-};
+}

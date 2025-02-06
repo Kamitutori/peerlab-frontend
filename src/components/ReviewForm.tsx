@@ -16,7 +16,7 @@ import {
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 //import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useQuery} from "@tanstack/react-query";
 //import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";

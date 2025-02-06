@@ -1,4 +1,4 @@
-import {useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
     Avatar,
     Card,
@@ -11,18 +11,34 @@ import {
     Divider,
 } from "@mui/material";
 import ArticleIcon from "@mui/icons-material/Article";
-import {useNavigate} from "react-router-dom";
-import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-
-interface PaperListProps {
-    endpoint: string;
+import { useNavigate } from "react-router-dom";
+import { useUpdateAuth } from "./auth/AuthenticationContext.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
+interface Paper {
+    id: number;
     title: string;
+    owner: {
+        name: string;
+    };
+    reviewCount: number;
+    reviewLimit: number;
 }
 
-export default function PaperList({endpoint, title}: PaperListProps) {
-    const {logout} = useUpdateAuth();
+/** The props for the list of papers; the title of the list and the endpoint to fetch its data from. */
+export interface ListProps {
+    endpoint: string;
+    title: string;
+    filter?: (paper: Paper) => boolean;
+    width?: string | number;
+    height?: string | number;
+}
+
+export default function PaperList({ endpoint, title, filter, width = 1000, height = 300 }: ListProps) {
+    const { showAlert } = useAlertDialog();
+    const { logout } = useUpdateAuth();
     const navigate = useNavigate();
-    const {data, isLoading, error} = useQuery({
+
+    const { data, isLoading, error } = useQuery<Paper[]>({
         queryKey: [endpoint],
         queryFn: async () => {
             const res = await fetch(endpoint, {
@@ -33,12 +49,17 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 },
             });
             if (res.status === 401) {
+                await showAlert("Forced Logout", "You will be logged out shortly as your token is invalid.", "", "OK");
                 logout();
             }
-            if (!res.ok) throw new Error("Failed to fetch papers");
-            return res.json();
-        },
+            if (!res.ok) {
+                throw new Error("Failed to fetch papers.");
+            }
+            return await res.json();
+        }
     });
+
+    const filteredData = data ? (filter ? data.filter(filter) : data) : [];
 
     const handleClick = (paperId: number) => {
         navigate(`/paper/${paperId}`);
@@ -51,10 +72,10 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                 mt: 4,
                 boxShadow: 3,
                 backgroundColor: "background.default",
-                minWidth: 300,
+                minWidth: width,
             }}
         >
-            <CardContent sx={{maxHeight: 400, overflow: 'hidden', padding: 0}}>
+            <CardContent sx={{padding: 0 }}>
                 <Typography
                     variant="h6"
                     component="div"
@@ -66,10 +87,10 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                         px: "2px",
                         width: '100%',
                         textAlign: 'center',
-                        display: 'flex', // Enables flexbox for vertical centering
-                        justifyContent: 'center', // Centers content horizontally
+                        display: 'flex',
+                        justifyContent: 'center',
                         alignItems: 'center',
-                        minHeight: '50px', // Ensures enough height for vertical centering
+                        minHeight: '50px',
                     }}
                 >
                     {title}
@@ -78,13 +99,13 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                     <Typography>Loading papers...</Typography>
                 ) : error ? (
                     <Typography color="error">Failed to load papers.</Typography>
-                ) : data.length === 0 ? (
+                ) : filteredData.length === 0 ? (
                     <Typography color={"textSecondary"}>
                         No papers to display.
                     </Typography>
                 ) : (
-                    <List sx={{maxHeight: 353, overflow: 'auto'}}>
-                        {data.map((paper: { id: number; title: string; owner: { name: string } }, index: number) => (
+                    <List sx={{ maxHeight: height, overflow: 'auto' }}>
+                        {filteredData.map((paper: Paper, index: number) => (
                             <div key={paper.id}>
                                 <ListItemButton
                                     onClick={() => handleClick(paper.id)}
@@ -97,7 +118,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                 >
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <ArticleIcon sx={{color: 'background.default'}}/>
+                                            <ArticleIcon sx={{ color: 'background.default' }} />
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
@@ -122,7 +143,7 @@ export default function PaperList({endpoint, title}: PaperListProps) {
                                         }}
                                     />
                                 </ListItemButton>
-                                {index < data.length - 1 && <Divider sx={{backgroundColor: "grey"}}/>}
+                                {index < filteredData.length - 1 && <Divider sx={{ backgroundColor: "grey" }} />}
                             </div>
                         ))}
                     </List>
