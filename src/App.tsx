@@ -181,9 +181,8 @@ function App() {
                                             </PrivateRoute>
                                         }
                                     />
-                                    {/*
                                     <Route
-                                        path="/singlereview/:id"
+                                        path="/review/:id"
                                         element={
                                             <PrivateRoute>
                                                 <>
@@ -193,9 +192,8 @@ function App() {
                                             </PrivateRoute>
                                         }
                                     />
-                                    */}
                                     <Route
-                                        path="/requests/:id/add-review"
+                                        path="/request/:id/add-review"
                                         element={
                                             <PrivateRoute>
                                                 <>
@@ -206,7 +204,7 @@ function App() {
                                         }
                                     />
                                     <Route
-                                        path="/edit-review"
+                                        path="/request/:id/edit-review"
                                         element={
                                             <PrivateRoute>
                                                 <>
