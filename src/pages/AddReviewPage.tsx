@@ -1,8 +1,10 @@
 import ReviewForm from '../components/ReviewForm.tsx';
-// TODO Why is there a submission func in the form but also the add review page?
+
+// Define the AddReviewPage component which renders the ReviewForm component
 export default function AddReviewPage() {
 
     return (
+        // Render the ReviewForm component within the AddReviewPage
         <ReviewForm />
     );
 }

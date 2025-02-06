@@ -18,6 +18,7 @@ import { useAlertDialog } from '../utils/alertDialogUtils.ts';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
+// Define types for the props and data
 interface ReviewFormProps {
     initialData?: ReviewData;
 }
@@ -59,12 +60,15 @@ interface PaperData {
     fileId: string;
 }
 
+// Main ReviewForm component
 const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData }) => {
+    // Constants for cancel review alert
     const CANCEL_REVIEW_ALERT_TITLE = "Cancel Review";
     const CANCEL_REVIEW_ALERT_MESSAGE = "Are you sure you want to cancel writing this review? All inputs will be discarded.";
     const CANCEL_REVIEW_ALERT_OK_TEXT = "Confirm";
     const CANCEL_REVIEW_ALERT_CANCEL_TEXT = "Cancel";
 
+    // State hooks for form data and file uploads
     const [files, setFiles] = useState<File[]>([]);
     const [summary, setSummary] = useState(initialData.summary || '');
     const [strengths, setStrengths] = useState(initialData.strengths || '');
@@ -76,6 +80,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
     const [warning, setWarning] = useState('');
     const [isTextRequired, setIsTextRequired] = useState(true);
 
+    // Refs and parameters
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { id } = useParams<{ id: string }>();
     const { showAlert } = useAlertDialog();
@@ -85,10 +90,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
     let [minScore] = useState<number>(NaN);
     let [maxScore] = useState<number>(NaN);
 
+    // Check if files are added to the review
     useEffect(() => {
         setIsTextRequired(files.length === 0);
     }, [files]);
 
+    // Fetch request data for the review
     const {
         isPending: isRequestPending,
         isError: isRequestError,
@@ -109,9 +116,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         }
     });
 
+    // Set request data for later use
     initialData.request = requestData;
     request = requestData;
 
+    // Fetch paper data from the reviewed paper
     const [paperData, setPaperData] = useState<PaperData | null>(null);
     useEffect(() => {
         if (requestData) {
@@ -137,6 +146,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         }
     }, [requestData]);
 
+    // Loading states for request and paper data
     if (isRequestPending) {
         return <span>Loading request...</span>;
     }
@@ -149,10 +159,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
     }
 
     const paperObject: PaperData = paperData;
+    // Setting the relevant paper information
     isExternal = !paperObject.isInternal;
     minScore = paperObject.minScore;
     maxScore = paperObject.maxScore;
 
+    // Confidence level selection
     const confidenceLevels = ['High', 'Medium', 'Low'];
     const handleConfidenceLevel = (event: SelectChangeEvent) => {
         setConfidenceLevel(event.target.value as string);
@@ -168,6 +180,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
             scoreNum = score;
         }
 
+        // Validate the score for external papers
         if (isExternal) {
             if (isNaN(scoreNum) || scoreNum < minScore || scoreNum > maxScore) {
                 setWarning('Please enter a valid score.');
@@ -176,6 +189,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         }
 
         setWarning('');
+        // Creates file IDs in minio server
         const fileIds: string[] = [];
         if (!isTextRequired) {
             for (const file of files) {
@@ -218,6 +232,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
             request: request
         };
 
+        // Submit the review data to the AP
         try {
             const response = await fetch(`http://localhost:8080/api/reviews${initialData.id ? `/${initialData.id}` : ''}`, {
                 method: initialData.id ? 'PUT' : 'POST',
@@ -235,12 +250,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         }
     };
 
+    // Handle file upload click
     const handleUploadClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
     };
 
+    // Handle file removal
     const handleRemoveFile = (fileName: string) => {
         setFiles(files.filter(file => file.name !== fileName));
     };
@@ -256,6 +273,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
     return (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%" }}>
             <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
+                {/* Edit Review Page or Add Review Page */}
                 <Typography variant="h4" component="h1" fontWeight={"bold"}>
                     {initialData.id ? 'Edit Review' : 'Add Review'}
                 </Typography>
@@ -263,6 +281,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                 {/* Review Form */}
                 <form onSubmit={handleSubmit}>
                     <Grid2 container spacing={1} sx={{ maxWidth: "800px" }}>
+                        {/* Summary text field */}
                         <CustomTextField
                             required={isTextRequired}
                             label="Summary"
@@ -272,6 +291,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             onChange={(e) => setSummary(e.target.value)}
                         />
                         <Grid2 gap={2} sx={{ display: 'flex', flexDirection: 'row', width: "100%" }}>
+                            {/* Strengths text field */}
                             <CustomTextField
                                 required={isTextRequired}
                                 label="Strenghts"
@@ -280,6 +300,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                                 rows={9.4}
                                 onChange={(e) => setStrengths(e.target.value)}
                             />
+                            {/* Weaknesses text field */}
                             <CustomTextField
                                 required={isTextRequired}
                                 label="Weaknesses"
@@ -290,6 +311,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             />
                         </Grid2>
                         <Grid2 gap={2} sx={{ display: 'flex', flexDirection: 'row', width: "100%" }}>
+                            {/* Comments text field */}
                             <CustomTextField
                                 required={isTextRequired}
                                 label="Comments"
@@ -298,6 +320,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                                 rows={5.4}
                                 onChange={(e) => setComments(e.target.value)}
                             />
+                            {/* Questions text field */}
                             <CustomTextField
                                 required={isTextRequired}
                                 label="Questions"
@@ -308,6 +331,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             />
                         </Grid2>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
+                            {/* Confidence Level Dropdown */}
                             <FormControl required sx={{ minWidth: "175px", flexGrow: 1 }}>
                                 <InputLabel id="confidence-level-label">Confidence Level</InputLabel>
                                 <Select
@@ -326,6 +350,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                                     ))}
                                 </Select>
                             </FormControl>
+                            {/* Score Input if external */}
                             {isExternal && (
                                 <>
                                     <CustomTextField
@@ -343,6 +368,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                         </Box>
                     </Grid2>
 
+                    {/* File Upload */}
                     <Box
                         sx={{
                             border: '2px dashed grey',
@@ -373,10 +399,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                         <Typography sx={{ color: 'primary' }}>
                             Drag & drop some files here, or click to select files
                         </Typography>
+
+                        {/* File Upload Button */}
                         <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{ mt: 2 }}>
                             Upload File
                         </Button>
                     </Box>
+
+                    {/* File List */}
                     {files.length > 0 && (
                         <Box sx={{ marginTop: 2 }}>
                             {files.map(file => (
@@ -403,9 +433,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                     </Typography>
 
                     <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+
+                        {/* Submit Button */}
                         <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
                             Submit
                         </Button>
+
+                        {/* Cancel Button */}
                         <Button variant="outlined" color="error" onClick={handleCancel} sx={{ mt: 2 }}>
                             Cancel
                         </Button>
