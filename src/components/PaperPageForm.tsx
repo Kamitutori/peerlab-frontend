@@ -73,6 +73,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [requestsToDelete, setRequestsToDelete] = useState<Request[]>([]);
     const [newRequests, setNewRequests] = useState<Request[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isEdited, setIsEdited] = useState(false);
     const {showAlert} = useAlertDialog();
 
     useEffect(() => {
@@ -298,6 +299,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
     const handleUploadClick = () => {
+        setIsEdited(true);
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
@@ -308,6 +310,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     };
 
     const handleReviewerChange = (reviewerId: string) => {
+        setIsEdited(true);
         setRequests(prevSelected => {
             const isAlreadyRequested = prevSelected.some(request => request.requestee.id === reviewerId);
 
@@ -330,6 +333,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
 
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setIsEdited(true);
         if (event.target.checked) {
             setRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
             setNewRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
@@ -344,8 +348,13 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     };
 
-    const handleCancelClick = () => {
+    const handleCancelClick = async () => {
+        if (isEdited) {
+            const result = await showAlert("Cancel", "All changes will be discarded", "Proceed", "Go back");
+            if (!result) return;
+        }
         navigate(-1); // Navigate back to the previous page
+        return;
     };
 
     return (
@@ -365,18 +374,28 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                             required
                             label="Paper name"
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            onChange={(e) => {
+                                setTitle(e.target.value)
+                                setIsEdited(true)
+                            }}
                         />
                         <CustomTextField
                             required
                             label="Authors/Conference"
                             value={authors}
-                            onChange={(e) => setAuthors(e.target.value)}
+                            onChange={(e) => {
+                                setAuthors(e.target.value)
+                                setIsEdited(true)
+
+                            }}
                         />
                         <CustomTextField
                             label="Maximum number of reviews"
                             value={reviewLimit}
-                            onChange={(e) => setReviewLimit(e.target.value)}
+                            onChange={(e) => {
+                                setReviewLimit(e.target.value)
+                                setIsEdited(true)
+                            }}
                         />
                         <Grid2 container spacing={2}>
                             <Grid2>
@@ -384,7 +403,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     required
                                     label="Minimum score"
                                     value={minScore}
-                                    onChange={(e) => setMinScore(e.target.value)}
+                                    onChange={(e) => {
+                                        setMinScore(e.target.value)
+                                        setIsEdited(true)
+                                    }}
                                     disabled={isInternal === 'internal'}
                                 />
                             </Grid2>
@@ -393,7 +415,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     required
                                     label="Maximum score"
                                     value={maxScore}
-                                    onChange={(e) => setMaxScore(e.target.value)}
+                                    onChange={(e) => {
+                                        setMaxScore(e.target.value)
+                                        setIsEdited(true)
+                                    }}
                                     disabled={isInternal === 'internal'}
                                 />
                             </Grid2>
@@ -403,7 +428,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         <CustomTextField
                             label="Authors note"
                             value={authorsNote}
-                            onChange={(e) => setAuthorsNote(e.target.value)}
+                            onChange={(e) => {
+                                setAuthorsNote(e.target.value)
+                                setIsEdited(true)
+                            }}
                             multiline
                             rows={9.4}
                             sx={{ width: '100%' }}
@@ -414,7 +442,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     <RadioGroup
                         row
                         value={isInternal}
-                        onChange={(e) => setIsInternal(e.target.value)}
+                        onChange={(e) => {
+                            setIsInternal(e.target.value)
+                            setIsEdited(true)
+                        }}
                     >
                         <FormControlLabel
                             value="internal"
@@ -433,7 +464,10 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 <CustomTextField
                     label="Abstract Text"
                     value={abstractText}
-                    onChange={(e) => setAbstractText(e.target.value)}
+                    onChange={(e) => {
+                        setAbstractText(e.target.value)
+                        setIsEdited(true)
+                    }}
                     multiline
                     rows={4}
                     sx={{ width: '100%', marginTop: 2 }}
@@ -486,7 +520,9 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         if (e.target.files) {
                             setFiles(Array.from(e.target.files));
                         }
-                    }}
+                        setIsEdited(true);
+                    }
+                }
                 />
                 <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                     <Table stickyHeader>
