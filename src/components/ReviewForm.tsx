@@ -12,13 +12,14 @@ import {
     SelectChangeEvent,
     Typography
 } from '@mui/material';
-import {useDropzone} from 'react-dropzone';
+//import {useDropzone} from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
-import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
+//import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
 import {useNavigate, useParams} from "react-router-dom";
 import {useQuery} from "@tanstack/react-query";
+//import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 
 interface ReviewFormProps {
     initialData?: ReviewData;
@@ -84,31 +85,28 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
     const [questions, setQuestions] = useState(initialData.questions || '');
     const [score, setScore] = useState(initialData.score || '');
     const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
+    const [warning, setWarning] = useState('');
+    const [isTextRequired, setIsTextRequired] = useState(true);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-
-    let [request] = useState(null);
-    let [isExternal] = useState(false);
-    let [minScore] = useState(NaN);
-    let [maxScore] = useState(NaN);
-
-
     const { id } = useParams<{ id: string }>();
-    const {logout} = useUpdateAuth();
+    //const {logout} = useUpdateAuth();
     const {showAlert} = useAlertDialog();
     const navigate = useNavigate();
-    const [warning, setWarning] = useState('');
-
-
-    /** Checks whether the text fields have to be filled out or a file is uploaded */
-    const [isTextRequired, setIsTextRequired] = useState(true);
+    let [request] = useState<RequestData | null>(null);
+    let [isExternal] = useState(false);
+    let [minScore] = useState<number>(NaN);
+    let [maxScore] = useState<number>(NaN);
 
     useEffect(() => {
         setIsTextRequired(files.length === 0);
     }, [files]);
 
 
-    //"http://localhost:8080/api/requests&status=PENDING"
+    /** Checks whether the text fields have to be filled out or a file is uploaded */
+
+
+
 
     const {
         isPending: isRequestPending,
@@ -118,7 +116,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
     } = useQuery({
         queryKey: ["request", id],
         queryFn: async () => {
-            const res = await fetch(`http://localhost:8080/api/request/${id}`, {
+            const res = await fetch(`http://localhost:8080/api/requests/${id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -129,17 +127,18 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
             return res.json();
         }
     });
+
     initialData.request = requestData;
     request = requestData;
-    const [paperData, setPaperData] = useState<PaperData | null>(null);
 
+    const [paperData, setPaperData] = useState<PaperData | null>(null);
     // Second Query: Fetch paper data (only after the request data is available)
     useEffect(() => {
         if (requestData) {
             const paperId = requestData.paperId;
             const fetchPaperData = async () => {
                 try {
-                    const res = await fetch(`http://localhost:8080/api/paper/${paperId}`, {
+                    const res = await fetch(`http://localhost:8080/api/papers/${paperId}`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
@@ -157,6 +156,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
             fetchPaperData();
         }
     }, [requestData]); // Only run when requestData is available
+
+
+
+
+
+
     if (isRequestPending) {
         return <span>Loading request...</span>;
     }
@@ -167,6 +172,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
     if (!paperData) {
         return <span>Loading paper...</span>;
     }
+
 
     const paperObject: PaperData = paperData;
     isExternal = !paperObject.isInternal;
@@ -197,38 +203,40 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
             }
         }
 
+
         setWarning('');
-
         const fileIds: string[] = [];
+        if (!isTextRequired) {
+            for (const file of files) {
+                console.log(file.name);
+                try {
+                    const uploadResponse = await fetch(`http://localhost:8080/api/minio/review-upload-url?fileName=${file.name}`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                        }
+                    });
 
-        for (const file of files) {
-            console.log(file.name);
-            try {
-                const uploadResponse = await fetch(`http://localhost:8080/api/minio/review-upload-url?fileName=${file.name}`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-                    }
-                });
+                    const { uploadUrl, fileId : newFileId} = await uploadResponse.json();
 
-                const { uploadUrl, fileId : newFileId} = await uploadResponse.json();
+                    await fetch(uploadUrl, {
+                        method: "PUT",
+                        body: file,
+                        headers: {
+                            "Content-Type": file.type
+                        }
+                    });
 
-                await fetch(uploadUrl, {
-                    method: "PUT",
-                    body: file,
-                    headers: {
-                        "Content-Type": file.type
-                    }
-                });
-
-                fileIds.push(newFileId);
-                console.log(`File uploaded: ${file.name}`);
-            } catch (error) {
-                console.error("Error uploading file:", error);
-                setWarning('Error uploading file(s).');
-                return;
+                    fileIds.push(newFileId);
+                    console.log(`File uploaded: ${file.name}`);
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    setWarning('Error uploading file(s).');
+                    return;
+                }
             }
         }
+
 
         const reviewData = {
             summary: summary,
@@ -297,7 +305,19 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
 
 
     /** These functions handle the file upload */
-    const onDrop = (acceptedFiles: File[]) => {
+    {/*const onDrop = (acceptedFiles: File[]) => {
+        {/*const newFiles = acceptedFiles.filter(file => {
+            const existingFileIndex = files.findIndex(existingFile => existingFile.name === file.name);
+            if (existingFileIndex !== -1) {
+                // Remplacer le fichier existant de manière immuable
+                const updatedFiles = [...files]; // Créer une copie
+                updatedFiles[existingFileIndex] = file;
+                setFiles(updatedFiles); // Mettre à jour l'état
+                return false; // Ne pas ajouter à newFiles
+            }
+            return true; // Ajouter à newFiles
+        });
+
         const newFiles = acceptedFiles.filter(file => {
             const existingFileIndex = files.findIndex(existingFile => existingFile.name === file.name);
             if (existingFileIndex !== -1) {
@@ -310,7 +330,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
         setFiles(prevFiles => [...prevFiles, ...newFiles]);
     };
 
-    const {getRootProps, getInputProps} = useDropzone({onDrop, multiple: true});
+
+    const {getRootProps, getInputProps} = useDropzone({onDrop, multiple: true});*/}
 
     const handleUploadClick = () => {
         if (fileInputRef.current) {
@@ -415,7 +436,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
                                         onChange={(e) => setScore(e.target.value)}
                                     />
                                     <Typography sx={{whiteSpace: "nowrap"}}>
-                                        {`∈ [${minScore || 1}, ${maxScore || 5}]`}
+                                        {`∈ [${minScore}, ${maxScore}]`}
                                     </Typography>
                                 </>
                             )}
@@ -423,14 +444,16 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
                     </Grid2>
 
                     {/* File Upload */}
-                    <Box {...getRootProps()}
+                    {/*{...getRootProps()*/}
+                    <Box
                          sx={{
                              border: '2px dashed grey',
                              padding: 4,
                              textAlign: 'center',
                              marginTop: 2
                          }}>
-                        <input {...getInputProps()} />
+                        {/*{...getInputProps()}*/}
+                        <input  />
                         <Typography sx={{color: 'primary'}}>
                             Drag & drop some files here, or click to select files
                         </Typography>
