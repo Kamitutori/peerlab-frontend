@@ -17,7 +17,6 @@ export interface UserObject {
     id: number;
     name: string;
     email: string;
-    password: string;
 }
 
 /** The request object as returned by the server endpoint. */

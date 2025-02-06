@@ -7,9 +7,9 @@ import Chip from '@mui/material/Chip';
 /** The wrapping box component of the request state banner. */
 import {styled} from '@mui/material/styles';
 import {Card, Divider, Grid2, Typography, useTheme} from "@mui/material";
-import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
+import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "../utils/alertDialogUtils.ts";
-import RequestListOfRequestees, {RequestObject, UserObject} from "./RequestListOfRequestees.tsx";
+import RequestListOfRequestees, {RequestObject, UserObject} from "../components/RequestListOfRequestees.tsx";
 import React, {useEffect, useState} from "react";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
@@ -19,16 +19,17 @@ interface PaperElement {
     title: string;
     authors: string;
     fileId: string;
-    internal: boolean;
+    isInternal: boolean;
     abstractText: string;
     authorsNote: string;
-    active: boolean;
+    isActive: boolean;
     uploadDate: string;
     reviewLimit: number;
     requests: RequestObject[];
     owner: UserObject;
 }
 
+/** The wrapping box component of the request state banner. */
 const BannerBox = styled(Box, {
     shouldForwardProp: (prop) => prop !== "bannerColor",
 })<{ bannerColor: string }>(({ bannerColor, theme }) => ({
@@ -40,14 +41,34 @@ const BannerBox = styled(Box, {
     borderRadius: "4px",
 }));
 
+/** Converts the date of the paper form iso 8601 to format 'DD.MM.YYYY at HH:MM'.*/
+export function convertISO8601ToDate(isoString: string) {
+    console.log(isoString);
+    try {
+        const date = new Date(isoString);
+        if (isNaN(date.getTime())) {
+            return "Date is invalid."
+        }
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
 
-export default function SinglePaper() {
+        return `${day}.${month}.${year} at ${hours}:${minutes}`;
+    } catch (error) {
+        return "";
+    }
+}
+
+export default function SinglePaperPage() {
     const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
     const {logout} = useUpdateAuth();
     const {showAlert} = useAlertDialog();
     const theme = useTheme();
     const isLightMode = theme.palette.mode === "light";
+    const [uploadDate, setUploadDate] = useState<string>("DD.MM.YYYY at HH:MM");
 
     /** If the user is a requestee, this const will be set to the request he received. */
     const [requestofRequestee, setRequestofRequestee] = useState<RequestObject>({
@@ -60,7 +81,6 @@ export default function SinglePaper() {
             id: 0,
             name: '',
             email: '',
-            password: '',
         },
         reviewId: null,
         creationDate: '',
@@ -83,7 +103,13 @@ export default function SinglePaper() {
                     "Authorization": `Bearer ${localStorage.getItem("jwt")}`
                 }
             });
-            if (!res.ok) throw new Error("Failed to fetch paper");
+            if (res.status === 401) {
+                await showAlert("Invalid Token", "Your token is invalid. You will be logged out.", "", "OK");
+                logout();
+            }
+            if (!res.ok) {
+                await showAlert("Failed to Fetch Paper", `There was an error when fetching the paper: ${await res.text()}`, "", "OK");
+            }
             return res.json();
         },
     });
@@ -93,10 +119,10 @@ export default function SinglePaper() {
         title: "",
         authors: "",
         fileId: "",
-        internal: false,
+        isInternal: false,
         abstractText: "",
         authorsNote: "",
-        active: false,
+        isActive: false,
         uploadDate: "",
         reviewLimit: 0,
         requests: [],
@@ -104,10 +130,11 @@ export default function SinglePaper() {
             id: 0,
             name: "",
             email: "",
-            password: ""
         }
     });
+
     const [numberOfSubmittedReviews, setNumberOfSubmittedReviews] = useState<number>(-1);
+
     useEffect(() => {
         if (!isPaperError && !isPaperPending && paperData) {
             setPaperObject(paperData);
@@ -119,22 +146,32 @@ export default function SinglePaper() {
     const [isRequest, setIsRequest] = useState<boolean>(false);
     useEffect(() => {
         const userJson = localStorage.getItem("user");
-        if (!paperData || isPaperPending || isPaperError) {
+        if (!paperData && isPaperPending && isPaperError) {
             setIsRequest(false);
         }
         if (userJson && (JSON.parse(userJson)?.name !== paperObject.owner.name) && paperObject.owner.name !== "") {
             setIsRequest(true);
             if (paperData.requests.length > 0) {
-                console.log(paperData.requests[0]);
                 setRequestofRequestee(paperData.requests[0]);
             }
         }
+
+        const updateUploadDate = async () => {
+            if (paperObject.uploadDate) {
+                setUploadDate(convertISO8601ToDate(paperObject.uploadDate));
+                if (uploadDate === "") {
+                    setUploadDate(new Date().toISOString());
+                    await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format. Date is set to now. ", "", "OK");
+                }
+            }
+        }
+        updateUploadDate();
     }, [isPaperPending, isPaperError, paperData, paperObject]);
 
     const openToReview = isRequest
         && (
             (requestofRequestee.status === "ACCEPTED" && !requestofRequestee.reviewId)
-            || (requestofRequestee.status === "EXPIRED" && !requestofRequestee.reviewId && !paperObject.reviewLimit && paperObject.active)
+            || (requestofRequestee.status === "EXPIRED" && !requestofRequestee.reviewId && !paperObject.reviewLimit && paperObject.isActive)
         );
 
     /** Banner logic concerning coloring and message. */
@@ -181,25 +218,6 @@ export default function SinglePaper() {
         bannerMessage = getBannerMessage(requestofRequestee.status);
     }
 
-    /** Converts the date of the paper form iso 8601 to format 'DD.MM.YYYY at HH:MM'.*/
-    const convertISO8601ToDate = (isoString: string) => {
-        try {
-            const date = new Date(isoString);
-            if (isNaN(date.getTime())) {
-                return "Date is invalid."
-            }
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-
-            return `${day}.${month}.${year} at ${hours}:${minutes}`;
-        } catch {
-            //await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format: ", "", "OK");
-            return
-        }
-    }
 
     /** This function downloads the paper file from the server. */
     const handleDownload = async () => {
@@ -268,14 +286,13 @@ export default function SinglePaper() {
                       minWidth: '320px',
                       maxWidth: '1000px',
                       minHeight: '540px',
-                      marginLeft: 10,
-                      marginTop: 10,
-                      paddingLeft: '10px',
-                      paddingRight: '10px',
+                      ml: 10,
+                      my: 10,
+                      px: '10px',
                   }}
         >
             <Typography textAlign="end">
-                Upload Date: {convertISO8601ToDate(paperObject.uploadDate)}
+                Upload Date: {uploadDate}
             </Typography>
             {isRequest && (
                 <BannerBox
@@ -336,10 +353,10 @@ export default function SinglePaper() {
                             </Typography>
                         </Grid2>
                         <Grid2 container spacing={1}>
-                            <Chip label={paperObject.active ? 'active' : 'locked'}
-                                  color={paperObject.active ? "success" : "warning"}
+                            <Chip label={paperObject.isActive ? 'active' : 'locked'}
+                                  color={paperObject.isActive ? "success" : "warning"}
                             />
-                            <Chip label={paperObject.internal ? 'internal' : 'external'}
+                            <Chip label={paperObject.isInternal ? 'internal' : 'external'}
                                   color="primary"
                             />
                         </Grid2>
@@ -374,7 +391,7 @@ export default function SinglePaper() {
                             <Typography variant="h6" textAlign="center">Author's Note</Typography>
                             <Divider></Divider>
                             <Typography variant="body1">
-                                {paperObject.authorsNote ? paperObject.authorsNote : `${paperObject.owner.name} has made no comments on the paper.`}
+                                {paperObject.authorsNote ? paperObject.authorsNote : `${isRequest ? `${paperObject.owner.name} has` : 'You have'} made no comments on the paper.`}
                             </Typography>
                         </Box>
                     </Grid2>
@@ -420,7 +437,7 @@ export default function SinglePaper() {
                                flexDirection: 'row',
                                justifyContent: 'flex-start',
 
-                }}
+                           }}
                 >
                     {!isRequest && (
                         <Button
@@ -432,12 +449,12 @@ export default function SinglePaper() {
                         </Button>
                     )}
                     {(openToReview && requestofRequestee.status !== "SUBMITTED") && (
-                        <Button variant="outlined" onClick={() => (window.location.href=`http://localhost:5173/request/${requestofRequestee.id}/add-review/`)}>
+                        <Button variant="contained" onClick={() => (window.location.href=`http://localhost:5173/request/${requestofRequestee.id}/add-review/`)}>
                             Add Review
                         </Button>
                     )}
                     {isRequest && requestofRequestee.reviewId && (
-                        <Button variant="outlined"
+                        <Button variant="contained"
                                 onClick={() => navigate(`/review/${requestofRequestee.reviewId}`)}>
                             View Review
                         </Button>

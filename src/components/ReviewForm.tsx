@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Box,
     Button,
@@ -14,9 +14,10 @@ import {
 } from '@mui/material';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
-import { useAlertDialog } from '../utils/alertDialogUtils.ts';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import {useAlertDialog} from '../utils/alertDialogUtils.ts';
+import {useNavigate, useParams} from 'react-router-dom';
+import {useQuery} from '@tanstack/react-query';
+import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 
 interface ReviewFormProps {
     initialData?: ReviewData;
@@ -59,7 +60,7 @@ interface PaperData {
     fileId: string;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData }) => {
+const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData}) => {
     const CANCEL_REVIEW_ALERT_TITLE = "Cancel Review";
     const CANCEL_REVIEW_ALERT_MESSAGE = "Are you sure you want to cancel writing this review? All inputs will be discarded.";
     const CANCEL_REVIEW_ALERT_OK_TEXT = "Confirm";
@@ -77,8 +78,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
     const [isTextRequired, setIsTextRequired] = useState(true);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { id } = useParams<{ id: string }>();
-    const { showAlert } = useAlertDialog();
+    const {id} = useParams<{ id: string }>();
+    const {showAlert} = useAlertDialog();
+    const {logout} = useUpdateAuth();
     const navigate = useNavigate();
     let [request] = useState<RequestData | null>(null);
     let [isExternal] = useState(false);
@@ -104,7 +106,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                     "Authorization": `Bearer ${localStorage.getItem("jwt")}`
                 }
             });
-            if (!res.ok) throw new Error("Failed to fetch request");
+            if (res.status === 403) {
+                await showAlert('Token Invalid', 'Your token is invalid. You will be logged out.', '', 'OK');
+                logout();
+            }
+            if (!res.ok) {
+                await showAlert("Failed to Fetch Request", `There was an error while fetching the request: ${await res.text()}`, "", "OK");
+            }
             return res.json();
         }
     });
@@ -125,11 +133,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
                         },
                     });
-                    if (!res.ok) throw new Error('Failed to fetch paper');
+                    if (res.status === 403) {
+                        await showAlert('Token Invalid', 'Your token is invalid. You will be logged out.', '', 'OK');
+                        logout();
+                    }
+                    if (!res.ok) {
+                        await showAlert("Failed to Fetch Paper", `There was an error while fetching the corresponding paper: ${await res.text()}`, "", "OK");
+                    }
                     const data = await res.json();
                     setPaperData(data);
                 } catch (error) {
-                    console.error('Error fetching paper:', error);
+                    await showAlert("Error", `An error occurred while fetching the corresponding paper: ${error}`, "", "OK");
                 }
             };
 
@@ -158,6 +172,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         setConfidenceLevel(event.target.value as string);
     };
 
+    /** Handles the submission of the review */
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         let scoreNum;
@@ -186,7 +201,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                         }
                     });
 
-                    const { uploadUrl, fileId: newFileId } = await uploadResponse.json();
+                    const {uploadUrl, fileId: newFileId} = await uploadResponse.json();
 
                     await fetch(uploadUrl, {
                         method: "PUT",
@@ -210,6 +225,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
             strengths: strengths,
             weaknesses: weaknesses,
             comments: comments,
+            questions: questions,
             confidenceLevel: confidenceLevel,
             score: score,
             fileIds: fileIds,
@@ -226,11 +242,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                 },
                 body: JSON.stringify(reviewData)
             });
+            console.log("reached")
             const reviewResponse = await response.json();
             console.log('Success:', reviewResponse);
             navigate(`/review/${reviewResponse.id}`);
         } catch (error) {
-            console.error('Error:', error);
+            console.error(error);
         }
     };
 
@@ -244,6 +261,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         setFiles(files.filter(file => file.name !== fileName));
     };
 
+    /** Handles the cancellation of the review */
     const handleCancel = async () => {
         const hasCanceled = await showAlert(CANCEL_REVIEW_ALERT_TITLE, CANCEL_REVIEW_ALERT_MESSAGE, CANCEL_REVIEW_ALERT_OK_TEXT, CANCEL_REVIEW_ALERT_CANCEL_TEXT);
         if (hasCanceled) {
@@ -251,15 +269,39 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
         }
     };
 
+    const handleDelete = async () => {
+        const confirmed = await showAlert("Delete Review", "Are you sure you want to delete this review?", "Delete", "Cancel");
+        if (!confirmed) {
+            return;
+        }
+        const response = await fetch(`http://localhost:8080/api/reviews/${initialData.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            }
+        });
+        if (response.status === 403) {
+            await showAlert("Token Invalid", "Your token is invalid. You will be logged out.", "", "OK");
+            logout();
+        }
+        if (!response.ok) {
+            showAlert("Error During Deletion", `An error occurred while deleting the review: ${await response.text()}`, "", "OK");
+        }
+        await showAlert("Review Deleted", "The review has been successfully deleted.", "", "OK");
+        navigate(`/paper/${paperObject.id}`);
+    }
+
     return (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%" }}>
-            <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10 }}>
+        <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%"}}>
+            <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10}}>
                 <Typography variant="h4" component="h1" fontWeight={"bold"}>
                     {initialData.id ? 'Edit Review' : 'Add Review'}
                 </Typography>
 
+                {/* Review Form */}
                 <form onSubmit={handleSubmit}>
-                    <Grid2 container spacing={1} sx={{ maxWidth: "800px" }}>
+                    <Grid2 container spacing={1} sx={{maxWidth: "800px"}}>
                         <CustomTextField
                             required={isTextRequired}
                             label="Summary"
@@ -268,7 +310,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             rows={5.4}
                             onChange={(e) => setSummary(e.target.value)}
                         />
-                        <Grid2 gap={2} sx={{ display: 'flex', flexDirection: 'row', width: "100%" }}>
+                        <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
                             <CustomTextField
                                 required={isTextRequired}
                                 label="Strenghts"
@@ -286,7 +328,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                                 onChange={(e) => setWeaknesses(e.target.value)}
                             />
                         </Grid2>
-                        <Grid2 gap={2} sx={{ display: 'flex', flexDirection: 'row', width: "100%" }}>
+                        <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
                             <CustomTextField
                                 required={isTextRequired}
                                 label="Comments"
@@ -304,8 +346,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                                 onChange={(e) => setQuestions(e.target.value)}
                             />
                         </Grid2>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-                            <FormControl required sx={{ minWidth: "175px", flexGrow: 1 }}>
+                        <Box sx={{display: "flex", alignItems: "center", gap: 2, width: "100%"}}>
+                            <FormControl required sx={{minWidth: "175px", flexGrow: 1}}>
                                 <InputLabel id="confidence-level-label">Confidence Level</InputLabel>
                                 <Select
                                     required={true}
@@ -314,7 +356,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                                     label="Confidence Level *"
                                     value={confidenceLevel}
                                     onChange={handleConfidenceLevel}
-                                    sx={{ width: "33%" }}
+                                    sx={{width: "33%"}}
                                 >
                                     {confidenceLevels.map((level) => (
                                         <MenuItem key={level} value={level}>
@@ -326,13 +368,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             {isExternal && (
                                 <>
                                     <CustomTextField
-                                        sx={{ width: "150px" }}
+                                        sx={{width: "150px"}}
                                         required={isExternal}
                                         label="Score"
                                         value={score}
                                         onChange={(e) => setScore(e.target.value)}
                                     />
-                                    <Typography sx={{ whiteSpace: "nowrap" }}>
+                                    <Typography sx={{whiteSpace: "nowrap"}}>
                                         {`∈ [${minScore}, ${maxScore}]`}
                                     </Typography>
                                 </>
@@ -351,7 +393,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             type="file"
                             accept={'.pdf'}
                             ref={fileInputRef}
-                            style={{ display: 'none' }}
+                            style={{display: 'none'}}
                             onChange={(e) => {
                                 if (e.target.files) {
                                     const newFiles = Array.from(e.target.files).filter(file => {
@@ -367,22 +409,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                             }}
                             multiple
                         />
-                        <Typography sx={{ color: 'primary' }}>
+                        <Typography sx={{color: 'primary'}}>
                             Drag & drop some files here, or click to select files
                         </Typography>
-                        <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{ mt: 2 }}>
+                        <Button variant="contained" color="secondary" onClick={handleUploadClick} sx={{mt: 2}}>
                             Upload File
                         </Button>
                     </Box>
                     {files.length > 0 && (
-                        <Box sx={{ marginTop: 2 }}>
+                        <Box sx={{marginTop: 2}}>
                             {files.map(file => (
-                                <Box key={file.name} sx={{ display: 'flex', alignItems: 'center', marginTop: 1 }}>
-                                    <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
+                                <Box key={file.name} sx={{display: 'flex', alignItems: 'center', marginTop: 1}}>
+                                    <Typography sx={{color: 'primary', fontWeight: 'bold'}}>
                                         {file.name}
                                     </Typography>
-                                    <IconButton onClick={() => handleRemoveFile(file.name)} sx={{ ml: 1 }}>
-                                        <CloseIcon />
+                                    <IconButton onClick={() => handleRemoveFile(file.name)} sx={{ml: 1}}>
+                                        <CloseIcon/>
                                     </IconButton>
                                 </Box>
                             ))}
@@ -390,21 +432,25 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ initialData = {} as ReviewData 
                     )}
 
                     {warning && (
-                        <Typography color="error" sx={{ mt: 2 }}>
+                        <Typography color="error" sx={{mt: 2}}>
                             {warning}
                         </Typography>
                     )}
 
-                    <Typography sx={{ mt: 2, color: 'gray', fontSize: '0.875rem' }}>
+                    <Typography sx={{mt: 2, color: 'gray', fontSize: '0.875rem'}}>
                         To submit your review, either fill in all text fields or upload at least one review file.
                     </Typography>
 
-                    <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+                    <Box sx={{display: "flex", gap: 2, mt: 2, position: "relative"}}>
+                        <Button type="submit" variant="contained" color="primary" sx={{mt: 2}}>
                             Submit
                         </Button>
-                        <Button variant="outlined" color="error" onClick={handleCancel} sx={{ mt: 2 }}>
+                        <Button variant="outlined" color="error" onClick={handleCancel} sx={{mt: 2}}>
                             Cancel
+                        </Button>
+                        <Button variant={"contained"} color={"error"} onClick={handleDelete}
+                                sx={{position: "absolute", right: 0}}>
+                            Delete
                         </Button>
                     </Box>
                 </form>

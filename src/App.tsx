@@ -20,7 +20,8 @@ import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import EditReviewPage from "./pages/EditReviewPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
-import SinglePaper from "./components/SinglePaper.tsx";
+import SinglePaperPage from "./pages/SinglePaperPage.tsx";
+import SingleReviewPage from "./pages/SingleReviewPage.tsx";
 
 function App() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -142,19 +143,7 @@ function App() {
                                             <PrivateRoute>
                                                 <>
                                                     <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
-                                                    <SinglePaper/>
-                                                </>
-                                            </PrivateRoute>
-                                        }
-                                    />
-
-                                    <Route
-                                        path="/edit-paper/:id"
-                                        element={
-                                            <PrivateRoute>
-                                                <>
-                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
-                                                    <EditPaperPage/>
+                                                    <SinglePaperPage/>
                                                 </>
                                             </PrivateRoute>
                                         }
@@ -171,6 +160,39 @@ function App() {
                                         }
                                     />
                                     <Route
+                                        path="/edit-paper/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <EditPaperPage/>
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/viewreview/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <SingleReviewPage />
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/review/:id"
+                                        element={
+                                            <PrivateRoute>
+                                                <>
+                                                    <TopMenuBar toggleTheme={toggleTheme} isDarkMode={isDarkMode}/>
+                                                    <SingleReviewPage />
+                                                </>
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
                                         path="/request/:id/add-review"
                                         element={
                                             <PrivateRoute>
@@ -182,7 +204,7 @@ function App() {
                                         }
                                     />
                                     <Route
-                                        path="/edit-review"
+                                        path="/request/:id/edit-review/:reviewId"
                                         element={
                                             <PrivateRoute>
                                                 <>

@@ -1,3 +1,7 @@
+## TODO
+- Request status reset after review is deleted
+
+
 ## Getting Started
 You will need the node package manager (npm) to actually develop and run anything of the frontend.
 It is the node package manager for Node.js, so you will need to install Node.js first.
