@@ -14,7 +14,7 @@ import {useDropzone} from 'react-dropzone';
 import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
 import {useNavigate} from "react-router-dom";
 
 interface ReviewFormProps {

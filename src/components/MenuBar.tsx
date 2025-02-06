@@ -26,7 +26,8 @@ import { Link } from "react-router-dom";
 import { useUpdateAuth } from "./auth/AuthenticationContext.tsx";
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
+
 
 const drawerWidth = 240;
 
@@ -147,7 +148,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
             if (userJson) {
                 try {
                     setUsername(JSON.parse(userJson).name);
-                } catch (error) {
+                } catch {
                     showAlert("User Object Error", "Unexpected behavior: User object in local storage is not a valid JSON object. You will be logged out as a result.", "", "OK")
                         .then(() => { logout(); });
                 }
@@ -167,7 +168,7 @@ export default function MenuAppBar({ toggleTheme, isDarkMode }: TopMenuBarProps)
         return () => {
             window.removeEventListener(LOCAL_STORAGE_UPDATE_EVENT, handleStorageChange);
         };
-    }, []);
+    });
 
     return (
         <Box sx={{ flexGrow: 1, display: 'flex' }}>

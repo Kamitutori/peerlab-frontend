@@ -1,13 +1,14 @@
 import {useQuery} from "@tanstack/react-query";
-import {useParams, useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from '@mui/material/Button';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Chip from '@mui/material/Chip';
+/** The wrapping box component of the request state banner. */
 import {styled} from '@mui/material/styles';
 import {Card, Divider, Grid2, Typography, useTheme} from "@mui/material";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
 import RequestListOfRequestees, {RequestObject, UserObject} from "./RequestListOfRequestees.tsx";
 import React, {useEffect, useState} from "react";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -28,15 +29,17 @@ interface PaperElement {
     owner: UserObject;
 }
 
-/** The wrapping box component of the request state banner. */
-const BannerBox = styled(Box)(({theme, bannerColor}: { bannerColor: string, theme: any }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
+const BannerBox = styled(Box, {
+    shouldForwardProp: (prop) => prop !== "bannerColor",
+})<{ bannerColor: string }>(({ bannerColor, theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
     backgroundColor: bannerColor,
     padding: theme.spacing(1.5),
-    borderRadius: '4px',
+    borderRadius: "4px",
 }));
+
 
 export default function SinglePaper() {
     const {id} = useParams<{ id: string }>();
@@ -122,6 +125,7 @@ export default function SinglePaper() {
         if (userJson && (JSON.parse(userJson)?.name !== paperObject.owner.name) && paperObject.owner.name !== "") {
             setIsRequest(true);
             if (paperData.requests.length > 0) {
+                console.log(paperData.requests[0]);
                 setRequestofRequestee(paperData.requests[0]);
             }
         }
@@ -191,7 +195,7 @@ export default function SinglePaper() {
             const year = date.getFullYear();
 
             return `${day}.${month}.${year} at ${hours}:${minutes}`;
-        } catch (error) {
+        } catch {
             //await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format: ", "", "OK");
             return
         }
@@ -276,10 +280,9 @@ export default function SinglePaper() {
             {isRequest && (
                 <BannerBox
                     bannerColor={bannerColor}
-                    theme={undefined}
-                    sx={{mt: 1}}
+                    sx={{ mt: 1 }}
                 >
-                    <Typography variant="h6" sx={{flexGrow: 1, color: 'primary', pl: 1}}>
+                    <Typography variant="h6" sx={{ flexGrow: 1, color: 'primary', pl: 1 }}>
                         {bannerMessage}
                     </Typography>
                     {requestofRequestee.status === "PENDING" && (
@@ -296,7 +299,7 @@ export default function SinglePaper() {
                                 id="rejectButton"
                                 variant="outlined"
                                 color="primary"
-                                sx={{ml: 2}}
+                                sx={{ ml: 2 }}
                                 onClick={handleResponseToRequest}
                             >
                                 Reject
