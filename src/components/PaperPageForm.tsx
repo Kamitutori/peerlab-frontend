@@ -172,7 +172,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             const file = files[0];
 
             try {
-                const uploadResponse = await fetch(`http://localhost:8080/api/minio/upload-url?fileName=${file.name}`, {
+                const uploadResponse = await fetch(`http://localhost:8080/api/minio/paper-upload-url?fileName=${file.name}`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem("jwt")}`
@@ -275,7 +275,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
     const handleDownloadClick = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${initialData.fileId}`, {
+            const response = await fetch(`http://localhost:8080/api/minio/paper-download-url?fileId=${initialData.fileId}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("jwt")}`
