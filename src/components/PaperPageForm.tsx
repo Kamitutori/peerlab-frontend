@@ -317,22 +317,32 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             if (isAlreadyRequested) {
                 const requestToDelete = prevSelected.find(request => request.requestee.id === reviewerId);
                 if (requestToDelete) {
-                    setRequestsToDelete(prev => [...prev, requestToDelete]);
+                    // Remove from requestsToDelete if already scheduled for deletion
+                    setRequestsToDelete(prev => prev.filter(req => req.requestee.id !== reviewerId));
                 }
+                setNewRequests(prev => prev.filter(request => request.requestee.id !== reviewerId));
                 return prevSelected.filter(request => request.requestee.id !== reviewerId);
             } else {
+                // If the reviewer was previously marked for deletion, remove it from there
+                setRequestsToDelete(prev => prev.filter(req => req.requestee.id !== reviewerId));
                 setNewRequests(prev => [...prev, { requestee: { id: reviewerId } }]);
                 return [...prevSelected, { requestee: { id: reviewerId } }];
             }
         });
     };
 
+
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
             setRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
             setNewRequests(reviewers.map(reviewer => ({ requestee: { id: reviewer.id } })));
+            setRequestsToDelete([]);
         } else {
             setRequests([]);
+            setRequestsToDelete(prev => [
+                ...prev,
+                ...requests.filter(request => !newRequests.some(newRequest => newRequest.requestee.id === request.requestee.id))
+            ]);
             setNewRequests([]);
         }
     };
