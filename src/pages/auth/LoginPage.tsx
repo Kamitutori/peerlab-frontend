@@ -1,6 +1,6 @@
 import { Alert, Button, Checkbox, FormControlLabel, Paper, Stack, TextField } from "@mui/material";
 import Box from "@mui/material/Box";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { useTheme } from "@mui/material/styles";
 import peerLabLogoLight from "../../assets/peerlab_logo_squared_transparent.svg";
 import peerLabLogoDark from "../../assets/peerlab_logo_squared_transparent_white.svg";
@@ -45,9 +45,11 @@ export default function LoginPage() {
         setShowMessage(true);
     }
 
-    if (localStorage.getItem("jwt") && localStorage.getItem("user")) {
-        navigate("/dashboard");
-    }
+    useEffect(() => {
+        if (localStorage.getItem("jwt") && localStorage.getItem("user")) {
+            navigate("/dashboard");
+        }
+    }, [])
 
     const loginToApplication = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
