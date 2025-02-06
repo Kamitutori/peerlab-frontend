@@ -22,6 +22,7 @@ import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
+import {useAlertDialog} from "./AlertDialogProvider.tsx";
 
 interface Reviewer {
     id: string;
@@ -71,6 +72,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [requestsToDelete, setRequestsToDelete] = useState<Request[]>([]);
     const [newRequests, setNewRequests] = useState<Request[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const {showAlert} = useAlertDialog();
 
     useEffect(() => {
         const fetchReviewers = async (retryCount = 0) => {
@@ -83,10 +85,6 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                     }
                 });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
 
                 const text = await response.text();
                 const data = text ? JSON.parse(text) : [];
@@ -231,17 +229,13 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             for (const request of requestsToDelete) {
                 if (request.id) {
                     try {
-                        const response = await fetch(`http://localhost:8080/api/requests/${request.id}`, {
+                        await fetch(`http://localhost:8080/api/requests/${request.id}`, {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${localStorage.getItem('jwt')}`
                             }
                         });
-
-                        if (!response.ok) {
-                            throw new Error('Failed to delete request');
-                        }
 
                         console.log('Successfully deleted request:', request.id);
                     } catch (error) {
@@ -274,6 +268,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     };
 
     const handleDeleteClick = async () => {
+        const result = await showAlert("Paper deletion", "Are you sure you want to delete this paper?", "Delete", "Cancel");
+        if (!result) return;
         try {
             const response = await fetch(`http://localhost:8080/api/papers/${initialData.id}`, {
                 method: 'DELETE',
