@@ -7,9 +7,9 @@ import Chip from '@mui/material/Chip';
 /** The wrapping box component of the request state banner. */
 import {styled} from '@mui/material/styles';
 import {Card, Divider, Grid2, Typography, useTheme} from "@mui/material";
-import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
+import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "../utils/alertDialogUtils.ts";
-import RequestListOfRequestees, {RequestObject, UserObject} from "./RequestListOfRequestees.tsx";
+import RequestListOfRequestees, {RequestObject, UserObject} from "../components/RequestListOfRequestees.tsx";
 import React, {useEffect, useState} from "react";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
@@ -43,6 +43,7 @@ const BannerBox = styled(Box, {
 
 /** Converts the date of the paper form iso 8601 to format 'DD.MM.YYYY at HH:MM'.*/
 export function convertISO8601ToDate(isoString: string) {
+    console.log(isoString);
     try {
         const date = new Date(isoString);
         if (isNaN(date.getTime())) {
@@ -67,6 +68,7 @@ export default function SinglePaperPage() {
     const {showAlert} = useAlertDialog();
     const theme = useTheme();
     const isLightMode = theme.palette.mode === "light";
+    const [uploadDate, setUploadDate] = useState<string>("DD.MM.YYYY at HH:MM");
 
     /** If the user is a requestee, this const will be set to the request he received. */
     const [requestofRequestee, setRequestofRequestee] = useState<RequestObject>({
@@ -132,7 +134,6 @@ export default function SinglePaperPage() {
     });
 
     const [numberOfSubmittedReviews, setNumberOfSubmittedReviews] = useState<number>(-1);
-    const [uploadDate, setUploadDate] = useState<string>("");
 
     useEffect(() => {
         if (!isPaperError && !isPaperPending && paperData) {
@@ -145,7 +146,7 @@ export default function SinglePaperPage() {
     const [isRequest, setIsRequest] = useState<boolean>(false);
     useEffect(() => {
         const userJson = localStorage.getItem("user");
-        if (!paperData || isPaperPending || isPaperError) {
+        if (!paperData && isPaperPending && isPaperError) {
             setIsRequest(false);
         }
         if (userJson && (JSON.parse(userJson)?.name !== paperObject.owner.name) && paperObject.owner.name !== "") {
@@ -156,10 +157,12 @@ export default function SinglePaperPage() {
         }
 
         const updateUploadDate = async () => {
-            setUploadDate(convertISO8601ToDate(paperObject.uploadDate));
-            if (uploadDate === "") {
-                setUploadDate(new Date().toISOString());
-                await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format. Date is set to now. ", "", "OK");
+            if (paperObject.uploadDate) {
+                setUploadDate(convertISO8601ToDate(paperObject.uploadDate));
+                if (uploadDate === "") {
+                    setUploadDate(new Date().toISOString());
+                    await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format. Date is set to now. ", "", "OK");
+                }
             }
         }
         updateUploadDate();
@@ -388,7 +391,7 @@ export default function SinglePaperPage() {
                             <Typography variant="h6" textAlign="center">Author's Note</Typography>
                             <Divider></Divider>
                             <Typography variant="body1">
-                                {paperObject.authorsNote ? paperObject.authorsNote : `${paperObject.owner.name} has made no comments on the paper.`}
+                                {paperObject.authorsNote ? paperObject.authorsNote : `${isRequest ? `${paperObject.owner.name} has` : 'You have'} made no comments on the paper.`}
                             </Typography>
                         </Box>
                     </Grid2>

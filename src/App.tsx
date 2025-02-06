@@ -20,7 +20,7 @@ import AddReviewPage from "./pages/AddReviewPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import EditReviewPage from "./pages/EditReviewPage.tsx";
 import AlertDialogProvider from "./components/AlertDialogProvider.tsx";
-import SinglePaperPage from "./components/SinglePaperPage.tsx";
+import SinglePaperPage from "./pages/SinglePaperPage.tsx";
 import SingleReviewPage from "./pages/SingleReviewPage.tsx";
 
 function App() {
@@ -204,7 +204,7 @@ function App() {
                                         }
                                     />
                                     <Route
-                                        path="/request/:id/edit-review"
+                                        path="/request/:id/edit-review/:reviewId"
                                         element={
                                             <PrivateRoute>
                                                 <>

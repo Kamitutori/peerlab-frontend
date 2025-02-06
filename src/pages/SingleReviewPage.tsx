@@ -12,7 +12,7 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import {convertISO8601ToDate} from "../components/SinglePaperPage.tsx";
+import {convertISO8601ToDate} from "./SinglePaperPage.tsx";
 
 interface ReviewElement {
     id: number;
@@ -46,7 +46,7 @@ export default function SingleReviewPage() {
     const [isReviewer, setIsReviewer] = useState(false);
     const [isInternal, setIsInternal] = useState(false);
     const [hasReviewFiles, setHasReviewFiles] = useState(false);
-    const [submissionDate, setSubmissionDate] = useState("");
+    const [submissionDate, setSubmissionDate] = useState("DD.MM.YYYY at HH:MM");
 
     const [reviewObject, setReviewObject] = useState<ReviewElement>({
         id: 0,
@@ -71,7 +71,7 @@ export default function SingleReviewPage() {
         questions: "",
         score: Number.MAX_SAFE_INTEGER,
         confidenceLevel: "",
-        submissionDate: ""
+        submissionDate: "DD.MM.YYYY at HH:MM"
     });
 
     const {
@@ -115,10 +115,12 @@ export default function SingleReviewPage() {
             }
 
             const updateSubmissionDate = async () => {
-                setSubmissionDate(convertISO8601ToDate(reviewObject.submissionDate));
-                if (submissionDate === "") {
-                    setSubmissionDate(new Date().toISOString());
-                    await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format. Date is set to now. ", "", "OK");
+                if (reviewObject.submissionDate) {
+                    setSubmissionDate(convertISO8601ToDate(reviewObject.submissionDate));
+                    if (submissionDate === "") {
+                        setSubmissionDate(new Date().toISOString());
+                        await showAlert("Error converting ISO-8601", "An error occurred while converting the date from ISO-8601 format. Date is set to now. ", "", "OK");
+                    }
                 }
             }
             updateSubmissionDate();
@@ -162,7 +164,7 @@ export default function SingleReviewPage() {
                     <FirstPageIcon></FirstPageIcon>
                     <Typography>Back to Paper</Typography>
                 </Button>
-                <Typography sx={{position: "absolute", right: 0,}}>
+                <Typography sx={{position: "absolute", right: 20,}}>
                     Upload Date: {convertISO8601ToDate(reviewObject.submissionDate)}
                 </Typography>
             </Grid2>
@@ -299,25 +301,38 @@ export default function SingleReviewPage() {
                         )}
                     </Grid2>
                 </Box>
-                {hasReviewFiles && (
-                    <>
-                        <Typography>Review Files:</Typography>
-                        <Grid2 container sx={{display: "flex", flexDirection: "row", alignItems: "center", gap: 2}}>
-                            {reviewObject.fileIds.map((fileId, index) => (
-                                <Button
-                                    key={index}
-                                    variant="text"
-                                    color="primary"
-                                    onClick={() => downloadFile(fileId)}
-                                    startIcon={
-                                        <InsertDriveFileIcon sx={{height: "50px", width: "50px"}}/>
-                                    }
-                                >
-                                </Button>
-                            ))}
-                        </Grid2>
-                    </>
-                )}
+                <Grid2 container sx={{display: "flex", flexDirection: "column", alignItems: "start"}}>
+                    {!hasReviewFiles && (
+                        <Typography>No review files were uploaded.</Typography>
+                    )}
+                    {hasReviewFiles && (
+                        <>
+                            <Typography>Review Files:</Typography>
+                            <Grid2 container sx={{display: "flex", flexDirection: "row", alignItems: "center", gap: 2}}>
+                                {reviewObject.fileIds.map((fileId, index) => (
+                                    <Button
+                                        key={index}
+                                        variant="text"
+                                        color="primary"
+                                        onClick={() => downloadFile(fileId)}
+                                        startIcon={
+                                            <InsertDriveFileIcon sx={{height: "50px", width: "50px"}}/>
+                                        }
+                                    >
+                                    </Button>
+                                ))}
+                            </Grid2>
+                        </>
+                    )}
+                    {isReviewer && (
+                        <Button
+                            variant={"contained"}
+                            onClick={() => navigate(`/request/${reviewObject.request.id}/edit-review/${reviewObject.id}`)}
+                        >
+                            Edit Review
+                        </Button>
+                    )}
+                </Grid2>
             </Grid2>
 
         </Paper>
