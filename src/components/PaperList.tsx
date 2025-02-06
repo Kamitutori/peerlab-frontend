@@ -13,8 +13,7 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 import { useNavigate } from "react-router-dom";
 import { useUpdateAuth } from "./auth/AuthenticationContext.tsx";
-import { useAlertDialog } from "./AlertDialogProvider.tsx";
-
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
 interface Paper {
     id: number;
     title: string;

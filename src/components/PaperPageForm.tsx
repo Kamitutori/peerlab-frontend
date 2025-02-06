@@ -22,7 +22,8 @@ import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
+
 
 interface Reviewer {
     id: string;

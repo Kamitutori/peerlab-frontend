@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import PaperList from "../components/PaperList.tsx";
 import {useUpdateAuth} from "../components/auth/AuthenticationContext.tsx";
-import {useAlertDialog} from "../components/AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
 import RequestListOfPapers from "../components/RequestListOfPapers.tsx";
 
 /** The ProfilePage component is a page that displays the user's account and provides functionality to manage it. */

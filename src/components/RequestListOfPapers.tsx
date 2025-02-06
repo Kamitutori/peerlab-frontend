@@ -13,7 +13,8 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 import {useNavigate} from "react-router-dom";
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
-import {useAlertDialog} from "./AlertDialogProvider.tsx";
+import {useAlertDialog} from "../utils/alertDialogUtils.ts";
+
 import {RequestObject} from "./RequestListOfRequestees.tsx";
 
 /** The props for the list of papers; the title of the list and the endpoint to fetch its data from. */
