@@ -171,7 +171,7 @@ function App() {
                                         }
                                     />
                                     <Route
-                                        path="/add-review"
+                                        path="/request/:id/add-review"
                                         element={
                                             <PrivateRoute>
                                                 <>

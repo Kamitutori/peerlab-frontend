@@ -15,23 +15,60 @@ import CustomTextField from './CustomTextField';
 import CloseIcon from '@mui/icons-material/Close';
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 interface ReviewFormProps {
-    initialData?: any;
-    onSubmit: (data: any) => void;
+    initialData?: ReviewData;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {}}) => {
+interface ReviewData {
+    id?: string;
+    request: RequestData;
+    fileIds: string[];
+    summary: string;
+    strengths:string;
+    weaknesses:string;
+    comments:string;
+    questions:string;
+    score:number;
+    confidenceLevel:string;
+    submissionDate:string;
+}
+
+interface Reviewer {
+    id: string;
+    name: string;
+    email: string;
+}
+
+interface RequestData {
+    id: string;
+    status: string;
+    paperId: string;
+    paperTitle: string;
+    paperMaxScore: number;
+    requestee: Reviewer;
+    review: ReviewData;
+    date: string;
+}
+
+const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData}) => {
     const CANCEL_REVIEW_ALERT_TITLE = "Cancel Review";
     const CANCEL_REVIEW_ALERT_MESSAGE = "Are you sure you want to cancel writing this review? All inputs will be discarded.";
     const CANCEL_REVIEW_ALERT_OK_TEXT = "Confirm";
     const CANCEL_REVIEW_ALERT_CANCEL_TEXT = "Cancel";
 
+    const { id } = useParams<{ id: string }>();
     const {logout} = useUpdateAuth();
     const {showAlert} = useAlertDialog();
     const navigate = useNavigate();
     const [warning, setWarning] = useState('');
+
+
+    "http://localhost:8080/api/requests&status=PENDING"
+
+
+
 
     /** Input fields of a review */
     const [summary, setSummary] = useState(initialData.summary || '');
