@@ -64,12 +64,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
     const navigate = useNavigate();
     const [warning, setWarning] = useState('');
 
-
-    "http://localhost:8080/api/requests&status=PENDING"
-
-
-
-
     /** Input fields of a review */
     const [summary, setSummary] = useState(initialData.summary || '');
     const [strengths, setStrengths] = useState(initialData.strengths || '');
