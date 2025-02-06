@@ -14,6 +14,7 @@ import FirstPageIcon from '@mui/icons-material/FirstPage';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import {convertISO8601ToDate} from "../components/SinglePaperPage.tsx";
 
+// Define the interface for ReviewElement and RequestElement structures
 interface ReviewElement {
     id: number;
     request: RequestElement;
@@ -38,16 +39,27 @@ interface RequestElement {
     paperMinScore: number;
 }
 
+// SingleReviewPage component: Main page to display review details
 export default function SingleReviewPage() {
+    // Extract review ID from URL parameters
     const {id} = useParams<{ id: string }>();
+
+    // Authentication context to handle logout
     const {logout} = useUpdateAuth();
+
+    // Alert dialog utility to show messages
     const {showAlert} = useAlertDialog();
+
+    // React Router's navigate function to redirect user
     const navigate = useNavigate();
+
+    // Local state to store review data and UI flags
     const [isReviewer, setIsReviewer] = useState(false);
     const [isInternal, setIsInternal] = useState(false);
     const [hasReviewFiles, setHasReviewFiles] = useState(false);
     const [submissionDate, setSubmissionDate] = useState("");
 
+    // Default state for reviewObject (empty initial state)
     const [reviewObject, setReviewObject] = useState<ReviewElement>({
         id: 0,
         request: {
@@ -74,6 +86,7 @@ export default function SingleReviewPage() {
         submissionDate: ""
     });
 
+    // React Query to fetch review data from the API
     const {
         isPending: isReviewPending,
         isError: isReviewError,
@@ -82,6 +95,7 @@ export default function SingleReviewPage() {
     } = useQuery({
         queryKey: ["review", id],
         queryFn: async () => {
+            // Make a GET request to fetch review details
             const res = await fetch(`http://localhost:8080/api/reviews/${id}`, {
                 method: "GET",
                 headers: {
@@ -89,31 +103,42 @@ export default function SingleReviewPage() {
                     "Authorization": `Bearer ${localStorage.getItem("jwt")}`
                 }
             });
+
+            // Handle token expiration or invalid token by logging out the user
             if (res.status === 401) {
                 await showAlert("Invalid Token", "Your token is invalid. You will be logged out.", "", "OK");
                 logout();
             } else if (!res.ok) {
                 await showAlert("Failed to Fetch Review", "The review could not be fetched: " + await res.text(), "", "OK");
             } else {
+                // Return review data if the response is successful
                 return await res.json();
             }
         }
     });
 
+    // Effect hook to handle state updates when review data is fetched
     useEffect(() => {
         if (reviewData && !isReviewPending && !isReviewError) {
-            setReviewObject(reviewData);
+            setReviewObject(reviewData); // Set the fetched review data
+
+            // Check if the logged-in user is the reviewer or the paper owner
             const userJson = localStorage.getItem("user");
             if (userJson && reviewObject.request.paperOwnerName !== JSON.parse(userJson)?.name) {
                 setIsReviewer(true);
             }
+
+            // Set internal review flag if score is not set
             if (reviewObject.score === Number.MAX_SAFE_INTEGER) {
                 setIsInternal(true);
             }
+
+            // Check if review files are available
             if (reviewObject.fileIds.length !== 0) {
                 setHasReviewFiles(true);
             }
 
+            // Convert ISO-8601 date format and set submission date
             const updateSubmissionDate = async () => {
                 setSubmissionDate(convertISO8601ToDate(reviewObject.submissionDate));
                 if (submissionDate === "") {
@@ -123,8 +148,9 @@ export default function SingleReviewPage() {
             }
             updateSubmissionDate();
         }
-    }, [reviewData]);
+    }, [reviewData]); // Runs whenever reviewData changes
 
+    // Function to handle file download when user clicks a file
     const downloadFile = (fileId: string) => {
         const fileUrl = `/path/to/files/${fileId}`;
         const link = document.createElement('a');
@@ -133,6 +159,7 @@ export default function SingleReviewPage() {
         link.click();
     };
 
+    // Loading and error states before review data is fetched
     if (isReviewPending) {
         return <span>Loading...</span>;
     }
@@ -141,6 +168,7 @@ export default function SingleReviewPage() {
     }
 
     return (
+        // Main Paper component that holds the review details UI
         <Paper sx=
                    {{
                        maxWidth: '3000px',
@@ -158,10 +186,12 @@ export default function SingleReviewPage() {
                    }}
         >
             <Grid2 sx={{display: "flex", flexDirection: "row"}}>
+                {/* Back button to navigate to the paper details page */}
                 <Button variant="contained" onClick={() => navigate(`/paper/${reviewObject.request.paperId}`)}>
                     <FirstPageIcon></FirstPageIcon>
                     <Typography>Back to Paper</Typography>
                 </Button>
+                {/* Display the submission date */}
                 <Typography sx={{position: "absolute", right: 0,}}>
                     Upload Date: {convertISO8601ToDate(reviewObject.submissionDate)}
                 </Typography>
@@ -174,7 +204,9 @@ export default function SingleReviewPage() {
                 {isReviewer ? "Your Review" : `${reviewObject.request.requestee.name}'s Review`}
             </Typography>
 
+            {/* Display review sections such as Summary, Strengths, Weaknesses, etc. */}
             <Grid2 container spacing={1} sx={{maxWidth: "100%", alignItems: "center"}}>
+                {/* Summary Section */}
                 <Box sx=
                          {{
                              minHeight: "210px",
@@ -195,7 +227,9 @@ export default function SingleReviewPage() {
                         {reviewObject.summary}
                     </Typography>
                 </Box>
+                {/* Strengths and Weaknesses sections */}
                 <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%",}}>
+                    {/* Strengths Section */}
                     <Box sx=
                              {{
                                  minHeight: "210px",
@@ -216,6 +250,7 @@ export default function SingleReviewPage() {
                             {reviewObject.strengths}
                         </Typography>
                     </Box>
+                    {/* Weaknesses Section */}
                     <Box sx=
                              {{
                                  minHeight: "210px",
@@ -237,7 +272,9 @@ export default function SingleReviewPage() {
                         </Typography>
                     </Box>
                 </Grid2>
+                {/* Comments and Questions sections */}
                 <Grid2 gap={2} sx={{display: 'flex', flexDirection: 'row', width: "100%"}}>
+                    {/* Comments Section */}
                     <Box sx=
                              {{
                                  minHeight: "210px",
@@ -258,6 +295,7 @@ export default function SingleReviewPage() {
                             {reviewObject.comments}
                         </Typography>
                     </Box>
+                    {/* Questions Section */}
                     <Box sx=
                              {{
                                  minHeight: "210px",
@@ -279,6 +317,7 @@ export default function SingleReviewPage() {
                         </Typography>
                     </Box>
                 </Grid2>
+                {/* Display Confidence Level and Score */}
                 <Box sx={{display: "flex", alignItems: "center", gap: 2, width: "100%"}}>
                     <Grid2 container sx={{display: "flex", flexDirection: "row", alignItems: "center", gap: 2}}>
                         <Typography>Confidence Level: </Typography>
@@ -292,6 +331,7 @@ export default function SingleReviewPage() {
                             }
                         >
                         </Chip>
+                        {/* Display score if it's not an internal review */}
                         {!isInternal && (
                             <Typography sx={{whiteSpace: "nowrap", position: "absolute", right: "25px"}}>
                                 {`Score: ${reviewObject.score} from range [${reviewObject.request.paperMinScore}, ${reviewObject.request.paperMaxScore}]`}
@@ -299,10 +339,13 @@ export default function SingleReviewPage() {
                         )}
                     </Grid2>
                 </Box>
+
+                {/* Review files section */}
                 {hasReviewFiles && (
                     <>
                         <Typography>Review Files:</Typography>
                         <Grid2 container sx={{display: "flex", flexDirection: "row", alignItems: "center", gap: 2}}>
+                            {/* Display file download buttons */}
                             {reviewObject.fileIds.map((fileId, index) => (
                                 <Button
                                     key={index}
