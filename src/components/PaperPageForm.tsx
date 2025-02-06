@@ -25,7 +25,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
 import {useAlertDialog} from "../utils/alertDialogUtils.ts";
 
-
+// Define types for the paper and reviewer data
 interface Reviewer {
     id: string;
     name: string;
@@ -54,11 +54,14 @@ interface Request {
     status?: string;
 }
 
+// Paper data to populate the form
 interface PaperFormProps {
     initialData?: PaperData;
 }
 
+// Main PaperPageForm component
 const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData }) => {
+    // Declare state variables to manage form data
     const [title, setTitle] = useState(initialData.title || '');
     const [authors, setAuthors] = useState(initialData.authors || '');
     const [reviewLimit, setReviewLimit] = useState(initialData.reviewLimit || '');
@@ -67,16 +70,17 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
     const [isInternal, setIsInternal] = useState(initialData.isInternal !== undefined ? (initialData.isInternal ? 'internal' : 'external') : 'internal');
     const [authorsNote, setAuthorsNote] = useState(initialData.authorsNote || '');
     const [abstractText, setAbstractText] = useState(initialData.abstractText || '');
-    const [files, setFiles] = useState<File[]>([]);
-    const [warning, setWarning] = useState('');
-    const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-    const [requests, setRequests] = useState<Request[]>(initialData.requests || []);
-    const [requestsToDelete, setRequestsToDelete] = useState<Request[]>([]);
-    const [newRequests, setNewRequests] = useState<Request[]>([]);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isEdited, setIsEdited] = useState(false);
-    const {showAlert} = useAlertDialog();
+    const [files, setFiles] = useState<File[]>([]); // For managing uploaded files
+    const [warning, setWarning] = useState(''); // For handling warning messages
+    const [reviewers, setReviewers] = useState<Reviewer[]>([]); // List of reviewers
+    const [requests, setRequests] = useState<Request[]>(initialData.requests || []);// Paper review requests
+    const [requestsToDelete, setRequestsToDelete] = useState<Request[]>([]); // Requests to delete
+    const [newRequests, setNewRequests] = useState<Request[]>([]); // New review requests
+    const fileInputRef = useRef<HTMLInputElement>(null); // Reference to file input element
+    const [isEdited, setIsEdited] = useState(false); // Flag to track if the form is edited
+    const {showAlert} = useAlertDialog(); // Custom hook to show alerts
 
+    // Fetch reviewers on component mount
     useEffect(() => {
         const fetchReviewers = async (retryCount = 0) => {
             console.log(`Fetching reviewers, attempt ${retryCount + 1}`);
@@ -92,7 +96,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 const text = await response.text();
                 const data = text ? JSON.parse(text) : [];
                 console.log('Fetched reviewers:', data);
-                setReviewers(data);
+                setReviewers(data); // Set the list of reviewers
             } catch (error) {
                 console.error('Error fetching reviewers:', error);
                 if (retryCount < 3) {
@@ -103,6 +107,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         fetchReviewers();
     }, []);
 
+    // Update min and max score when internal status changes
     useEffect(() => {
         if (isInternal === 'internal') {
             setMinScore('');
@@ -110,19 +115,21 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     }, [isInternal]);
 
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // For navigation
     const [authorsNoteCount, setAuthorsNoteCount] = useState(authorsNote.length);
     const [abstractTextCount, setAbstractTextCount] = useState(abstractText.length);
 
+    // Handle input change for authors note
     const handleAuthorsNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (value.length <= 2000) {
             setAuthorsNoteCount(value.length);
             setAuthorsNote(value);
-            setIsEdited(true);
+            setIsEdited(true); // Mark form as edited
         }
     };
 
+    // Handle input change for abstract text
     const handleAbstractTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (value.length <= 2000) {
@@ -132,6 +139,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     };
 
+    // Form submission handler
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
@@ -156,7 +164,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             setWarning("Please upload a file.");
             return;
         }
-        setWarning('');
+        setWarning(''); // Reset warning
 
         const owner = {
             id: user.id,
@@ -168,6 +176,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
 
         let fileId = initialData.fileId;
 
+        // Handle file upload if a new file is selected
         if (files.length > 0) {
             const file = files[0];
 
@@ -197,6 +206,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             }
         }
 
+        // Prepare paper data and submit it to the server
         const paperData = {
             title,
             owner,
@@ -225,6 +235,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
             const paperResult = await paperResponse.json();
             console.log('Successfully posted paper:', paperResult);
 
+            // Handle new review requests if there are any
             if (newRequests.length > 0) {
                 const requestsData = newRequests.map(request => ({
                     requestee: {
@@ -249,6 +260,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 }
             }
 
+            // Delete requests if necessary
             for (const request of requestsToDelete) {
                 if (request.id) {
                     try {
@@ -267,12 +279,13 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 }
             }
 
-            navigate(`/paper/${paperResult.id}`);
+            navigate(`/paper/${paperResult.id}`); // Navigate to the created/updated paper page
         } catch (error) {
             console.error('Error:', error);
         }
     };
 
+    // Handle file download
     const handleDownloadClick = async () => {
         try {
             const response = await fetch(`http://localhost:8080/api/minio/paper-download-url?fileId=${initialData.fileId}`, {
@@ -290,6 +303,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     };
 
+    // Handle delete paper action
     const handleDeleteClick = async () => {
         const result = await showAlert("Paper deletion", "Are you sure you want to delete this paper?", "Delete", "Cancel");
         if (!result) return;
@@ -313,12 +327,14 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     }
 
+    // Handle file drop (upload via drag and drop)
     const onDrop = (acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
     };
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
+    // Open file input when upload button is clicked
     const handleUploadClick = () => {
         setIsEdited(true);
         if (fileInputRef.current) {
@@ -326,10 +342,12 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     };
 
+    // Remove selected file
     const handleRemoveFile = () => {
         setFiles([]);
     };
 
+    // Handle reviewer selection
     const handleReviewerChange = (reviewerId: string) => {
         setIsEdited(true);
         setRequests(prevSelected => {
@@ -352,7 +370,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         });
     };
 
-
+    // Select/deselect all reviewers
     const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
         setIsEdited(true);
         if (event.target.checked) {
@@ -369,6 +387,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         }
     };
 
+    // Handle cancel button click
     const handleCancelClick = async () => {
         if (isEdited) {
             const result = await showAlert("Cancel", "All changes will be discarded", "Proceed", "Go back");
@@ -378,26 +397,32 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
         return;
     };
 
+    // Render the PaperPageForm component, which displays the form for adding or editing paper data.
     return (
         <Paper sx={{ width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10, position: 'relative' }}>
+            {/* Display delete button if there is an existing paper (editing scenario) */}
             {initialData.id && (
                 <IconButton onClick={handleDeleteClick} sx={{ position: 'absolute', top: 35, right: 25 }}>
                     <DeleteIcon />
                 </IconButton>
             )}
+            {/* Title: 'Edit Paper' if there is paper data, otherwise 'Add Paper' */}
             <Typography variant="h4" component="h1" fontWeight={"bold"} sx={{ textAlign: 'leftZ' }}>
                 {initialData.title ? 'Edit Paper' : 'Add Paper'}
             </Typography>
+
+            {/* Form for submitting paper data */}
             <form onSubmit={handleSubmit}>
                 <Grid2 container spacing={2}>
+                    {/* Paper name and authors/conference */}
                     <Grid2 sx={{ display: 'flex', flexDirection: 'column' }}>
                         <CustomTextField
                             required
                             label="Paper name"
                             value={title}
                             onChange={(e) => {
-                                setTitle(e.target.value)
-                                setIsEdited(true)
+                                setTitle(e.target.value) // Update title value
+                                setIsEdited(true) // Mark form as edited
                             }}
                         />
                         <CustomTextField
@@ -405,8 +430,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                             label="Authors/Conference"
                             value={authors}
                             onChange={(e) => {
-                                setAuthors(e.target.value)
-                                setIsEdited(true)
+                                setAuthors(e.target.value) // Update authors value
+                                setIsEdited(true) // Mark form as edited
 
                             }}
                         />
@@ -414,10 +439,11 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                             label="Maximum number of reviews"
                             value={reviewLimit}
                             onChange={(e) => {
-                                setReviewLimit(e.target.value)
-                                setIsEdited(true)
+                                setReviewLimit(e.target.value) // Update review limit
+                                setIsEdited(true) // Mark form as edited
                             }}
                         />
+                        {/* Min and Max score fields */}
                         <Grid2 container spacing={2}>
                             <Grid2>
                                 <CustomTextField
@@ -425,8 +451,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     label="Minimum score"
                                     value={minScore}
                                     onChange={(e) => {
-                                        setMinScore(e.target.value)
-                                        setIsEdited(true)
+                                        setMinScore(e.target.value) // Update minimum score
+                                        setIsEdited(true) // Mark form as edited
                                     }}
                                     disabled={isInternal === 'internal'}
                                 />
@@ -437,24 +463,27 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                     label="Maximum score"
                                     value={maxScore}
                                     onChange={(e) => {
-                                        setMaxScore(e.target.value)
-                                        setIsEdited(true)
+                                        setMaxScore(e.target.value) // Update maximum score
+                                        setIsEdited(true) // Mark form as edited
                                     }}
-                                    disabled={isInternal === 'internal'}
+                                    disabled={isInternal === 'internal'} // Disable if internal
                                 />
                             </Grid2>
                         </Grid2>
                     </Grid2>
+
+                    {/* Authors' note with character count */}
                     <Grid2>
                         <Box sx={{ position: 'relative', width: '100%' }}>
                             <CustomTextField
                                 label="Authors note"
                                 value={authorsNote}
-                                onChange={handleAuthorsNoteChange}
+                                onChange={handleAuthorsNoteChange} // Update authors note
                                 multiline
                                 rows={9.4}
                                 sx={{ width: '100%' }}
                             />
+                            {/* Display character count */}
                             <FormHelperText sx={{ position: 'absolute', right: 0, bottom: '-20px' }}>
                                 <Typography variant="body2" color="text.secondary" fontSize={12}>
                                     {`${authorsNoteCount}/2000`}
@@ -463,34 +492,36 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         </Box>
                     </Grid2>
                 </Grid2>
+                {/* Radio buttons for selecting internal or external status */}
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <RadioGroup
                         row
                         value={isInternal}
                         onChange={(e) => {
-                            setIsInternal(e.target.value)
-                            setIsEdited(true)
+                            setIsInternal(e.target.value) // Update internal/external status
+                            setIsEdited(true) // Mark form as edited
                         }}
                     >
                         <FormControlLabel
                             value="internal"
-                            control={<Radio disabled={!!initialData.id} />}
+                            control={<Radio disabled={!!initialData.id} />} // Disable if editing
                             label="Internal"
                             sx={{ color: 'primary' }}
                         />
                         <FormControlLabel
                             value="external"
-                            control={<Radio disabled={!!initialData.id} />}
+                            control={<Radio disabled={!!initialData.id} />} // Disable if editing
                             label="External"
                             sx={{ color: 'primary' }}
                         />
                     </RadioGroup>
                 </Box>
+                {/* Abstract text input field with character count */}
                 <Box sx={{ position: 'relative', width: '100%', marginTop: 2 }}>
                     <CustomTextField
                         label="Abstract Text"
                         value={abstractText}
-                        onChange={handleAbstractTextChange}
+                        onChange={handleAbstractTextChange} // Update abstract text
                         multiline
                         rows={4}
                         sx={{ width: '100%' }}
@@ -501,6 +532,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         </Typography>
                     </FormHelperText>
                 </Box>
+                {/* Display uploaded file info if editing an existing paper */}
                 {initialData.id ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
                         <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
@@ -512,6 +544,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     </Box>
                 ) : (
                     <>
+                        {/* Display file upload area when no file is uploaded */}
                         {files.length === 0 ? (
                             <Box {...getRootProps()}
                                  sx={{
@@ -529,7 +562,9 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                 </Button>
                             </Box>
                         ) : (
+
                             <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                                {/* Display the uploaded file name */}
                                 <Typography sx={{ color: 'primary', fontWeight: 'bold' }}>
                                     Uploaded file: {files[0].name}
                                 </Typography>
@@ -540,6 +575,8 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         )}
                     </>
                 )}
+
+                {/* Hidden file input to allow file upload */}
                 <input
                     type="file"
                     accept={'.pdf'}
@@ -547,12 +584,14 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     style={{ display: 'none' }}
                     onChange={(e) => {
                         if (e.target.files) {
-                            setFiles(Array.from(e.target.files));
+                            setFiles(Array.from(e.target.files)); // Set selected files
                         }
-                        setIsEdited(true);
+                        setIsEdited(true); // Mark form as edited
                     }
                 }
                 />
+
+                {/* Table for displaying reviewers and selecting them */}
                 <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                     <Table stickyHeader>
                         <TableHead>
@@ -575,7 +614,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                         <Checkbox
                                             checked={requests.length === reviewers.length}
                                             indeterminate={requests.length > 0 && requests.length < reviewers.length}
-                                            onChange={handleSelectAll}
+                                            onChange={handleSelectAll} // Select all reviewers
                                         />
                                         <Typography
                                             variant="body2"
@@ -592,6 +631,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                 <TableContainer component={Paper} sx={{ maxHeight: 350, overflow: 'auto' }}>
                     <Table>
                         <TableBody>
+                            {/* Render reviewers in table rows */}
                             {reviewers.map((reviewer) => {
                                 const request = requests.find(request => request.requestee.id === reviewer.id && request.status !== 'REJECTED');
                                 const isDisabled = request && (request.status === 'ACCEPTED' || request.status === 'SUBMITTED');
@@ -608,9 +648,9 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                                                     </Typography>
                                                 )}
                                                 <Checkbox
-                                                    checked={!!request}
-                                                    onChange={() => handleReviewerChange(reviewer.id)}
-                                                    disabled={isDisabled}
+                                                    checked={!!request} // Mark checkbox if reviewer is selected
+                                                    onChange={() => handleReviewerChange(reviewer.id)} // Handle reviewer selection change
+                                                    disabled={isDisabled} // Disable if status is ACCEPTED/SUBMITTED
                                                 />
                                             </Box>
                                         </TableCell>
@@ -620,11 +660,15 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                         </TableBody>
                     </Table>
                 </TableContainer>
+
+                {/* Display warning message if there's any */}
                 {warning && (
                     <Typography color="error" sx={{ mt: 2 }}>
                         {warning}
                     </Typography>
                 )}
+
+                {/* Cancel and Submit buttons */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                     <Button type="button" variant="contained" color="error" onClick={handleCancelClick}>
                         Cancel
