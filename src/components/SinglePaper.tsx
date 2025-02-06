@@ -146,7 +146,7 @@ export default function SinglePaper() {
         const getBannerColor = (status: string): string => {
             switch (status) {
                 case "PENDING":
-                    return isLightMode ? "#c1b80b" : "#b3b300";
+                    return isLightMode ? "#a5a5a5" : "#9e9e9e";
                 case "ACCEPTED":
                     return isLightMode ? "#449fd5" : "#008ae6";
                 case "SUBMITTED":
@@ -297,8 +297,8 @@ export default function SinglePaper() {
                             </Button>
                             <Button
                                 id="rejectButton"
-                                variant="outlined"
-                                color="primary"
+                                variant="contained"
+                                color="error"
                                 sx={{ ml: 2 }}
                                 onClick={handleResponseToRequest}
                             >

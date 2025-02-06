@@ -597,7 +597,7 @@ const PaperPageForm: React.FC<PaperFormProps> = ({ initialData = {} as PaperData
                     </Typography>
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                    <Button type="button" variant="contained" color="secondary" onClick={handleCancelClick}>
+                    <Button type="button" variant="contained" color="error" onClick={handleCancelClick}>
                         Cancel
                     </Button>
                     <Button type="submit" variant="contained" color="primary">
