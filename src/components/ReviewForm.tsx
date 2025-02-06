@@ -30,30 +30,28 @@ interface ReviewData {
     request: RequestData;
     fileIds: string[];
     summary: string;
-    strengths:string;
-    weaknesses:string;
-    comments:string;
-    questions:string;
-    score:number;
-    confidenceLevel:string;
-    submissionDate:string;
+    strengths: string;
+    weaknesses: string;
+    comments: string;
+    questions: string;
+    score: number;
+    confidenceLevel: string;
+    submissionDate: string;
 }
 
 interface Reviewer {
     id: string;
-    name: string;
-    email: string;
 }
 
 interface RequestData {
-    id: string;
-    status: string;
+    // id: string;
+    // status: string;
     paperId: string;
-    paperTitle: string;
-    paperMaxScore: number;
+    // paperTitle: string;
+    // paperMaxScore: number;
     requestee: Reviewer;
-    review: ReviewData;
-    date: string;
+    // review: ReviewData;
+    // date: string;
 }
 
 interface PaperData {
@@ -249,9 +247,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
             submissionDate: new Date().toISOString(),
             request: request
         };
-
+        console.log("REVIEW DATA:", reviewData);
         try {
-            const response = await fetch(`http://localhost:8080/api/review${initialData.id ? `/${initialData.id}` : ''}`, {
+            const response = await fetch(`http://localhost:8080/api/reviews${initialData.id ? `/${initialData.id}` : ''}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
