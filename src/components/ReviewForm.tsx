@@ -4,7 +4,9 @@ import {
     Button,
     FormControl,
     Grid2,
-    IconButton, InputLabel, MenuItem,
+    IconButton,
+    InputLabel,
+    MenuItem,
     Paper,
     Select,
     SelectChangeEvent,
@@ -16,6 +18,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import {useUpdateAuth} from "./auth/AuthenticationContext.tsx";
 import {useAlertDialog} from "./AlertDialogProvider.tsx";
 import {useNavigate, useParams} from "react-router-dom";
+import {useQuery} from "@tanstack/react-query";
 
 interface ReviewFormProps {
     initialData?: ReviewData;
@@ -52,11 +55,43 @@ interface RequestData {
     date: string;
 }
 
+interface PaperData {
+    id: string;
+    title: string;
+    authors: string;
+    reviewLimit: number;
+    minScore: number;
+    maxScore: number;
+    isInternal: boolean;
+    authorsNote: string;
+    abstractText: string;
+    requests: string[];
+    fileId: string;
+}
+
 const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData}) => {
     const CANCEL_REVIEW_ALERT_TITLE = "Cancel Review";
     const CANCEL_REVIEW_ALERT_MESSAGE = "Are you sure you want to cancel writing this review? All inputs will be discarded.";
     const CANCEL_REVIEW_ALERT_OK_TEXT = "Confirm";
     const CANCEL_REVIEW_ALERT_CANCEL_TEXT = "Cancel";
+
+    /** Input fields of a review */
+    const [files, setFiles] = useState<File[]>([]);
+    const [summary, setSummary] = useState(initialData.summary || '');
+    const [strengths, setStrengths] = useState(initialData.strengths || '');
+    const [weaknesses, setWeaknesses] = useState(initialData.weaknesses || '');
+    const [comments, setComments] = useState(initialData.comments || '');
+    const [questions, setQuestions] = useState(initialData.questions || '');
+    const [score, setScore] = useState(initialData.score || '');
+    const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+
+    let [request] = useState(null);
+    let [isExternal] = useState(false);
+    let [minScore] = useState(NaN);
+    let [maxScore] = useState(NaN);
+
 
     const { id } = useParams<{ id: string }>();
     const {logout} = useUpdateAuth();
@@ -65,33 +100,79 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
     const [warning, setWarning] = useState('');
 
 
-    "http://localhost:8080/api/requests&status=PENDING"
-
-
-
-
-    /** Input fields of a review */
-    const [summary, setSummary] = useState(initialData.summary || '');
-    const [strengths, setStrengths] = useState(initialData.strengths || '');
-    const [weaknesses, setWeaknesses] = useState(initialData.weaknesses || '');
-    const [comments, setComments] = useState(initialData.comments || '');
-    const [questions, setQuestions] = useState(initialData.questions || '');
-    const [score, setScore] = useState(initialData.score || '');
-    const [confidenceLevel, setConfidenceLevel] = useState(initialData.confidenceLevel || '');
-    const [files, setFiles] = useState<File[]>([]);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    /** Properties of the corresponding request needed for a correct submission of a review */
-    const [request] = useState(initialData.request);
-    const [isExternal] = useState(!initialData.isInternal);
-    const [minScore] = useState(initialData.minScore);
-    const [maxScore] = useState(initialData.maxScore);
-
     /** Checks whether the text fields have to be filled out or a file is uploaded */
     const [isTextRequired, setIsTextRequired] = useState(true);
+
     useEffect(() => {
         setIsTextRequired(files.length === 0);
     }, [files]);
+
+
+    //"http://localhost:8080/api/requests&status=PENDING"
+
+    const {
+        isPending: isRequestPending,
+        isError: isRequestError,
+        error: requestError,
+        data: requestData
+    } = useQuery({
+        queryKey: ["request", id],
+        queryFn: async () => {
+            const res = await fetch(`http://localhost:8080/api/request/${id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("jwt")}`
+                }
+            });
+            if (!res.ok) throw new Error("Failed to fetch request");
+            return res.json();
+        }
+    });
+    initialData.request = requestData;
+    request = requestData;
+    const [paperData, setPaperData] = useState<PaperData | null>(null);
+
+    // Second Query: Fetch paper data (only after the request data is available)
+    useEffect(() => {
+        if (requestData) {
+            const paperId = requestData.paperId;
+            const fetchPaperData = async () => {
+                try {
+                    const res = await fetch(`http://localhost:8080/api/paper/${paperId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                        },
+                    });
+                    if (!res.ok) throw new Error('Failed to fetch paper');
+                    const data = await res.json();
+                    setPaperData(data);
+                } catch (error) {
+                    console.error('Error fetching paper:', error);
+                }
+            };
+
+            fetchPaperData();
+        }
+    }, [requestData]); // Only run when requestData is available
+    if (isRequestPending) {
+        return <span>Loading request...</span>;
+    }
+    if (isRequestError) {
+        return <span>{`Error!: ${requestError.message}`}</span>;
+    }
+
+    if (!paperData) {
+        return <span>Loading paper...</span>;
+    }
+
+    const paperObject: PaperData = paperData;
+    isExternal = !paperObject.isInternal;
+    minScore = paperObject.minScore;
+    maxScore = paperObject.maxScore;
+
 
     /** Confidence levels for the select field */
     const confidenceLevels = ['High', 'Medium', 'Low'];
@@ -102,7 +183,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
     /** Handles the submission of the review */
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        const scoreNum = parseInt(score);
+        let scoreNum = NaN;
+        if (typeof score === "string") {
+            scoreNum = parseInt(score);
+        } else {
+            scoreNum = score;
+        }
 
         if (isExternal) {
             if (isNaN(scoreNum) || scoreNum < minScore || scoreNum > maxScore) {
@@ -114,6 +200,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
         setWarning('');
 
         const fileIds: string[] = [];
+
         for (const file of files) {
             console.log(file.name);
             try {
@@ -124,7 +211,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
                     }
                 });
 
-                const { uploadUrl, fileId } = await uploadResponse.json();
+                const { uploadUrl, fileId : newFileId} = await uploadResponse.json();
 
                 await fetch(uploadUrl, {
                     method: "PUT",
@@ -134,7 +221,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
                     }
                 });
 
-                fileIds.push(fileId);
+                fileIds.push(newFileId);
                 console.log(`File uploaded: ${file.name}`);
             } catch (error) {
                 console.error("Error uploading file:", error);
@@ -156,7 +243,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
         };
 
         try {
-            const response = await fetch('http://localhost:8080/api/reviews', {
+            const response = await fetch(`http://localhost:8080/api/review${initialData.id ? `/${initialData.id}` : ''}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,8 +251,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
                 },
                 body: JSON.stringify(reviewData)
             });
+            const reviewResponse = await response.json();
+            console.log('Success:', reviewResponse);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
-            if (response.ok) {
+
+
+
+
+
+
+
+
+    {/*if (response.ok) {
                 const result = await response.text();
                 if (result) {
                     console.log('Success:', JSON.parse(result));
@@ -185,7 +286,15 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
         } catch (error) {
             alert(`An error has occurred: ${error}`);
         }
-    };
+    };*/}
+
+
+
+
+
+
+
+
 
     /** These functions handle the file upload */
     const onDrop = (acceptedFiles: File[]) => {
@@ -217,7 +326,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
     const handleCancel = async () => {
         const hasCanceled = await showAlert(CANCEL_REVIEW_ALERT_TITLE, CANCEL_REVIEW_ALERT_MESSAGE, CANCEL_REVIEW_ALERT_OK_TEXT, CANCEL_REVIEW_ALERT_CANCEL_TEXT);
         if (hasCanceled) {
-            navigate(`http://localhost:8080/paper/${request.paperId}`, { state: { source: "paper_list" } });
+            //navigate(`http://localhost:8080/paper/${request.paperId}`, { state: { source: "paper_list" } });
+            navigate(-1);
         }
     };
     console.log(files)
@@ -226,7 +336,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({initialData = {} as ReviewData})
         <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%"}}>
             <Paper sx={{width: '100%', padding: 4, backgroundColor: 'background.paper', boxShadow: 3, marginTop: 10,}}>
                 <Typography variant="h4" component="h1" fontWeight={"bold"}>
-                    {initialData.title ? 'Edit Review' : 'Add Review'}
+                    {initialData.id ? 'Edit Review' : 'Add Review'}
                 </Typography>
 
                 {/* Review Form */}
