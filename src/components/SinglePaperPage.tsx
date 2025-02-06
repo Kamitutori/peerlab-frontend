@@ -288,7 +288,7 @@ export default function SinglePaperPage() {
                       px: '10px',
                   }}
         >
-            <Typography textAlign="end">
+            <Typography textAlign="right" sx={{position: 'sticky', top: '10px', mr: 3}}>
                 Upload Date: {uploadDate}
             </Typography>
             {isRequest && (
@@ -341,8 +341,8 @@ export default function SinglePaperPage() {
                 <Grid2 container spacing={2} sx={{flex: 1, display: "flex", flexDirection: "row"}}>
                     {/* The left upper box content*/}
                     <Grid2 sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 1}}>
-                        <Typography variant="h4">{paperObject.title}</Typography>
-                        <Typography variant="h5">{paperObject.authors}</Typography>
+                        <Typography variant="h4" sx={{ wordBreak: 'break-word' }}>{paperObject.title}</Typography>
+                        <Typography variant="h5" sx={{ wordBreak: 'break-word' }}>{paperObject.authors}</Typography>
                         <Grid2 container spacing={1}>
                             <CloudUploadIcon/>
                             <Typography variant="body1">
@@ -372,7 +372,7 @@ export default function SinglePaperPage() {
                     </Grid2>
 
                     {/* Upload and Authors note*/}
-                    <Grid2 sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 1}}>
+                    <Grid2 sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1, ml: 9 }}>
                         <Box
                             sx={{
                                 maxWidth: "400px",
@@ -450,7 +450,7 @@ export default function SinglePaperPage() {
                             Add Review
                         </Button>
                     )}
-                    {isRequest && requestofRequestee.reviewId && (
+                    {(isRequest && requestofRequestee.reviewId) && (
                         <Button variant="contained"
                                 onClick={() => navigate(`/review/${requestofRequestee.reviewId}`)}>
                             View Review

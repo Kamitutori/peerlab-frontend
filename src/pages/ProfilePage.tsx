@@ -184,7 +184,7 @@ function ProfilePage() {
         // Handle empty or invalid name
         if (!name) {
             return {
-                sx: { bgcolor: "theme.palette.secondary.main" },
+                sx: {bgcolor: "theme.palette.secondary.main"},
                 children: "",
             };
         }
@@ -196,7 +196,7 @@ function ProfilePage() {
         const firstInitial = nameParts[0]?.[0] || ""; // First part's first letter
         const lastInitial = nameParts[nameParts.length - 1]?.[0] || ""; // Last part's first letter
         return {
-            sx: { bgcolor: "theme.palette.secondary.main" },
+            sx: {bgcolor: "theme.palette.secondary.main"},
             children: `${firstInitial}${lastInitial}`.toUpperCase(),
         };
     }
@@ -389,7 +389,7 @@ function ProfilePage() {
                     flex: 1, // Same width as the profile card
                     marginX: 2,
                     padding: 3,
-                    minWidth: '320px',
+                    // minWidth: '320px',
                     minHeight: '540px',
                     display: 'flex',
                     flexDirection: 'column',
@@ -402,12 +402,26 @@ function ProfilePage() {
                     justifyContent="center"
                     sx={{
                         display: 'flex',
-                        flexDirection: 'row',
-                        width: '100%',
+                        flexDirection: 'column',
+                        // width: '100%',
                     }}
                 >
-                    <PaperList endpoint={`http://localhost:8080/api/papers`} title="My Papers"/>
-                    <RequestListOfPapers endpoint={`http://localhost:8080/api/requests?status=PENDING`} title="My Reviews"/>
+                    <Grid2>
+                        <PaperList
+                            endpoint={`http://localhost:8080/api/papers`}
+                            title="My Papers"
+                            width={700}
+                            height={300}
+                        />
+                    </Grid2>
+                    <Grid2>
+                        <RequestListOfPapers
+                            endpoint={`http://localhost:8080/api/requests?status=PENDING`}
+                            title="My Reviews"
+                            width={700}
+                            height={300}
+                        />
+                    </Grid2>
                 </Grid2>
             </Card>
         </Grid2>
