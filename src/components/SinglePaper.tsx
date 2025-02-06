@@ -204,7 +204,7 @@ export default function SinglePaper() {
     /** This function downloads the paper file from the server. */
     const handleDownload = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/minio/download-url?fileId=${paperObject.fileId}`, {
+            const response = await fetch(`http://localhost:8080/api/minio/paper-download-url?fileId=${paperObject.fileId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -432,7 +432,7 @@ export default function SinglePaper() {
                         </Button>
                     )}
                     {(openToReview && requestofRequestee.status !== "SUBMITTED") && (
-                        <Button variant="outlined" onClick={() => navigate(`requests/${id}/add-review/`)}>
+                        <Button variant="outlined" onClick={() => (window.location.href=`http://localhost:5173/request/${requestofRequestee.id}/add-review/`)}>
                             Add Review
                         </Button>
                     )}
